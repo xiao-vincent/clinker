@@ -8,11 +8,14 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class BindingErrorsResponse {
 
-    private List<BindingError> bindingErrors = new ArrayList<BindingError>();
+
+    private List<BindingError> bindingErrors = new ArrayList<>();
 
     public List<BindingError> getBindingErrors() {
         return bindingErrors;
@@ -44,7 +47,11 @@ public class BindingErrorsResponse {
         mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
         String errorsAsJSON = "";
         try {
-            errorsAsJSON = mapper.writeValueAsString(bindingErrors);
+//            errorsAsJSON = mapper.writeValueAsString(bindingErrors);
+            Map<String, Object> map = new HashMap<>();
+            map.put("errors", bindingErrors);
+            map.put("detail", "example");
+            errorsAsJSON = mapper.writeValueAsString(map);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }

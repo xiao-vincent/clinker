@@ -2,7 +2,8 @@ package com.vince.retailmanager.web;
 
 import com.vince.retailmanager.entity.Franchisee;
 import com.vince.retailmanager.entity.Franchisor;
-import com.vince.retailmanager.service.BusinessService;
+import com.vince.retailmanager.entity.Payment;
+import com.vince.retailmanager.service.FranchiseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -24,73 +25,91 @@ import java.util.Set;
 
 @RestController
 @CrossOrigin(exposedHeaders = "errors, content-type")
-@RequestMapping("/franchisor/{franchisorId}/franchisees")
+@RequestMapping("/franchisor/{franchisorId}/franchisees/{franchiseeId}")
 public class FranchiseeController {
-    @Autowired
-    private BusinessService businessService;
+	@Autowired
+	private FranchiseService franchiseService;
 
-    @Autowired
-    private HttpServletRequest request;
+	@Autowired
+	private HttpServletRequest request;
 
-    @ModelAttribute("franchisor")
-    public Franchisor findFranchisor(@PathVariable("franchisorId") int franchisorId) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println(authentication);
-        return businessService.findFranchisorById(franchisorId);
-    }
+	@ModelAttribute("franchisor")
+	public Franchisor findFranchisor(@PathVariable("franchisorId") int franchisorId) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		System.out.println(authentication);
+		return franchiseService.findFranchisorById(franchisorId);
+	}
 
-    @InitBinder("franchisor")
-    public void initOwnerBinder(WebDataBinder dataBinder) {
-        dataBinder.setDisallowedFields("id");
-    }
+	@ModelAttribute("franchisee")
+	public Franchisee findFranchisee(@PathVariable("franchiseeId") int franchiseeId) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		System.out.println(authentication);
+		return franchiseService.findFranchiseeById(franchiseeId);
+	}
 
-    @InitBinder("franchisee")
-    public void initFranchiseeBinder(WebDataBinder dataBinder) {
-        System.out.println("hello");
-    }
+	@InitBinder("franchisor")
+	public void initOwnerBinder(WebDataBinder dataBinder) {
+		dataBinder.setDisallowedFields("id");
+	}
+
+	@InitBinder("franchisee")
+	public void initFranchiseeBinder(WebDataBinder dataBinder) {
+		dataBinder.setDisallowedFields("id");
+	}
+
+	@PostMapping("/pay/{amount}")
+	@PreAuthorize("authentication.name == #franchisee.getUser().getUsername()")
+	public void makePaymentToFranchisor(@PathVariable Double amount, Franchisee franchisee) {
+		System.out.println(franchisee.getUser());
+		Payment payment = Payment.builder()
+			 .payer(franchisee)
+			 .recipient(franchisee.getFranchisor())
+			 .amount(amount)
+			 .build();
+	}
 
 
-    @GetMapping("/hi")
-    @PreAuthorize("authentication.name == 'admin'")
-    public Set<String> hello(Franchisor franchisor, ServletUriComponentsBuilder ucBuilder) {
-        System.out.println(ucBuilder.fromCurrentRequest());
-        System.out.println(ucBuilder.buildAndExpand().getPath());
-        System.out.println(ServletUriComponentsBuilder.fromCurrentRequest().build());
-        System.out.println(ServletUriComponentsBuilder.fromCurrentRequestUri().build());
-        System.out.println(ServletUriComponentsBuilder.fromCurrentContextPath().build());
+	@GetMapping("/hi")
+	@PreAuthorize("authentication.name == 'admin'")
+	public Set<String> hello(Franchisor franchisor, ServletUriComponentsBuilder ucBuilder) {
+		System.out.println(ucBuilder.fromCurrentRequest());
+		System.out.println(ucBuilder.buildAndExpand().getPath());
+		System.out.println(ServletUriComponentsBuilder.fromCurrentRequest().build());
+		System.out.println(ServletUriComponentsBuilder.fromCurrentRequestUri().build());
+		System.out.println(ServletUriComponentsBuilder.fromCurrentContextPath().build());
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println(authentication);
-        System.out.println(franchisor.getName());
-        Set<String> set = new HashSet<>(Arrays.asList("admin", "b"));
-        return set;
-    }
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		System.out.println(authentication);
+		System.out.println(franchisor.getDescription());
+		Set<String> set = new HashSet<>(Arrays.asList("admin", "b"));
+		return set;
+	}
 
 
-    @PostMapping("/new")
-    @PreAuthorize("authentication.name == #franchisor.getUser().getUsername()")
-    public ResponseEntity<Franchisee> createFranchisee(Franchisor franchisor,
-                                                       @RequestBody @Valid Franchisee franchisee,
-                                                       BindingResult bindingResult,
-                                                       ServletUriComponentsBuilder ucBuilder
-    ) {
-        BindingErrorsResponse errors = new BindingErrorsResponse();
-        HttpHeaders headers = new HttpHeaders();
-        if (bindingResult.hasErrors() || (franchisee == null)) {
-            errors.addAllErrors(bindingResult);
-            headers.add("errors", errors.toJSON());
-            return new ResponseEntity<Franchisee>(headers, HttpStatus.BAD_REQUEST);
-        }
-        franchisor.addFranchisee(franchisee);
-        this.businessService.saveFranchisee(franchisee);
-        headers.setLocation(ucBuilder.fromCurrentContextPath().buildAndExpand(franchisee.getId()).toUri());
-        return new ResponseEntity<Franchisee>(franchisee, headers, HttpStatus.CREATED);
-    }
+	@PostMapping("/new")
+	@PreAuthorize("authentication.name == #franchisor.getUser().getUsername()")
+	public ResponseEntity<Franchisee> createFranchisee(Franchisor franchisor,
+	                                                   @RequestBody @Valid Franchisee franchisee,
+	                                                   BindingResult bindingResult,
+	                                                   ServletUriComponentsBuilder ucBuilder
+	) {
+		BindingErrorsResponse errors = new BindingErrorsResponse();
+		HttpHeaders headers = new HttpHeaders();
+		if (bindingResult.hasErrors() || (franchisee == null)) {
+			errors.addAllErrors(bindingResult);
+			headers.add("errors", errors.toJSON());
+			return new ResponseEntity<Franchisee>(headers, HttpStatus.BAD_REQUEST);
+		}
+		franchisor.addFranchisee(franchisee);
+		this.franchiseService.saveFranchisee(franchisee);
+		headers.setLocation(ucBuilder.fromCurrentContextPath().buildAndExpand(franchisee.getId()).toUri());
+		return new ResponseEntity<Franchisee>(franchisee, headers, HttpStatus.CREATED);
+	}
 
 
 //    @GetMapping("/{franchisorId}")
 //    public Franchisor findCompany(@PathVariable("franchisorId") int franchisorId) {
-//        Optional<Franchisor> franchisorOptional = businessService.findFranchisorById(franchisorId);
+//        Optional<Franchisor> franchisorOptional = franchiseService.findFranchisorById(franchisorId);
 //        if (franchisorOptional.isPresent()) return franchisorOptional.get();
 //
 //        return null;
@@ -99,11 +118,11 @@ public class FranchiseeController {
 //    @PostMapping
 //    public Franchisor createCompany(@Valid @RequestBody Franchisor franchisor) {
 //        System.out.println(franchisor);
-//        if (businessService.findFranchisorById(franchisor.getId()).isPresent()) {
+//        if (franchiseService.findFranchisorById(franchisor.getId()).isPresent()) {
 //            // refactor, should return 'already exists' error
 //            return null;
 //        }
-//        businessService.saveFranchisor(franchisor);
+//        franchiseService.saveFranchisor(franchisor);
 //        return franchisor;
 //    }
 //
@@ -113,19 +132,19 @@ public class FranchiseeController {
 //        Franchisor franchisorModel = retrieveCompany(franchisorId);
 //        EntityObjectMampper mapper = Mappers.getMapper(EntityObjectMampper.class);
 //        franchisorModel = mapper.sourceToDestination(franchisorRequest, franchisorModel);
-//        businessService.saveFranchisor(franchisorModel);
+//        franchiseService.saveFranchisor(franchisorModel);
 //        return franchisorModel;
 //    }
 
 //    @DeleteMapping("/{franchisorId")
 //    public ResponseEntity<?> deleteCompany(@PathVariable("franchisorId") int franchisorId) {
-//        return businessService.findCompanyById(franchisorId);
+//        return franchiseService.findCompanyById(franchisorId);
 //    }
 
 //let's make some crud
 
 //    private Franchisor retrieveCompany(int franchisorId) {
-//        Optional<Franchisor> franchisorOptional = this.businessService.findFranchisorById(franchisorId);
+//        Optional<Franchisor> franchisorOptional = this.franchiseService.findFranchisorById(franchisorId);
 //        if (franchisorOptional.isPresent()) {
 //            return franchisorOptional.get();
 //        }

@@ -19,12 +19,13 @@ import javax.validation.Valid;
 @RequestMapping("/users")
 public class UserController {
 
+
     @Autowired
     private UserService userService;
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping
-    public ResponseEntity<User> addOwner(@RequestBody @Valid User user, BindingResult bindingResult) throws Exception {
+    public ResponseEntity<User> addUser(@RequestBody @Valid User user, BindingResult bindingResult) throws Exception {
         BindingErrorsResponse errors = new BindingErrorsResponse();
         HttpHeaders headers = new HttpHeaders();
         if (bindingResult.hasErrors() || (user == null)) {
@@ -34,6 +35,7 @@ public class UserController {
         }
 
         this.userService.saveUser(user);
+        user.setPassword("");
         return new ResponseEntity<User>(user, headers, HttpStatus.CREATED);
     }
 
