@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.StringJoiner;
 
 @Entity
 @Table(name = "franchisees")
@@ -31,4 +32,11 @@ public class Franchisee extends Company {
 			 .build();
 	}
 
+	@Override
+	public String toString() {
+		return new StringJoiner(", ", Franchisee.class.getSimpleName() + "[", "]")
+			 .add("id=" + getId())
+			 .toString();
+	}
 }
+

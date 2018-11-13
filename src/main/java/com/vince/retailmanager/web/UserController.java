@@ -20,29 +20,29 @@ import javax.validation.Valid;
 public class UserController {
 
 
-    @Autowired
-    private UserService userService;
+	@Autowired
+	private UserService userService;
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PostMapping
-    public ResponseEntity<User> addUser(@RequestBody @Valid User user, BindingResult bindingResult) throws Exception {
-        BindingErrorsResponse errors = new BindingErrorsResponse();
-        HttpHeaders headers = new HttpHeaders();
-        if (bindingResult.hasErrors() || (user == null)) {
-            errors.addAllErrors(bindingResult);
-            headers.add("errors", errors.toJSON());
-            return new ResponseEntity<User>(user, headers, HttpStatus.BAD_REQUEST);
-        }
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	@PostMapping
+	public ResponseEntity<User> addUser(@RequestBody @Valid User user, BindingResult bindingResult) throws Exception {
+		BindingErrorsResponse errors = new BindingErrorsResponse();
+		HttpHeaders headers = new HttpHeaders();
+		if (bindingResult.hasErrors() || (user == null)) {
+			errors.addAllErrors(bindingResult);
+			headers.add("errors", errors.toJSON());
+			return new ResponseEntity<User>(user, headers, HttpStatus.BAD_REQUEST);
+		}
 
-        this.userService.saveUser(user);
-        user.setPassword("");
-        return new ResponseEntity<User>(user, headers, HttpStatus.CREATED);
-    }
+		this.userService.saveUser(user);
+		user.setPassword("");
+		return new ResponseEntity<User>(user, headers, HttpStatus.CREATED);
+	}
 
-    @GetMapping("/test")
-    public String getAuthenticationInfo() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println(authentication);
-        return authentication.toString();
-    }
+	@GetMapping("/test")
+	public String getAuthenticationInfo() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		System.out.println(authentication);
+		return authentication.toString();
+	}
 }

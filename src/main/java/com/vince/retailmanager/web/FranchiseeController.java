@@ -11,16 +11,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import javax.validation.constraints.Positive;
 
 
 @RestController
@@ -33,17 +29,16 @@ public class FranchiseeController {
 	@Autowired
 	private HttpServletRequest request;
 
+
 	@ModelAttribute("franchisor")
 	public Franchisor findFranchisor(@PathVariable("franchisorId") int franchisorId) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		System.out.println(authentication);
 		return franchiseService.findFranchisorById(franchisorId);
 	}
 
 	@ModelAttribute("franchisee")
 	public Franchisee findFranchisee(@PathVariable("franchiseeId") int franchiseeId) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		System.out.println(authentication);
 		return franchiseService.findFranchiseeById(franchiseeId);
 	}
 
@@ -58,53 +53,41 @@ public class FranchiseeController {
 	}
 
 	@PostMapping("/pay/{amount}")
-	@PreAuthorize("authentication.name == #franchisee.getUser().getUsername()")
-	public void makePaymentToFranchisor(@PathVariable Double amount, Franchisee franchisee) {
-		System.out.println(franchisee.getUser());
+	@PreAuthorize("isLoggedIn(#franchisee.getUser())")
+	@Validated
+	public ResponseEntity<String> makePaymentToFranchisor(@PathVariable @Positive Double amount, Franchisee franchisee) {
+		BindingErrorsResponse errors = new BindingErrorsResponse();
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("errors", errors.toJSON());
+		if (isValidCurrency(amount)) return new ResponseEntity<>(headers, HttpStatus.BAD_REQUEST);
 		Payment payment = Payment.builder()
 			 .payer(franchisee)
 			 .recipient(franchisee.getFranchisor())
 			 .amount(amount)
 			 .build();
+		franchiseService.savePayment(payment);
+		return null;
 	}
 
-
-	@GetMapping("/hi")
-	@PreAuthorize("authentication.name == 'admin'")
-	public Set<String> hello(Franchisor franchisor, ServletUriComponentsBuilder ucBuilder) {
-		System.out.println(ucBuilder.fromCurrentRequest());
-		System.out.println(ucBuilder.buildAndExpand().getPath());
-		System.out.println(ServletUriComponentsBuilder.fromCurrentRequest().build());
-		System.out.println(ServletUriComponentsBuilder.fromCurrentRequestUri().build());
-		System.out.println(ServletUriComponentsBuilder.fromCurrentContextPath().build());
-
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		System.out.println(authentication);
-		System.out.println(franchisor.getDescription());
-		Set<String> set = new HashSet<>(Arrays.asList("admin", "b"));
-		return set;
+	private boolean isValidCurrency(Double amount) {
+		return amount <= 0.0;
 	}
 
-
-	@PostMapping("/new")
-	@PreAuthorize("authentication.name == #franchisor.getUser().getUsername()")
-	public ResponseEntity<Franchisee> createFranchisee(Franchisor franchisor,
-	                                                   @RequestBody @Valid Franchisee franchisee,
-	                                                   BindingResult bindingResult,
-	                                                   ServletUriComponentsBuilder ucBuilder
-	) {
-		BindingErrorsResponse errors = new BindingErrorsResponse();
-		HttpHeaders headers = new HttpHeaders();
-		if (bindingResult.hasErrors() || (franchisee == null)) {
-			errors.addAllErrors(bindingResult);
-			headers.add("errors", errors.toJSON());
-			return new ResponseEntity<Franchisee>(headers, HttpStatus.BAD_REQUEST);
-		}
-		franchisor.addFranchisee(franchisee);
-		this.franchiseService.saveFranchisee(franchisee);
-		headers.setLocation(ucBuilder.fromCurrentContextPath().buildAndExpand(franchisee.getId()).toUri());
-		return new ResponseEntity<Franchisee>(franchisee, headers, HttpStatus.CREATED);
-	}
+//	@GetMapping("/hi")
+//	@PreAuthorize("authentication.name == 'admin'")
+//	public Set<String> hello(Franchisor franchisor, ServletUriComponentsBuilder ucBuilder) {
+//		System.out.println(ucBuilder.fromCurrentRequest());
+//		System.out.println(ucBuilder.buildAndExpand().getPath());
+//		System.out.println(ServletUriComponentsBuilder.fromCurrentRequest().build());
+//		System.out.println(ServletUriComponentsBuilder.fromCurrentRequestUri().build());
+//		System.out.println(ServletUriComponentsBuilder.fromCurrentContextPath().build());
+//
+//		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//		System.out.println(authentication);
+//		System.out.println(franchisor.getDescription());
+//		Set<String> set = new HashSet<>(Arrays.asList("admin", "b"));
+//		return set;
+//	}
 
 
 //    @GetMapping("/{franchisorId}")

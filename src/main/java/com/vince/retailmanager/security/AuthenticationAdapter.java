@@ -16,47 +16,47 @@ import javax.sql.DataSource;
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(
-        prePostEnabled = true
+	 prePostEnabled = true
 //        securedEnabled = true
 )
 public class AuthenticationAdapter extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    private DataSource dataSource;
+	@Autowired
+	private DataSource dataSource;
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
-                .authorizeRequests()
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+		http
+			 .authorizeRequests()
 //                .requestMatchers(EndpointRequest.to("env")).permitAll()
 //                .requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole("ACTUATOR")
 //                .requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole("ACTUATOR")
 //                .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                .antMatchers("/**").hasAnyRole("USER", "ADMIN")
-                .and()
-                .httpBasic()
-                .and()
-                .csrf().disable()
+			 .antMatchers("/**").hasAnyRole("USER", "ADMIN")
+			 .and()
+			 .httpBasic()
+			 .and()
+			 .csrf().disable()
 
-        ;
+		;
 
-    }
+	}
 
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth
-                .jdbcAuthentication()
-                .dataSource(dataSource)
-                .usersByUsernameQuery("select username,password,enabled from users where username=?")
-                .authoritiesByUsernameQuery("select username,role from roles where username=?");
-    }
+	@Autowired
+	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+		auth
+			 .jdbcAuthentication()
+			 .dataSource(dataSource)
+			 .usersByUsernameQuery("select username,password,enabled from users where username=?")
+			 .authoritiesByUsernameQuery("select username,role from roles where username=?");
+	}
 
 
-    //used for testing
-    //let's us add users with plaintext passwords
-    @SuppressWarnings("deprecation")
-    @Bean
-    public static NoOpPasswordEncoder passwordEncoder() {
-        return (NoOpPasswordEncoder) NoOpPasswordEncoder.getInstance();
-    }
+	//used for testing
+	//let's us add users with plaintext passwords
+	@SuppressWarnings("deprecation")
+	@Bean
+	public static NoOpPasswordEncoder passwordEncoder() {
+		return (NoOpPasswordEncoder) NoOpPasswordEncoder.getInstance();
+	}
 }

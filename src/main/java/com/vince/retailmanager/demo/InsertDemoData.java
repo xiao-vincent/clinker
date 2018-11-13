@@ -34,10 +34,9 @@ public class InsertDemoData {
 	public void appReady(ApplicationReadyEvent event) throws Exception {
 		System.out.println("Setting up demo data...");
 		clearDBTables();
-		setupAdmin();
 		createFranchise();
 
-
+		setupAdmin();
 		System.out.println("\nDemo data setup complete!");
 
 		//newfake scenario for testing
@@ -53,27 +52,28 @@ public class InsertDemoData {
 
 	public void createFranchise() throws Exception {
 		Franchisor franchisor = Franchisor.builder()
+			 .name("McDonald's Corporation")
+			 .website("mcdonalds.com")
+			 .description("Fast food company")
+			 .build();
+		setupFranchisorsAndFranchisees("mcd", franchisor, 2);
+		franchisor = Franchisor.builder()
 			 .name("Pizza Hut")
 			 .website("pizzahut.com")
 			 .description("Restaurant company")
 			 .build();
 		setupFranchisorsAndFranchisees("ph", franchisor, 1);
-
-		franchisor = Franchisor.builder()
-			 .name("McDonald's Corporation")
-			 .website("mcdonalds.com")
-			 .description("Fast food company")
-			 .build();
-		setupFranchisorsAndFranchisees("mc", franchisor, 2);
 	}
 
 	private void setupAdmin() throws Exception {
 		User admin = new User("admin", "adminpassword");
 		admin.addRole("ADMIN");
 		userService.saveUser(admin);
+		System.out.println("saving " + admin);
+
 	}
 
-	private void clearDBTables() {
+	private void clearDBTables() throws Exception {
 		userRepo.deleteAll();
 		paymentRepo.deleteAll();
 		franchisorRepo.deleteAll();
@@ -93,20 +93,23 @@ public class InsertDemoData {
 
 	private void setupFranchisorInDB(String shortName, Franchisor franchisor) throws Exception {
 		User franchisorUser = new User(shortName + "_franchisor", dummyPassword);
-		userService.saveUser(franchisorUser);
-		franchisor.setUser(franchisorUser);
 		franchisorRepo.save(franchisor);
+
+		franchisorUser.addAccessToken(franchisor);
+		userService.saveUser(franchisorUser);
 	}
 
 	private void setupFranchiseeInDB(String shortName, Franchisor franchisor, int i) throws Exception {
 		Franchisee franchisee = Franchisee.builder()
 			 .build();
-		franchisee.setFranchisor(franchisor);
 
 		User franchiseeUser = new User(shortName + "_franchisee_" + i, dummyPassword);
-		franchisee.setUser(franchiseeUser);
+		franchiseeRepo.save(franchisee);
+		franchisor.addFranchisee(franchisee);
+		franchisorRepo.save(franchisor);
+
+		franchiseeUser.addAccessToken(franchisee);
 		userService.saveUser(franchiseeUser);
 		System.out.println("saving " + franchisee);
-		franchiseeRepo.save(franchisee);
 	}
 }

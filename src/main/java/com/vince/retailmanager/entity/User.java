@@ -1,6 +1,5 @@
 package com.vince.retailmanager.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
@@ -9,6 +8,7 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.StringJoiner;
 
 @Entity
 @Table(name = "users")
@@ -30,7 +30,10 @@ public class User {
 	private Boolean enabled;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.EAGER)
-	private Set<Role> roles;
+	private Set<Role> roles = new HashSet<>();
+
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.EAGER)
+	private Set<AccessToken> accessTokens = new HashSet<>();
 
 //    @OneToOne()
 //    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
@@ -83,13 +86,29 @@ public class User {
 	}
 
 
-	@JsonIgnore
 	public void addRole(String roleName) {
-		if (this.roles == null) {
-			this.roles = new HashSet<>();
-		}
 		Role role = new Role();
+		role.setUser(this);
 		role.setName(roleName);
 		this.roles.add(role);
 	}
+
+	public void addAccessToken(Company company) {
+		AccessToken token = new AccessToken();
+		token.setUser(this);
+		token.setCompany(company);
+		this.accessTokens.add(token);
+	}
+
+	@Override
+	public String toString() {
+		return new StringJoiner(", ", User.class.getSimpleName() + "[", "]")
+			 .add("username='" + username + "'")
+			 .add("password='" + password + "'")
+			 .add("enabled=" + enabled)
+			 .add("roles=" + roles)
+			 .add("accessTokens=" + accessTokens)
+			 .toString();
+	}
+
 }

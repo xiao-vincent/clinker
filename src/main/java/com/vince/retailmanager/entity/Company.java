@@ -1,27 +1,23 @@
 package com.vince.retailmanager.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @Data
 @EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
 public abstract class Company extends BaseEntity {
 
-	@OneToOne
-	@JoinColumn(name = "username")
-	@JsonIgnore
-	private User user;
+//	@OneToOne
+//	@JoinColumn(name = "username")
+//	@JsonIgnore
+//	private User user;
 
-	public User getUser() {
-		return user;
-	}
-
-	public void setUser(User user) {
-		this.user = user;
-	}
 }
