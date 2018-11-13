@@ -38,6 +38,7 @@ public class InsertDemoData {
 
 		setupAdmin();
 		System.out.println("\nDemo data setup complete!");
+		System.out.println(franchisorRepo.findById(4));
 
 		//newfake scenario for testing
 //		Payment payment = new Payment();
@@ -56,13 +57,14 @@ public class InsertDemoData {
 			 .website("mcdonalds.com")
 			 .description("Fast food company")
 			 .build();
-		setupFranchisorsAndFranchisees("mcd", franchisor, 2);
+		setupFranchisorsAndFranchisees("mc", franchisor, 2);
 		franchisor = Franchisor.builder()
 			 .name("Pizza Hut")
 			 .website("pizzahut.com")
 			 .description("Restaurant company")
 			 .build();
 		setupFranchisorsAndFranchisees("ph", franchisor, 1);
+		System.out.println("franchisees: " + franchisor.getFranchisees());
 	}
 
 	private void setupAdmin() throws Exception {
@@ -73,7 +75,7 @@ public class InsertDemoData {
 
 	}
 
-	private void clearDBTables() throws Exception {
+	private void clearDBTables() {
 		userRepo.deleteAll();
 		paymentRepo.deleteAll();
 		franchisorRepo.deleteAll();
@@ -106,7 +108,6 @@ public class InsertDemoData {
 		User franchiseeUser = new User(shortName + "_franchisee_" + i, dummyPassword);
 		franchiseeRepo.save(franchisee);
 		franchisor.addFranchisee(franchisee);
-		franchisorRepo.save(franchisor);
 
 		franchiseeUser.addAccessToken(franchisee);
 		userService.saveUser(franchiseeUser);

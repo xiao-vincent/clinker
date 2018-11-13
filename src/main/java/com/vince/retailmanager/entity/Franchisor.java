@@ -1,6 +1,7 @@
 package com.vince.retailmanager.entity;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.*;
 
@@ -24,13 +25,12 @@ public class Franchisor extends Company {
 	private String description;
 
 	@OneToMany(mappedBy = "franchisor", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@JsonIgnoreProperties(value = "franchisor")
 	private Set<Franchisee> franchisees;
 
 
 	public void addFranchisee(Franchisee franchisee) {
-		if (franchisees == null) {
-			franchisees = new HashSet<>();
-		}
+		if (franchisees == null) franchisees = new HashSet<>();
 		franchisees.add(franchisee);
 		franchisee.setFranchisor(this);
 	}

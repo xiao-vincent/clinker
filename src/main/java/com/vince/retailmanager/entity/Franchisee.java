@@ -1,8 +1,5 @@
 package com.vince.retailmanager.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.*;
 
 import javax.persistence.*;
@@ -10,7 +7,7 @@ import java.util.StringJoiner;
 
 @Entity
 @Table(name = "franchisees")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+//@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Builder
@@ -20,7 +17,6 @@ public class Franchisee extends Company {
 
 	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
 	@JoinColumn(name = "franchisor_id")
-	@JsonFormat()
 	@EqualsAndHashCode.Exclude
 	private Franchisor franchisor;
 
