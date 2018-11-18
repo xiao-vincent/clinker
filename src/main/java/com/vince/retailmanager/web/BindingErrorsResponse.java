@@ -50,7 +50,6 @@ public class BindingErrorsResponse {
 //            errorsAsJSON = mapper.writeValueAsString(bindingErrors);
 			Map<String, Object> map = new HashMap<>();
 			map.put("errors", bindingErrors);
-			map.put("detail", "example");
 			errorsAsJSON = mapper.writeValueAsString(map);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();

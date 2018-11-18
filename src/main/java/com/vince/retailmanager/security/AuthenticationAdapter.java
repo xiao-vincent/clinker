@@ -15,10 +15,7 @@ import javax.sql.DataSource;
 
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(
-	 prePostEnabled = true
-//        securedEnabled = true
-)
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class AuthenticationAdapter extends WebSecurityConfigurerAdapter {
 
 	@Autowired
@@ -28,19 +25,20 @@ public class AuthenticationAdapter extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 		http
 			 .authorizeRequests()
-//                .requestMatchers(EndpointRequest.to("env")).permitAll()
-//                .requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole("ACTUATOR")
-//                .requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole("ACTUATOR")
-//                .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-			 .antMatchers("/**").hasAnyRole("USER", "ADMIN")
-			 .and()
-			 .httpBasic()
-			 .and()
+			 .antMatchers("/", "/login", "/mobile/login", "/api/auth/**", "/reservations/**").permitAll()
+			 .anyRequest().authenticated().and()
+			 .httpBasic().and()
 			 .csrf().disable()
-
 		;
 
 	}
+
+//	@Override
+//	public void configure(AuthenticationManagerBuilder builder)
+//		 throws Exception {
+//		builder.userDetailsService(new UserDetailsServiceImpl());
+//	}
+
 
 	@Autowired
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {

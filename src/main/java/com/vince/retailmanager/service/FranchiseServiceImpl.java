@@ -6,6 +6,7 @@ import com.vince.retailmanager.entity.Payment;
 import com.vince.retailmanager.repository.FranchiseeRepository;
 import com.vince.retailmanager.repository.FranchisorRepository;
 import com.vince.retailmanager.repository.PaymentRepository;
+import com.vince.retailmanager.web.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -39,8 +40,12 @@ public class FranchiseServiceImpl implements FranchiseService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public Franchisor findFranchisorById(int id) {
-		return franchisorRepository.findById(id).orElse(null);
+	public Franchisor findFranchisorById(int id) throws EntityNotFoundException {
+		Franchisor franchisor = franchisorRepository.findById(id).orElse(null);
+		if (franchisor == null) {
+			throw new EntityNotFoundException(Franchisor.class, "id", String.valueOf(id));
+		}
+		return franchisor;
 	}
 
 	@Override
@@ -67,5 +72,10 @@ public class FranchiseServiceImpl implements FranchiseService {
 		paymentRepository.save(payment);
 	}
 
+	@Override
+	public boolean isValid(Franchisor franchisor) {
+		if (franchisorRepository.existsByNameIgnoreCase(franchisor.getName())) return false;
 
+		return true;
+	}
 }

@@ -1,7 +1,6 @@
 package com.vince.retailmanager.web;
 
 import com.vince.retailmanager.entity.Franchisee;
-import com.vince.retailmanager.entity.Franchisor;
 import com.vince.retailmanager.entity.Payment;
 import com.vince.retailmanager.service.FranchiseService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,11 +29,11 @@ public class FranchiseeController {
 	private HttpServletRequest request;
 
 
-	@ModelAttribute("franchisor")
-	public Franchisor findFranchisor(@PathVariable("franchisorId") int franchisorId) {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		return franchiseService.findFranchisorById(franchisorId);
-	}
+//	@ModelAttribute("franchisor")
+//	public Franchisor findFranchisor(@PathVariable("franchisorId") int franchisorId) {
+//		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//		return franchiseService.findFranchisorById(franchisorId);
+//	}
 
 	@ModelAttribute("franchisee")
 	public Franchisee findFranchisee(@PathVariable("franchiseeId") int franchiseeId) {

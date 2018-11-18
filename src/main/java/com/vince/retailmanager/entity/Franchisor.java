@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,8 +21,14 @@ import java.util.Set;
 public class Franchisor extends Company {
 
 	@Column(unique = true)
+	@NotNull
 	private String name;
+
+	@Column(unique = true)
+	@NotNull
 	private String website;
+
+	@NotNull
 	private String description;
 
 	@OneToMany(mappedBy = "franchisor", cascade = CascadeType.ALL, fetch = FetchType.EAGER)

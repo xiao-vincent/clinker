@@ -41,6 +41,7 @@ public class User {
 //    private Franchisor franchisor;
 
 	public User() {
+		System.out.println("IN NO ARG");
 		//add default  role
 		addRole("USER");
 		setEnabled(true);
@@ -62,7 +63,6 @@ public class User {
 		this.username = username;
 	}
 
-	//    @JsonIgnore
 	public String getPassword() {
 		return password;
 	}
