@@ -3,10 +3,8 @@ package com.vince.retailmanager.demo;
 import com.vince.retailmanager.entity.Franchisee;
 import com.vince.retailmanager.entity.Franchisor;
 import com.vince.retailmanager.entity.User;
-import com.vince.retailmanager.repository.FranchiseeRepository;
-import com.vince.retailmanager.repository.FranchisorRepository;
-import com.vince.retailmanager.repository.PaymentRepository;
-import com.vince.retailmanager.repository.UserRepository;
+import com.vince.retailmanager.repository.*;
+import com.vince.retailmanager.service.FranchiseService;
 import com.vince.retailmanager.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -19,9 +17,15 @@ public class InsertDemoData {
 	private static final String dummyPassword = "password";
 
 	@Autowired
+	private AccessTokensRepository accessTokenRepo;
+	@Autowired
 	private UserRepository userRepo;
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private FranchiseService franchiseService;
+	@Autowired
+	private CompanyRepository companyRepo;
 	@Autowired
 	private FranchisorRepository franchisorRepo;
 	@Autowired
@@ -38,9 +42,19 @@ public class InsertDemoData {
 
 		setupAdmin();
 		System.out.println("\nDemo data setup complete!");
-		System.out.println(franchisorRepo.findById(4));
+//		System.out.println(companyRepo.findById(1));
 
-		//newfake scenario for testing
+//		Company company = companyRepo.findById(1).orElse(null);
+//		User user = userRepo.findByUsername("mc_franchisor").orElse(null);
+//
+//		AccessToken accessToken = accessTokenRepo.findById(1).orElse(null);
+//		user.removeAccessToken(accessToken);
+//		accessTokenRepo.delete(accessToken);
+//		companyRepo.delete(companyRepo.findById(1).orElse(null));
+//
+//		System.out.println(accessToken);
+//		System.out.println(company);
+
 //		Payment payment = new Payment();
 //		System.out.println(franchisees.get(0));
 //		payment.setPayer(franchisees.get(0));
@@ -64,7 +78,6 @@ public class InsertDemoData {
 			 .description("Restaurant company")
 			 .build();
 		setupFranchisorsAndFranchisees("ph", franchisor, 1);
-		System.out.println("franchisees: " + franchisor.getFranchisees());
 	}
 
 	private void setupAdmin() throws Exception {
@@ -76,6 +89,8 @@ public class InsertDemoData {
 	}
 
 	private void clearDBTables() {
+		accessTokenRepo.deleteAll();
+
 		userRepo.deleteAll();
 		paymentRepo.deleteAll();
 		franchisorRepo.deleteAll();

@@ -7,7 +7,6 @@ import com.vince.retailmanager.entity.User;
 import com.vince.retailmanager.service.FranchiseService;
 import com.vince.retailmanager.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,7 +15,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import javax.xml.ws.http.HTTPException;
+import javax.validation.Validator;
 
 @RestController
 @RequestMapping(value = {"/franchisors/"})
@@ -25,18 +24,29 @@ public class FranchisorController {
 	private FranchiseService franchiseService;
 	@Autowired
 	public UserService userService;
+	@Autowired
+	public Validator validator;
 
 	@ModelAttribute
 	public void populateModel(Model model,
-	                          @AuthenticationPrincipal org.springframework.security.core.userdetails.User user,
+	                          @AuthenticationPrincipal org.springframework.security.core.userdetails.User authenticatedUser,
 	                          @PathVariable(value = "id", required = false) Integer id
 	) throws EntityNotFoundException {
-		System.out.println("username:" + user.getUsername());
-		System.out.println("user:" + userService.findUser(user.getUsername()));
-		model.addAttribute("activeUser", userService.findUser(user.getUsername()));
+		String authenticatedUsername = authenticatedUser.getUsername();
+		model.addAttribute("user", userService.findUser(authenticatedUsername));
 		if (id == null) return;
 		model.addAttribute("franchisor", franchiseService.findFranchisorById(id));
-		model.addAttribute("accessToken", userService.findAccessToken(id));
+		AccessToken accessToken = userService.findAccessToken(authenticatedUsername, id);
+//		model.addAttribute("accessToken", accessToken);
+		if (accessToken != null) {
+			model.addAttribute("activeUsername", accessToken.getUser().getUsername());
+		}
+
+//		if (accessToken != null) {
+//			eligibleUsername = accessToken.getUser().getUsername();
+//		}
+//		model.addAttribute(" ", );
+
 
 	}
 
@@ -47,27 +57,11 @@ public class FranchisorController {
 
 	@PostMapping("new")
 	public ResponseEntity<Franchisor> createCompany(@Valid @RequestBody Franchisor franchisor,
-	                                                @ModelAttribute("activeUser") User activeUser
+	                                                User user
 	) {
-		activeUser.addAccessToken(franchisor);
-		try {
-			franchiseService.saveFranchisor(franchisor);
-		} catch (DataIntegrityViolationException e) {
-			System.out.println(franchiseService.isValid(franchisor));
-		}
+		user.addAccessToken(franchisor);
+		franchiseService.saveFranchisor(franchisor);
 		return new ResponseEntity<>(franchisor, HttpStatus.CREATED);
-	}
-
-	@PostMapping("{id}/franchisees/new")
-	//find access token using [Company ID] and get corresponding username
-	@PreAuthorize("authentication.name == #accessToken.getUser().getUsername()")
-	public ResponseEntity<?> createFranchisee(Franchisor franchisor,
-	                                          AccessToken accessToken
-	) {
-		Franchisee franchisee = Franchisee.builder().build();
-		franchisor.addFranchisee(franchisee);
-		this.franchiseService.saveFranchisee(franchisee);
-		return new ResponseEntity<>(franchisee, HttpStatus.CREATED);
 	}
 
 	@PutMapping("{id}")
@@ -81,19 +75,25 @@ public class FranchisorController {
 		return null;
 	}
 
-//    @DeleteMapping("/{id")
-//    public ResponseEntity<?> deleteCompany(@PathVariable("id") int id) {
-//        return franchiseService.findCompanyById(id);
-//    }
+	@PostMapping("{id}/franchisees/new")
+	@PreAuthorize("authentication.name == #activeUsername")
+	public ResponseEntity<?> createFranchisee(Franchisor franchisor,
+	                                          @ModelAttribute("activeUsername") String activeUsername
+	) {
+		Franchisee franchisee = Franchisee.builder().build();
+		franchisor.addFranchisee(franchisee);
+		this.franchiseService.saveFranchisee(franchisee);
+		return new ResponseEntity<>(franchisee, HttpStatus.CREATED);
+	}
 
-
-	private Franchisor retrieveFranchisor(int id) throws EntityNotFoundException {
-		Franchisor franchisor = franchiseService.findFranchisorById(id);
-		if (franchisor == null) {
-			System.out.println("hi");
-			throw new HTTPException(403);
-		}
-		return franchisor;
+	@DeleteMapping("{id}")
+	@PreAuthorize("authentication.name == #activeUsername")
+	public ResponseEntity<Void> deleteFranchisor(Franchisor franchisor,
+	                                             @ModelAttribute("activeUsername") String activeUsername
+	) throws Exception {
+		//custom exception is best here, and catch it in restexcpetionhandler
+		franchiseService.disableFranchisor(franchisor);
+		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 	}
 
 

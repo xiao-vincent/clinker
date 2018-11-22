@@ -1,5 +1,6 @@
 package com.vince.retailmanager.web;
 
+import com.vince.retailmanager.exception.ObjectStateException;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.core.Ordered;
@@ -209,6 +210,14 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 		return buildResponseEntity(apiError);
 	}
 
+	@ExceptionHandler(ObjectStateException.class)
+	protected ResponseEntity<Object> handleObjectStateViolation(
+		 ObjectStateException ex) {
+		ApiError apiError = new ApiError(BAD_REQUEST);
+		apiError.setMessage("Incompatible object state");
+		apiError.addStateError(ex.getObjectName(), ex.getMessage(), ex.getInvalidValue());
+		return buildResponseEntity(apiError);
+	}
 
 	private ResponseEntity<Object> buildResponseEntity(ApiError apiError) {
 		return new ResponseEntity<>(apiError, apiError.getStatus());

@@ -9,4 +9,6 @@ public interface UserService {
 	User findUser(String username);
 
 	AccessToken findAccessToken(int companyId);
+
+	AccessToken findAccessToken(String username, int companyId);
 }

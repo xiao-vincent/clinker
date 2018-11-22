@@ -47,5 +47,11 @@ public class UserServiceImpl implements UserService {
 		return accessTokensRepository.findByCompanyId(companyId).orElse(null);
 	}
 
+	@Override
+	public AccessToken findAccessToken(String username, int companyId) {
+		return accessTokensRepository.findByUser_UsernameAndCompany_Id(username, companyId)
+			 .orElse(null);
+	}
+
 }
 

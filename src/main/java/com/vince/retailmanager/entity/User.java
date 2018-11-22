@@ -32,8 +32,9 @@ public class User {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.EAGER)
 	private Set<Role> roles = new HashSet<>();
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.EAGER)
+	@OneToMany(cascade = {CascadeType.REFRESH, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REMOVE}, mappedBy = "user", fetch = FetchType.EAGER)
 	private Set<AccessToken> accessTokens = new HashSet<>();
+
 
 //    @OneToOne()
 //    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
@@ -41,7 +42,6 @@ public class User {
 //    private Franchisor franchisor;
 
 	public User() {
-		System.out.println("IN NO ARG");
 		//add default  role
 		addRole("USER");
 		setEnabled(true);
@@ -85,6 +85,10 @@ public class User {
 		return roles;
 	}
 
+	public Set<AccessToken> getAccessTokens() {
+		return accessTokens;
+	}
+
 
 	public void addRole(String roleName) {
 		Role role = new Role();
@@ -98,6 +102,12 @@ public class User {
 		token.setUser(this);
 		token.setCompany(company);
 		this.accessTokens.add(token);
+	}
+
+	public void removeAccessToken(AccessToken accessToken) {
+		accessTokens.remove(accessToken);
+		accessToken.setUser(null);
+		accessToken.setCompany(null);
 	}
 
 	@Override

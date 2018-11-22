@@ -1,5 +1,6 @@
 package com.vince.retailmanager.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 
 import javax.persistence.*;
@@ -18,6 +19,7 @@ public class Franchisee extends Company {
 	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
 	@JoinColumn(name = "franchisor_id")
 	@EqualsAndHashCode.Exclude
+	@JsonManagedReference
 	private Franchisor franchisor;
 
 	public Payment createPaymentToFranchisor(Double amount) {

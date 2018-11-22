@@ -1,31 +1,44 @@
 package com.vince.retailmanager.service;
 
+import com.vince.retailmanager.entity.Company;
 import com.vince.retailmanager.entity.Franchisee;
 import com.vince.retailmanager.entity.Franchisor;
 import com.vince.retailmanager.entity.Payment;
-import com.vince.retailmanager.repository.FranchiseeRepository;
-import com.vince.retailmanager.repository.FranchisorRepository;
-import com.vince.retailmanager.repository.PaymentRepository;
+import com.vince.retailmanager.exception.ObjectStateException;
+import com.vince.retailmanager.repository.*;
 import com.vince.retailmanager.web.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 public class FranchiseServiceImpl implements FranchiseService {
+
+	private UserService userService;
+
+	private AccessTokensRepository accessTokensRepository;
+	private CompanyRepository companyRepository;
 	private FranchisorRepository franchisorRepository;
 	private FranchiseeRepository franchiseeRepository;
 	private PaymentRepository paymentRepository;
 
 	@Autowired
 	public FranchiseServiceImpl(
+		 UserService userService,
+		 AccessTokensRepository accessTokensRepository,
+		 CompanyRepository companyRepository,
 		 FranchisorRepository franchisorRepository,
 		 FranchiseeRepository franchiseeRepository,
-		 PaymentRepository paymentRepository
-	) {
+		 PaymentRepository paymentRepository) {
+		this.userService = userService;
+		this.accessTokensRepository = accessTokensRepository;
+		this.companyRepository = companyRepository;
 		this.franchisorRepository = franchisorRepository;
 		this.franchiseeRepository = franchiseeRepository;
 		this.paymentRepository = paymentRepository;
@@ -62,20 +75,38 @@ public class FranchiseServiceImpl implements FranchiseService {
 
 
 	@Override
+	@Transactional(readOnly = true)
 	public Franchisee findFranchiseeById(int franchiseeId) {
 		return franchiseeRepository.findById(franchiseeId).orElse(null);
+	}
+
+
+	@Override
+	public void disableFranchisor(Franchisor franchisor) throws ObjectStateException {
+		if (!franchisor.getFranchisees().isEmpty()) {
+			Map<String, Set<Franchisee>> invalidValues = new HashMap<>();
+			invalidValues.put("franchisees", franchisor.getFranchisees());
+
+			throw new ObjectStateException(
+				 "franchisor has franchisee(s)",
+				 "franchisor",
+				 invalidValues);
+		}
+		disableCompany(franchisor);
+	}
+
+	@Override
+	@Transactional
+	public void disableCompany(Company company) {
+		//check if there are any franchisees dependendent on franchisor
+		//remove all access tokens associated with company /// but throw exception in constraint validator
+		company.setEnabled(false);
+		companyRepository.save(company);
 	}
 
 	@Override
 	@Transactional
 	public void savePayment(Payment payment) {
 		paymentRepository.save(payment);
-	}
-
-	@Override
-	public boolean isValid(Franchisor franchisor) {
-		if (franchisorRepository.existsByNameIgnoreCase(franchisor.getName())) return false;
-
-		return true;
 	}
 }

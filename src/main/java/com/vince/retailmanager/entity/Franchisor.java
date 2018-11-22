@@ -1,8 +1,10 @@
 package com.vince.retailmanager.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.vince.retailmanager.web.ValidFranchisor;
 import lombok.*;
 
 import javax.persistence.*;
@@ -13,11 +15,13 @@ import java.util.Set;
 @Entity
 @Table(name = "franchisors")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+//@JsonIdentityReference(alwaysAsId=true) // otherwise first ref as POJO, others as id
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ValidFranchisor
 public class Franchisor extends Company {
 
 	@Column(unique = true)
@@ -31,8 +35,9 @@ public class Franchisor extends Company {
 	@NotNull
 	private String description;
 
-	@OneToMany(mappedBy = "franchisor", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "franchisor", fetch = FetchType.EAGER)
 	@JsonIgnoreProperties(value = "franchisor")
+	@JsonBackReference
 	private Set<Franchisee> franchisees;
 
 

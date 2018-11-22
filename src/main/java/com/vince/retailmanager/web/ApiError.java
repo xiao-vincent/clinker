@@ -91,6 +91,10 @@ class ApiError {
 		globalErrors.forEach(this::addValidationError);
 	}
 
+	void addStateError(String object, String message, Object details) {
+		addSubError(new ApiStateError(object, message, details));
+	}
+
 	/**
 	 * Utility method for adding error of ConstraintViolation. Usually when a @Validated validation fails.
 	 *
@@ -127,6 +131,21 @@ class ApiError {
 			this.message = message;
 		}
 	}
+
+	@Data
+	@EqualsAndHashCode(callSuper = false)
+	@AllArgsConstructor
+	class ApiStateError extends ApiSubError {
+		private String object;
+		private String message;
+		private Object details;
+
+		ApiStateError(String object, String message) {
+			this.object = object;
+			this.message = message;
+		}
+	}
+
 }
 
 class LowerCaseClassNameResolver extends TypeIdResolverBase {
