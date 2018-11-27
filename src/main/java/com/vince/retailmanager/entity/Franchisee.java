@@ -1,6 +1,6 @@
 package com.vince.retailmanager.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 
 import javax.persistence.*;
@@ -19,21 +19,13 @@ public class Franchisee extends Company {
 	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
 	@JoinColumn(name = "franchisor_id")
 	@EqualsAndHashCode.Exclude
-	@JsonManagedReference
+	@JsonBackReference
 	private Franchisor franchisor;
-
-	public Payment createPaymentToFranchisor(Double amount) {
-		return Payment.builder()
-			 .payer(this)
-			 .recipient(franchisor)
-			 .amount(amount)
-			 .build();
-	}
 
 	@Override
 	public String toString() {
 		return new StringJoiner(", ", Franchisee.class.getSimpleName() + "[", "]")
-			 .add("id=" + getId())
+			 .add("id=" + this.getId())
 			 .toString();
 	}
 }

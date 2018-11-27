@@ -57,7 +57,7 @@ public class InsertDemoData {
 
 //		Payment payment = new Payment();
 //		System.out.println(franchisees.get(0));
-//		payment.setPayer(franchisees.get(0));
+//		payment.setSender(franchisees.get(0));
 //		payment.setRecipient(franchisors.get(0));
 //		payment.setAmount(new BigDecimal(2250.34444));
 //		paymentRepo.save(payment);

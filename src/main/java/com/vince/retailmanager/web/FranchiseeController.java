@@ -3,46 +3,57 @@ package com.vince.retailmanager.web;
 import com.vince.retailmanager.entity.Franchisee;
 import com.vince.retailmanager.entity.Payment;
 import com.vince.retailmanager.service.FranchiseService;
+import com.vince.retailmanager.service.PaymentService;
+import com.vince.retailmanager.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.constraints.Positive;
+import javax.validation.Validator;
+import java.util.Map;
 
 
 @RestController
-@CrossOrigin(exposedHeaders = "errors, content-type")
-@RequestMapping("/franchisor/{franchisorId}/franchisees/{franchiseeId}")
+@RequestMapping("/{franchisorId}/franchisees/{franchiseeId}")
 public class FranchiseeController {
+
 	@Autowired
 	private FranchiseService franchiseService;
 
 	@Autowired
-	private HttpServletRequest request;
+	public UserService userService;
+
+	@Autowired
+	public PaymentService paymentService;
 
 
-//	@ModelAttribute("franchisor")
-//	public Franchisor findFranchisor(@PathVariable("franchisorId") int franchisorId) {
-//		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//		return franchiseService.findFranchisorById(franchisorId);
-//	}
+	@Autowired
+	public Validator validator;
 
-	@ModelAttribute("franchisee")
-	public Franchisee findFranchisee(@PathVariable("franchiseeId") int franchiseeId) {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		return franchiseService.findFranchiseeById(franchiseeId);
+	@ModelAttribute
+	public void populateModel(
+		 Model model,
+		 @AuthenticationPrincipal org.springframework.security.core.userdetails.User authenticatedUser,
+		 @PathVariable(value = "franchisorId") Integer franchisorId,
+		 @PathVariable(value = "franchiseeId") Integer franchiseeId
+	) throws EntityNotFoundException {
+		if (franchisorId == null || franchiseeId == null) return;
+		model.addAttribute("franchisor", franchiseService.findFranchisorById(franchisorId));
+		model.addAttribute("franchisee", franchiseService.findFranchiseeById(franchiseeId));
+		ControllerUtilities.addActiveUsername(model, authenticatedUser, franchiseeId, userService);
+	}
+
+	@GetMapping
+	public ResponseEntity<Franchisee> findFranchisee(Franchisee franchisee) {
+		return new ResponseEntity<>(franchisee, HttpStatus.OK);
 	}
 
 	@InitBinder("franchisor")
-	public void initOwnerBinder(WebDataBinder dataBinder) {
+	public void initFranchisorBinder(WebDataBinder dataBinder) {
 		dataBinder.setDisallowedFields("id");
 	}
 
@@ -51,26 +62,20 @@ public class FranchiseeController {
 		dataBinder.setDisallowedFields("id");
 	}
 
-	@PostMapping("/pay/{amount}")
-	@PreAuthorize("isLoggedIn(#franchisee.getUser())")
-	@Validated
-	public ResponseEntity<String> makePaymentToFranchisor(@PathVariable @Positive Double amount, Franchisee franchisee) {
-		BindingErrorsResponse errors = new BindingErrorsResponse();
-		HttpHeaders headers = new HttpHeaders();
-		headers.add("errors", errors.toJSON());
-		if (isValidCurrency(amount)) return new ResponseEntity<>(headers, HttpStatus.BAD_REQUEST);
+	@PostMapping("/pay-franchisor")
+	public ResponseEntity<Payment> payFranchisor(@RequestBody Map<String, Object> body,
+	                                             Franchisee franchisee) {
+		Double amount = (Double) body.get("amount");
 		Payment payment = Payment.builder()
-			 .payer(franchisee)
+			 .sender(franchisee)
 			 .recipient(franchisee.getFranchisor())
 			 .amount(amount)
 			 .build();
-		franchiseService.savePayment(payment);
-		return null;
+		ControllerUtilities.validate(validator, payment);
+		paymentService.savePayment(payment);
+		return new ResponseEntity<>(payment, HttpStatus.OK);
 	}
 
-	private boolean isValidCurrency(Double amount) {
-		return amount <= 0.0;
-	}
 
 //	@GetMapping("/hi")
 //	@PreAuthorize("authentication.name == 'admin'")
@@ -104,7 +109,7 @@ public class FranchiseeController {
 //            // refactor, should return 'already exists' error
 //            return null;
 //        }
-//        franchiseService.saveFranchisor(franchisor);
+//        franchiseService.saveCompany(franchisor);
 //        return franchisor;
 //    }
 //
@@ -114,7 +119,7 @@ public class FranchiseeController {
 //        Franchisor franchisorModel = retrieveCompany(franchisorId);
 //        EntityObjectMampper mapper = Mappers.getMapper(EntityObjectMampper.class);
 //        franchisorModel = mapper.sourceToDestination(franchisorRequest, franchisorModel);
-//        franchiseService.saveFranchisor(franchisorModel);
+//        franchiseService.saveCompany(franchisorModel);
 //        return franchisorModel;
 //    }
 

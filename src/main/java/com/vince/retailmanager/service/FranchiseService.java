@@ -3,15 +3,16 @@ package com.vince.retailmanager.service;
 import com.vince.retailmanager.entity.Company;
 import com.vince.retailmanager.entity.Franchisee;
 import com.vince.retailmanager.entity.Franchisor;
-import com.vince.retailmanager.entity.Payment;
 import com.vince.retailmanager.web.EntityNotFoundException;
 
 import java.util.List;
 
 public interface FranchiseService {
-	void saveFranchisor(Franchisor franchisor);
+//	void saveCompany(Franchisor franchisor);
 
 	void saveFranchisee(Franchisee franchisee);
+
+	void saveCompany(Company company);
 
 	Franchisor findFranchisorById(int id) throws EntityNotFoundException;
 
@@ -19,10 +20,8 @@ public interface FranchiseService {
 
 	void disableCompany(Company company);
 
-
 	List<Franchisor> findAllFranchisors();
 
-	void savePayment(Payment payment);
 
-	Franchisee findFranchiseeById(int franchiseeId);
+	Franchisee findFranchiseeById(int franchiseeId) throws EntityNotFoundException;
 }

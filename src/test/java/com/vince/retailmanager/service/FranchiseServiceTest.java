@@ -28,7 +28,7 @@ class FranchiseServiceTest {
 
 		Franchisor franchisor = new Franchisor("Mcdonalds", "www.mcd.com", "fastfood", null);
 
-		this.franchiseService.saveFranchisor(franchisor);
+		this.franchiseService.saveCompany(franchisor);
 
 		Collection<Franchisor> franchisors = this.franchiseService.findAllFranchisors();
 		System.out.println(franchisors);

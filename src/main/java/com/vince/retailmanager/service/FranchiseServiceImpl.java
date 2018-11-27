@@ -3,7 +3,6 @@ package com.vince.retailmanager.service;
 import com.vince.retailmanager.entity.Company;
 import com.vince.retailmanager.entity.Franchisee;
 import com.vince.retailmanager.entity.Franchisor;
-import com.vince.retailmanager.entity.Payment;
 import com.vince.retailmanager.exception.ObjectStateException;
 import com.vince.retailmanager.repository.*;
 import com.vince.retailmanager.web.EntityNotFoundException;
@@ -17,16 +16,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.vince.retailmanager.utils.StringUtils.singlePlural;
+
 @Service
 public class FranchiseServiceImpl implements FranchiseService {
 
 	private UserService userService;
-
 	private AccessTokensRepository accessTokensRepository;
 	private CompanyRepository companyRepository;
 	private FranchisorRepository franchisorRepository;
 	private FranchiseeRepository franchiseeRepository;
-	private PaymentRepository paymentRepository;
 
 	@Autowired
 	public FranchiseServiceImpl(
@@ -41,14 +40,13 @@ public class FranchiseServiceImpl implements FranchiseService {
 		this.companyRepository = companyRepository;
 		this.franchisorRepository = franchisorRepository;
 		this.franchiseeRepository = franchiseeRepository;
-		this.paymentRepository = paymentRepository;
 	}
 
 
 	@Override
 	@Transactional
-	public void saveFranchisor(Franchisor franchisor) {
-		franchisorRepository.save(franchisor);
+	public void saveCompany(Company company) {
+		companyRepository.save(company);
 	}
 
 	@Override
@@ -76,24 +74,44 @@ public class FranchiseServiceImpl implements FranchiseService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public Franchisee findFranchiseeById(int franchiseeId) {
-		return franchiseeRepository.findById(franchiseeId).orElse(null);
+	public Franchisee findFranchiseeById(int id) throws EntityNotFoundException {
+		Franchisee franchisee = franchiseeRepository.findById(id).orElse(null);
+		if (franchisee == null) {
+			throw new EntityNotFoundException(Franchisee.class, "id", String.valueOf(id));
+		}
+		return franchisee;
 	}
 
 
 	@Override
 	public void disableFranchisor(Franchisor franchisor) throws ObjectStateException {
-		if (!franchisor.getFranchisees().isEmpty()) {
-			Map<String, Set<Franchisee>> invalidValues = new HashMap<>();
-			invalidValues.put("franchisees", franchisor.getFranchisees());
-
-			throw new ObjectStateException(
-				 "franchisor has franchisee(s)",
-				 "franchisor",
-				 invalidValues);
+		Set<Franchisee> franchisees = franchisor.getFranchisees();
+		if (!franchisees.isEmpty()) {
+			throwObjectStateException(franchisor, franchisees);
+			return;
 		}
 		disableCompany(franchisor);
 	}
+
+	private void throwObjectStateException(Franchisor franchisor, Set<Franchisee> franchisees) {
+		Map<String, Set<Franchisee>> invalidValues = new HashMap<>();
+		invalidValues.put("franchisees", franchisees);
+		String franchisorClassName = franchisor.getClass().getSimpleName();
+		String errorMsg = new StringBuilder()
+			 .append(franchisorClassName)
+			 .append(" still has ")
+			 .append(franchisees.size())
+			 .append(" active ")
+			 .append(singlePlural(franchisees.size(), "franchisee"))
+			 .toString();
+
+		throw new ObjectStateException(
+			 errorMsg,
+			 franchisorClassName,
+			 invalidValues
+		);
+	}
+
 
 	@Override
 	@Transactional
@@ -104,9 +122,4 @@ public class FranchiseServiceImpl implements FranchiseService {
 		companyRepository.save(company);
 	}
 
-	@Override
-	@Transactional
-	public void savePayment(Payment payment) {
-		paymentRepository.save(payment);
-	}
 }

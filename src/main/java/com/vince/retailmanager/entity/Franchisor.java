@@ -1,8 +1,8 @@
 package com.vince.retailmanager.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.vince.retailmanager.web.ValidFranchisor;
 import lombok.*;
@@ -37,7 +37,7 @@ public class Franchisor extends Company {
 
 	@OneToMany(mappedBy = "franchisor", fetch = FetchType.EAGER)
 	@JsonIgnoreProperties(value = "franchisor")
-	@JsonBackReference
+	@JsonManagedReference
 	private Set<Franchisee> franchisees;
 
 
@@ -46,6 +46,7 @@ public class Franchisor extends Company {
 		franchisees.add(franchisee);
 		franchisee.setFranchisor(this);
 	}
+
 
 //	protected Set<Franchisee> getFranchiseesInternal() {
 //		if (this.franchisees == null) {
