@@ -70,14 +70,13 @@ public class InsertDemoData {
 			 .name("McDonald's Corporation")
 			 .website("mcdonalds.com")
 			 .description("Fast food company")
+			 .franchiseFee(30000.0)
+			 .liquidCapitalRequirement(200000.0)
+			 .royaltyFee(.08)
+			 .marketingFee(.02)
+			 .feeFrequency(12)
 			 .build();
 		setupFranchisorsAndFranchisees("mc", franchisor, 2);
-		franchisor = Franchisor.builder()
-			 .name("Pizza Hut")
-			 .website("pizzahut.com")
-			 .description("Restaurant company")
-			 .build();
-		setupFranchisorsAndFranchisees("ph", franchisor, 1);
 	}
 
 	private void setupAdmin() throws Exception {

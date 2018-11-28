@@ -1,4 +1,4 @@
-package com.vince.retailmanager.web;
+package com.vince.retailmanager.web.exception;
 
 import com.vince.retailmanager.exception.ObjectStateException;
 import lombok.extern.slf4j.Slf4j;

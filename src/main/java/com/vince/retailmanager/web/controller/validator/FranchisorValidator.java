@@ -1,4 +1,4 @@
-package com.vince.retailmanager.web;
+package com.vince.retailmanager.web.controller.validator;
 
 import com.vince.retailmanager.entity.Franchisor;
 import com.vince.retailmanager.repository.FranchisorRepository;
@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import java.util.function.BiFunction;
 
 public class FranchisorValidator implements ConstraintValidator<ValidFranchisor, Franchisor> {
 
@@ -22,7 +21,7 @@ public class FranchisorValidator implements ConstraintValidator<ValidFranchisor,
 	                       ConstraintValidatorContext context) {
 		if (franchisor == null) return true;
 
-		boolean isValid = applyValidators(franchisor, context,
+		boolean isValid = ValidatorUtils.applyValidators(franchisor, context,
 			 this::isNameValid,
 			 this::isWebsiteValid
 		);
@@ -69,17 +68,17 @@ public class FranchisorValidator implements ConstraintValidator<ValidFranchisor,
 			 .addConstraintViolation();
 	}
 
-	@SafeVarargs
-	private final boolean applyValidators(Franchisor franchisor, ConstraintValidatorContext context,
-	                                      BiFunction<Franchisor, ConstraintValidatorContext, Boolean>... fns) {
-		boolean isValid = true;
-		for (BiFunction<Franchisor, ConstraintValidatorContext, Boolean> fn : fns) {
-			if (!fn.apply(franchisor, context)) {
-				isValid = false;
-			}
-		}
-		return isValid;
-	}
+//	@SafeVarargs
+//	private final boolean applyValidators(Franchisor franchisor, ConstraintValidatorContext context,
+//	                                      BiFunction<Franchisor, ConstraintValidatorContext, Boolean>... fns) {
+//		boolean isValid = true;
+//		for (BiFunction<Franchisor, ConstraintValidatorContext, Boolean> fn : fns) {
+//			if (!fn.apply(franchisor, context)) {
+//				isValid = false;
+//			}
+//		}
+//		return isValid;
+//	}
 
 }
 

@@ -1,4 +1,4 @@
-package com.vince.retailmanager.web;
+package com.vince.retailmanager.web.exception;
 
 import org.apache.commons.lang3.StringUtils;
 

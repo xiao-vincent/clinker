@@ -1,4 +1,4 @@
-package com.vince.retailmanager.web;
+package com.vince.retailmanager.web.controller;
 
 import com.vince.retailmanager.entity.AccessToken;
 import com.vince.retailmanager.service.UserService;
@@ -14,7 +14,7 @@ import javax.validation.Validator;
 import java.util.Set;
 
 @Component
-class ControllerUtilities {
+class ControllerUtils {
 
 	static void addActiveUsername(
 		 Model model,
@@ -32,6 +32,7 @@ class ControllerUtilities {
 
 	static void validate(Validator validator, Object object) {
 		Set<ConstraintViolation<Object>> violations = validator.validate(object);
+		System.out.println(violations);
 		if (!violations.isEmpty()) {
 			throw new ConstraintViolationException(violations);
 		}

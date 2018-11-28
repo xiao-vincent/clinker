@@ -1,4 +1,4 @@
-package com.vince.retailmanager.web;
+package com.vince.retailmanager.web.controller.validator;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
@@ -15,7 +15,7 @@ import static java.lang.annotation.ElementType.TYPE;
 @Constraint(validatedBy = FranchisorValidator.class)
 @Documented
 public @interface ValidFranchisor {
-	String message() default "total price must be 50 or greater for online order. ";
+	String message() default "";
 
 	//		+ "Found: ${validatedValue.totalPrice}";
 	Class<?>[] groups() default {};

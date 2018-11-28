@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vince.retailmanager.entity.User;
 import com.vince.retailmanager.service.UserService;
 import com.vince.retailmanager.service.businessService.ApplicationTestConfig;
+import com.vince.retailmanager.web.controller.UserController;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;

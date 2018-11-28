@@ -5,7 +5,7 @@ import com.vince.retailmanager.entity.Franchisee;
 import com.vince.retailmanager.entity.Franchisor;
 import com.vince.retailmanager.exception.ObjectStateException;
 import com.vince.retailmanager.repository.*;
-import com.vince.retailmanager.web.EntityNotFoundException;
+import com.vince.retailmanager.web.exception.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;

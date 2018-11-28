@@ -1,7 +1,8 @@
-package com.vince.retailmanager.web;
+package com.vince.retailmanager.web.controller;
 
 import com.vince.retailmanager.entity.User;
 import com.vince.retailmanager.service.UserService;
+import com.vince.retailmanager.web.exception.BindingErrorsResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

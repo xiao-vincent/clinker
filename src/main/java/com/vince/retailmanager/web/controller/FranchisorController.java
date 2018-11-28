@@ -1,4 +1,4 @@
-package com.vince.retailmanager.web;
+package com.vince.retailmanager.web.controller;
 
 import com.vince.retailmanager.entity.Franchisee;
 import com.vince.retailmanager.entity.Franchisor;
@@ -7,6 +7,7 @@ import com.vince.retailmanager.entity.User;
 import com.vince.retailmanager.service.FranchiseService;
 import com.vince.retailmanager.service.PaymentService;
 import com.vince.retailmanager.service.UserService;
+import com.vince.retailmanager.web.exception.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,14 +42,12 @@ public class FranchisorController {
 	) throws EntityNotFoundException {
 		if (id != null) {
 			model.addAttribute("franchisor", franchiseService.findFranchisorById(id));
-			ControllerUtilities.addActiveUsername(model, authenticatedUser, id, userService);
+			ControllerUtils.addActiveUsername(model, authenticatedUser, id, userService);
 		}
 
 		if (franchiseeId != null) {
 			model.addAttribute("franchisee", franchiseService.findFranchiseeById(franchiseeId));
 		}
-
-
 	}
 
 	@InitBinder("franchisor")
@@ -96,6 +95,7 @@ public class FranchisorController {
 	) {
 		Franchisee franchisee = Franchisee.builder().build();
 		franchisor.addFranchisee(franchisee);
+		ControllerUtils.validate(validator, franchisee);
 		this.franchiseService.saveFranchisee(franchisee);
 		return new ResponseEntity<>(franchisee, HttpStatus.CREATED);
 	}
@@ -120,7 +120,7 @@ public class FranchisorController {
 			 .balance(due)
 			 .description("requesting royalty payment")
 			 .build();
-		ControllerUtilities.validate(validator, invoice);
+		ControllerUtils.validate(validator, invoice);
 		paymentService.saveInvoice(invoice);
 		return new ResponseEntity<>(invoice, HttpStatus.OK);
 	}

@@ -3,7 +3,7 @@ package com.vince.retailmanager.service;
 import com.vince.retailmanager.entity.Company;
 import com.vince.retailmanager.entity.Franchisee;
 import com.vince.retailmanager.entity.Franchisor;
-import com.vince.retailmanager.web.EntityNotFoundException;
+import com.vince.retailmanager.web.exception.EntityNotFoundException;
 
 import java.util.List;
 

@@ -1,6 +1,6 @@
 package com.vince.retailmanager.entity;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.*;
 
 import javax.persistence.Entity;
@@ -14,33 +14,38 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "invoices")
 @Data
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true, of = {""})
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Invoice extends BaseEntity {
 
 	@DecimalMin("0.00")
+	@JsonView(View.Public.class)
 	private BigDecimal due;
 
-	@JsonInclude
+	@JsonView(View.Invoice.class)
 	private transient BigDecimal balance;
 
-	//	@NotNull
+	@JsonView(View.Public.class)
+//	@NotNull
 	private String description;
 
 	@OneToOne
 	@JoinColumn(name = "seller_id")
 	@NotNull
+	@JsonView(View.Public.class)
 	private Company seller;
 
 	@OneToOne
 	@JoinColumn(name = "customer_id")
 	@NotNull
+	@JsonView(View.Public.class)
 	private Company customer;
 
 	@OneToOne
 	@JoinColumn(name = "payment_id")
+	@JsonView(View.Public.class)
 	private Payment payment;
 
 	public BigDecimal getBalance() {
