@@ -1,6 +1,8 @@
 package com.vince.retailmanager.entity;
 
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.vince.retailmanager.web.controller.validator.ValidFranchisor;
 import lombok.*;
 import org.hibernate.validator.constraints.Range;
@@ -14,7 +16,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "franchisors")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+//@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 //@JsonIdentityReference(alwaysAsId = true) // otherwise first ref as POJO, others as id
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -23,6 +25,7 @@ import java.util.Set;
 @AllArgsConstructor
 @ValidFranchisor
 public class Franchisor extends Company {
+
 
 	@Column(unique = true)
 	@NotNull
@@ -35,14 +38,16 @@ public class Franchisor extends Company {
 	private String website;
 
 	@NotNull
-	@JsonView(View.Public.class)
+	@JsonView(View.Summary.class)
 	private String description;
 
 	@OneToMany(mappedBy = "franchisor", fetch = FetchType.EAGER)
 	@JsonIgnoreProperties(value = {"franchisor", "cashBalance"})
 	@Builder.Default
 	@JsonProperty("franchisees")
+	@JsonView(View.Franchisor.class)
 	private Set<Franchisee> franchisees = new HashSet<>();
+
 
 	@NotNull
 	@Min(0)

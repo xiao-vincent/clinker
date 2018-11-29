@@ -1,12 +1,16 @@
 package com.vince.retailmanager.service;
 
+import com.vince.retailmanager.entity.Company;
 import com.vince.retailmanager.entity.Invoice;
 import com.vince.retailmanager.entity.Payment;
 import com.vince.retailmanager.repository.InvoiceRepository;
 import com.vince.retailmanager.repository.PaymentRepository;
+import com.vince.retailmanager.web.exception.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
@@ -24,6 +28,9 @@ public class PaymentServiceImpl implements PaymentService {
 	@Override
 	@Transactional
 	public void savePayment(Payment payment) {
+		Company sender = payment.getSender();
+		BigDecimal newCashBalance = sender.getCashBalance().subtract(payment.getAmount());
+		sender.setCashBalance(newCashBalance);
 		paymentRepository.save(payment);
 	}
 
@@ -32,4 +39,13 @@ public class PaymentServiceImpl implements PaymentService {
 		invoiceRepository.save(invoice);
 	}
 
+	@Override
+	@Transactional(readOnly = true)
+	public Invoice findInvoiceById(int id) throws EntityNotFoundException {
+		Invoice invoice = invoiceRepository.findById(id).orElse(null);
+		if (invoice == null) {
+			throw new EntityNotFoundException(Invoice.class, "id", String.valueOf(id));
+		}
+		return invoice;
+	}
 }

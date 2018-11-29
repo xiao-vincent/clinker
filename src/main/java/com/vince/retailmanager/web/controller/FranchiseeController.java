@@ -1,7 +1,8 @@
 package com.vince.retailmanager.web.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.vince.retailmanager.entity.*;
+import com.vince.retailmanager.entity.Franchisee;
+import com.vince.retailmanager.entity.View;
 import com.vince.retailmanager.service.FranchiseService;
 import com.vince.retailmanager.service.PaymentService;
 import com.vince.retailmanager.service.UserService;
@@ -15,8 +16,6 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Validator;
-import java.util.Map;
-import java.util.Set;
 
 
 @RestController
@@ -40,8 +39,8 @@ public class FranchiseeController {
 	public void populateModel(
 		 Model model,
 		 @AuthenticationPrincipal org.springframework.security.core.userdetails.User authenticatedUser,
-		 @PathVariable(value = "franchisorId") Integer franchisorId,
-		 @PathVariable(value = "franchiseeId") Integer franchiseeId
+		 @PathVariable("franchisorId") Integer franchisorId,
+		 @PathVariable("franchiseeId") Integer franchiseeId
 	) throws EntityNotFoundException {
 		if (franchisorId == null || franchiseeId == null) return;
 		model.addAttribute("franchisor", franchiseService.findFranchisorById(franchisorId));
@@ -66,31 +65,11 @@ public class FranchiseeController {
 		return new ResponseEntity<>(franchisee, HttpStatus.OK);
 	}
 
-	@GetMapping("/franchisor-info")
-	@JsonView(View.Public.class)
-	public ResponseEntity<Franchisor> getFranchisor(Franchisor franchisor) {
-		return new ResponseEntity<>(franchisor, HttpStatus.OK);
-	}
-
-	@PostMapping("/pay-franchisor")
-	public ResponseEntity<Payment> payFranchisor(@RequestBody Map<String, Object> body,
-	                                             Franchisee franchisee) {
-		Double amount = (Double) body.get("amount");
-		Payment payment = Payment.builder()
-			 .sender(franchisee)
-			 .recipient(franchisee.getFranchisor())
-			 .amount(amount)
-			 .build();
-		ControllerUtils.validate(validator, payment);
-		paymentService.savePayment(payment);
-		return new ResponseEntity<>(payment, HttpStatus.OK);
-	}
-
-	@GetMapping("/invoices")
-	@JsonView(View.Invoice.class)
-	public ResponseEntity<Set<Invoice>> getInvoices(Franchisee franchisee) {
-		return new ResponseEntity<>(franchisee.getInvoices(), HttpStatus.OK);
-	}
+//	@GetMapping("/franchisor-info")
+//	@JsonView(View.Summary.class)
+//	public ResponseEntity<Franchisor> getFranchisor(Franchisor franchisor) {
+//		return new ResponseEntity<>(franchisor, HttpStatus.OK);
+//	}
 
 
 //	@GetMapping("/hi")

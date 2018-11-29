@@ -4,15 +4,21 @@ import com.vince.retailmanager.entity.Company;
 import com.vince.retailmanager.entity.Franchisee;
 import com.vince.retailmanager.entity.Franchisor;
 import com.vince.retailmanager.web.exception.EntityNotFoundException;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 public interface FranchiseService {
 //	void saveCompany(Franchisor franchisor);
 
+	Franchisor saveFranchisor(Franchisor franchisor);
+
 	void saveFranchisee(Franchisee franchisee);
 
-	void saveCompany(Company company);
+	Company saveCompany(Company company);
+
+	@Transactional
+	Company findCompanyById(int id) throws EntityNotFoundException;
 
 	Franchisor findFranchisorById(int id) throws EntityNotFoundException;
 

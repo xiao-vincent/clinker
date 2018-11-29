@@ -1,8 +1,6 @@
 package com.vince.retailmanager.demo;
 
-import com.vince.retailmanager.entity.Franchisee;
-import com.vince.retailmanager.entity.Franchisor;
-import com.vince.retailmanager.entity.User;
+import com.vince.retailmanager.entity.*;
 import com.vince.retailmanager.repository.*;
 import com.vince.retailmanager.service.FranchiseService;
 import com.vince.retailmanager.service.UserService;
@@ -11,6 +9,11 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class InsertDemoData {
@@ -32,6 +35,10 @@ public class InsertDemoData {
 	private FranchiseeRepository franchiseeRepo;
 	@Autowired
 	private PaymentRepository paymentRepo;
+	@Autowired
+	private InvoiceRepository invoiceRepo;
+
+	private Map<String, Franchisor> franchisors = new HashMap<>();
 
 	@EventListener
 	@Transactional
@@ -42,41 +49,44 @@ public class InsertDemoData {
 
 		setupAdmin();
 		System.out.println("\nDemo data setup complete!");
-//		System.out.println(companyRepo.findById(1));
-
-//		Company company = companyRepo.findById(1).orElse(null);
-//		User user = userRepo.findByUsername("mc_franchisor").orElse(null);
-//
-//		AccessToken accessToken = accessTokenRepo.findById(1).orElse(null);
-//		user.removeAccessToken(accessToken);
-//		accessTokenRepo.delete(accessToken);
-//		companyRepo.delete(companyRepo.findById(1).orElse(null));
-//
-//		System.out.println(accessToken);
-//		System.out.println(company);
-
-//		Payment payment = new Payment();
-//		System.out.println(franchisees.get(0));
-//		payment.setSender(franchisees.get(0));
-//		payment.setRecipient(franchisors.get(0));
-//		payment.setAmount(new BigDecimal(2250.34444));
-//		paymentRepo.save(payment);
-//		System.out.println(payment);
 
 	}
 
-	public void createFranchise() throws Exception {
-		Franchisor franchisor = Franchisor.builder()
-			 .name("McDonald's Corporation")
-			 .website("mcdonalds.com")
-			 .description("Fast food company")
-			 .franchiseFee(30000.0)
-			 .liquidCapitalRequirement(200000.0)
-			 .royaltyFee(.08)
-			 .marketingFee(.02)
-			 .feeFrequency(12)
+	void createFranchise() throws Exception {
+		String key = createFranchisor("mc");
+		Franchisor franchisor = franchisors.get(key);
+		List<Franchisee> franchisees = addFranchiseesToFranchisor(key, franchisor, 2);
+		for (Franchisee franchisee : franchisees) {
+			createInvoice(franchisor, franchisee, 100);
+		}
+	}
+
+	String createFranchisor(String key) {
+		franchisors.put(key,
+			 Franchisor.builder()
+					.name("McDonald's Corporation")
+					.website("mcdonalds.com")
+					.description("Fast food company")
+					.franchiseFee(30000.0)
+					.liquidCapitalRequirement(200000.0)
+					.royaltyFee(.08)
+					.marketingFee(.02)
+					.feeFrequency(12)
+					.build()
+		);
+		return key;
+	}
+
+	Invoice createInvoice(Company seller, Company customer, double balance) {
+		Invoice invoice = Invoice.builder()
+			 .seller(seller)
+			 .customer(customer)
+			 .balance(balance)
+			 .description("royalty payment")
 			 .build();
-		setupFranchisorsAndFranchisees("mc", franchisor, 2);
+
+		invoiceRepo.save(invoice);
+		return invoice;
 	}
 
 	private void setupAdmin() throws Exception {
@@ -97,14 +107,16 @@ public class InsertDemoData {
 	}
 
 
-	public void setupFranchisorsAndFranchisees(String shortName, Franchisor franchisor, int numOfFranchisees) throws Exception {
+	public List<Franchisee> addFranchiseesToFranchisor(String shortName,
+	                                                   Franchisor franchisor, int numOfFranchisees) throws Exception {
 		shortName = shortName.toLowerCase();
 		setupFranchisorInDB(shortName, franchisor);
 
+		List<Franchisee> franchisees = new ArrayList<>();
 		for (int i = 1; i <= numOfFranchisees; i++) {
-			setupFranchiseeInDB(shortName, franchisor, i);
+			franchisees.add(setupFranchiseeInDB(shortName, franchisor, i));
 		}
-
+		return franchisees;
 	}
 
 	private void setupFranchisorInDB(String shortName, Franchisor franchisor) throws Exception {
@@ -115,7 +127,7 @@ public class InsertDemoData {
 		userService.saveUser(franchisorUser);
 	}
 
-	private void setupFranchiseeInDB(String shortName, Franchisor franchisor, int i) throws Exception {
+	private Franchisee setupFranchiseeInDB(String shortName, Franchisor franchisor, int i) throws Exception {
 		Franchisee franchisee = Franchisee.builder()
 			 .build();
 
@@ -126,5 +138,6 @@ public class InsertDemoData {
 		franchiseeUser.addAccessToken(franchisee);
 		userService.saveUser(franchiseeUser);
 		System.out.println("saving " + franchisee);
+		return franchisee;
 	}
 }

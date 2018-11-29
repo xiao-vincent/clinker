@@ -21,7 +21,7 @@ public class Franchisee extends Company {
 	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
 	@JoinColumn(name = "franchisor_id")
 	@EqualsAndHashCode.Exclude
-	@JsonView(View.Public.class)
+	@JsonView(View.Franchisee.class)
 	private Franchisor franchisor;
 
 	@Override

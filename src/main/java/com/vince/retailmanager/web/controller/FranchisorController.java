@@ -71,8 +71,8 @@ public class FranchisorController {
 	                                                User user
 	) {
 		user.addAccessToken(franchisor);
-		franchiseService.saveCompany(franchisor);
-		return new ResponseEntity<>(franchisor, HttpStatus.CREATED);
+		Franchisor savedFranchisor = franchiseService.saveFranchisor(franchisor);
+		return new ResponseEntity<>(savedFranchisor, HttpStatus.CREATED);
 	}
 
 	@PutMapping("/{id}")

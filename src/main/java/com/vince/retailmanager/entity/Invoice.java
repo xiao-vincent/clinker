@@ -3,13 +3,12 @@ package com.vince.retailmanager.entity;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "invoices")
@@ -24,11 +23,10 @@ public class Invoice extends BaseEntity {
 	@JsonView(View.Public.class)
 	private BigDecimal due;
 
-	@JsonView(View.Invoice.class)
+	@JsonView(View.Public.class)
 	private transient BigDecimal balance;
 
 	@JsonView(View.Public.class)
-//	@NotNull
 	private String description;
 
 	@OneToOne
@@ -43,16 +41,19 @@ public class Invoice extends BaseEntity {
 	@JsonView(View.Public.class)
 	private Company customer;
 
-	@OneToOne
-	@JoinColumn(name = "payment_id")
-	@JsonView(View.Public.class)
-	private Payment payment;
+	@OneToMany(mappedBy = "invoice")
+	@JsonView(View.Invoice.class)
+	@Builder.Default
+	private Set<Payment> payments = new HashSet<>();
 
 	public BigDecimal getBalance() {
-		if (payment == null) {
+		if (payments.isEmpty()) {
 			return due;
 		} else {
-			return due.subtract(payment.getAmount());
+			BigDecimal total = payments.stream()
+				 .map(Payment::getAmount)
+				 .reduce(BigDecimal.ZERO, BigDecimal::add);
+			return due.subtract(total);
 		}
 	}
 

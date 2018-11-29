@@ -45,8 +45,18 @@ public class FranchiseServiceImpl implements FranchiseService {
 
 	@Override
 	@Transactional
-	public void saveCompany(Company company) {
-		companyRepository.save(company);
+	public Company saveCompany(Company company) {
+		return companyRepository.save(company);
+	}
+
+	@Override
+	@Transactional
+	public Company findCompanyById(int id) throws EntityNotFoundException {
+		Company company = companyRepository.findById(id).orElse(null);
+		if (company == null) {
+			throw new EntityNotFoundException(Company.class, "id", String.valueOf(id));
+		}
+		return company;
 	}
 
 	@Override
@@ -57,6 +67,12 @@ public class FranchiseServiceImpl implements FranchiseService {
 			throw new EntityNotFoundException(Franchisor.class, "id", String.valueOf(id));
 		}
 		return franchisor;
+	}
+
+	@Override
+	@Transactional
+	public Franchisor saveFranchisor(Franchisor franchisor) {
+		return franchisorRepository.save(franchisor);
 	}
 
 	@Override
