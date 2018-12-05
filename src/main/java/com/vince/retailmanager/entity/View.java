@@ -7,16 +7,16 @@ public class View {
 	public interface Summary extends Public {
 	}
 
-	public interface Franchisor extends Public {
+	public interface Franchisor extends Summary {
 	}
 
-	public interface Franchisee extends Public {
+	public interface Franchisee extends Summary {
 	}
 
-	public interface Invoice extends Public {
+	public interface Invoice extends Summary {
 	}
 
-	public interface Payment extends Public {
+	public interface Payment extends Summary {
 	}
 
 

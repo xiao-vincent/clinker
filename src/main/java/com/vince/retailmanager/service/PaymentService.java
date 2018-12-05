@@ -12,4 +12,6 @@ public interface PaymentService {
 	void saveInvoice(Invoice invoice);
 
 	Invoice findInvoiceById(int id) throws EntityNotFoundException;
+
+	Payment findPaymentById(int id) throws EntityNotFoundException;
 }

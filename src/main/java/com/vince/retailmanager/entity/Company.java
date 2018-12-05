@@ -26,13 +26,17 @@ public abstract class Company extends BaseEntity {
 	@Column
 	private BigDecimal cashBalance = BigDecimal.valueOf(0);
 
-
-	@OneToMany(mappedBy = "customer", fetch = FetchType.LAZY)
-//	@JsonIgnore
+	@OneToMany(mappedBy = "customer")
 	private Set<Invoice> invoicesReceived = new HashSet<>();
 
-
-	@OneToMany(mappedBy = "seller", fetch = FetchType.LAZY)
-//	@JsonIgnore
+	@OneToMany(mappedBy = "seller")
 	private Set<Invoice> invoicesSent = new HashSet<>();
+
+	@OneToMany(mappedBy = "recipient")
+	private Set<Payment> paymentsReceived = new HashSet<>();
+
+	@OneToMany(mappedBy = "sender")
+	private Set<Payment> paymentsSent = new HashSet<>();
+
+
 }

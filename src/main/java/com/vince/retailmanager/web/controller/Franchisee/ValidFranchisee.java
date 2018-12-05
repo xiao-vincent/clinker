@@ -1,4 +1,4 @@
-package com.vince.retailmanager.web.controller.validator;
+package com.vince.retailmanager.web.controller.Franchisee;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
@@ -12,12 +12,11 @@ import static java.lang.annotation.ElementType.TYPE;
 
 @Target({TYPE, ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = FranchisorValidator.class)
+@Constraint(validatedBy = FranchiseeValidator.class)
 @Documented
-public @interface ValidFranchisor {
+public @interface ValidFranchisee {
 	String message() default "";
 
-	//		+ "Found: ${validatedValue.totalPrice}";
 	Class<?>[] groups() default {};
 
 	Class<? extends Payload>[] payload() default {};

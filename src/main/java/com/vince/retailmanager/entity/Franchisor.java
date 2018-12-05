@@ -3,7 +3,7 @@ package com.vince.retailmanager.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.vince.retailmanager.web.controller.validator.ValidFranchisor;
+import com.vince.retailmanager.web.controller.Franchisor.ValidFranchisor;
 import lombok.*;
 import org.hibernate.validator.constraints.Range;
 

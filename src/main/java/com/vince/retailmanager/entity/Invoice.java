@@ -1,5 +1,7 @@
 package com.vince.retailmanager.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.*;
 
@@ -24,7 +26,8 @@ public class Invoice extends BaseEntity {
 	private BigDecimal due;
 
 	@JsonView(View.Public.class)
-	private transient BigDecimal balance;
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
+	private BigDecimal balance;
 
 	@JsonView(View.Public.class)
 	private String description;
@@ -42,9 +45,16 @@ public class Invoice extends BaseEntity {
 	private Company customer;
 
 	@OneToMany(mappedBy = "invoice")
-	@JsonView(View.Invoice.class)
+	@JsonView(View.Summary.class)
 	@Builder.Default
+	@JsonBackReference
 	private Set<Payment> payments = new HashSet<>();
+
+	@OneToMany(mappedBy = "invoice")
+	@JsonView(View.Summary.class)
+	@Builder.Default
+	@JsonBackReference
+	private Set<Payment> refunds = new HashSet<>();
 
 	public BigDecimal getBalance() {
 		if (payments.isEmpty()) {
@@ -55,6 +65,10 @@ public class Invoice extends BaseEntity {
 				 .reduce(BigDecimal.ZERO, BigDecimal::add);
 			return due.subtract(total);
 		}
+	}
+
+	public boolean isFullyPaid() {
+		return this.getBalance().compareTo(BigDecimal.ZERO) <= 0;
 	}
 
 

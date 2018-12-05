@@ -1,8 +1,9 @@
-package com.vince.retailmanager.web.controller.validator;
+package com.vince.retailmanager.web.controller.Franchisee;
 
 import com.vince.retailmanager.entity.Franchisee;
 import com.vince.retailmanager.repository.FranchiseeRepository;
 import com.vince.retailmanager.utils.StringUtils;
+import com.vince.retailmanager.web.controller.utils.ValidatorUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.ConstraintValidator;

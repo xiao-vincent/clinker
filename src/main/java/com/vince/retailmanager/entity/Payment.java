@@ -1,6 +1,7 @@
 package com.vince.retailmanager.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.*;
 
@@ -12,27 +13,23 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "payments")
 @Data
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true, of = {""})
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Payment extends BaseEntity {
-	//	@Basic
 	@Column
 	@DecimalMin("0.00")
-	@JsonView(View.Summary.class)
+	@JsonView(View.Public.class)
 	private BigDecimal amount;
 
-	//	@Basic
 	@Builder.Default
 	@Column
-	@JsonView(View.Summary.class)
+	@JsonView(View.Public.class)
 	private String currency = "USD";
 
-//	private transient Money money;
-
 	@OneToOne
-	@JoinColumn(name = "payer_id")
+	@JoinColumn(name = "sender_id")
 	@NotNull
 	@JsonView(View.Summary.class)
 	private Company sender;
@@ -44,18 +41,36 @@ public class Payment extends BaseEntity {
 	@JsonView(View.Summary.class)
 	private Company recipient;
 
+//	@Setter(AccessLevel.NONE)
+//	@JsonView(View.Public.class)
+//	private boolean isRefund;
+
+	@OneToOne
+	@JsonView(View.Public.class)
+	private Payment refundedPayment;
 
 	@ManyToOne
 	@JoinColumn(name = "invoice_id")
 	@NotNull
-//	@JsonManagedReference
-	@JsonView(View.Payment.class)
+	@JsonManagedReference
+	@JsonView(View.Public.class)
 	private Invoice invoice;
 
 
 	public void addInvoice(Invoice invoice) {
-		invoice.getPayments().add(this);
 		this.invoice = invoice;
+		//check if this payment is a refund
+//		if (getRecipient().equals(invoice.getCustomer()) && getSender().equals(invoice.getSeller())) {
+//			isRefund = true;
+//			invoice.getRefunds().add(this);
+//		} else {
+//			invoice.getPayments().add(this);
+//		}
+		if (refundedPayment == null) {
+			invoice.getPayments().add(this);
+		} else {
+			invoice.getRefunds().add(this);
+		}
 	}
 
 

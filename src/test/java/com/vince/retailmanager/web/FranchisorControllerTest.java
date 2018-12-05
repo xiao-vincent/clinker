@@ -3,7 +3,7 @@ package com.vince.retailmanager.web;
 import com.vince.retailmanager.entity.Franchisor;
 import com.vince.retailmanager.service.FranchiseService;
 import com.vince.retailmanager.service.businessService.ApplicationTestConfig;
-import com.vince.retailmanager.web.controller.FranchisorController;
+import com.vince.retailmanager.web.controller.Franchisor.FranchisorController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

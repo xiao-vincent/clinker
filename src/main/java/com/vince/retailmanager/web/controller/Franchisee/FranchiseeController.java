@@ -1,4 +1,4 @@
-package com.vince.retailmanager.web.controller;
+package com.vince.retailmanager.web.controller.Franchisee;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.vince.retailmanager.entity.Franchisee;
@@ -6,6 +6,7 @@ import com.vince.retailmanager.entity.View;
 import com.vince.retailmanager.service.FranchiseService;
 import com.vince.retailmanager.service.PaymentService;
 import com.vince.retailmanager.service.UserService;
+import com.vince.retailmanager.web.controller.utils.ControllerUtils;
 import com.vince.retailmanager.web.exception.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

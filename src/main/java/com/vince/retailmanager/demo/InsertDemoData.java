@@ -10,9 +10,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Component
@@ -40,42 +38,50 @@ public class InsertDemoData {
 
 	private Map<String, Franchisor> franchisors = new HashMap<>();
 
+	//defaults
+	private static final int NUM_OF_FRANCHISEES = 2;
+	private static final int BEGINNING_BALANCE = 1000;
+	private static final double PAYMENT_AMOUNT = 100;
+
+
 	@EventListener
 	@Transactional
 	public void appReady(ApplicationReadyEvent event) throws Exception {
 		System.out.println("Setting up demo data...");
 		clearDBTables();
-		createFranchise();
+		createFranchises();
 
 		setupAdmin();
 		System.out.println("\nDemo data setup complete!");
+	}
+
+	void createFranchises() throws Exception {
+		String shortNameKey = "mc";
+		Franchisor franchisor = Franchisor.builder()
+			 .name("McDonald's Corporation")
+			 .website("mcdonalds.com")
+			 .description("Fast food company")
+			 .franchiseFee(30000.0)
+			 .liquidCapitalRequirement(200000.0)
+			 .royaltyFee(.08)
+			 .marketingFee(.02)
+			 .feeFrequency(12)
+			 .build();
+		franchisors.put(shortNameKey, franchisor);
+		addFranchiseesToFranchisor(shortNameKey, franchisor, NUM_OF_FRANCHISEES);
+
+		Franchisee firstFranchisee = franchisor.getFranchisees().stream().findFirst().orElse(null);
+		Invoice invoice = createInvoice(franchisor, firstFranchisee, BEGINNING_BALANCE);
+		Payment payment = Payment.builder()
+			 .amount(PAYMENT_AMOUNT)
+			 .sender(firstFranchisee)
+			 .recipient(franchisor)
+			 .invoice(invoice)
+			 .build();
+		paymentRepo.save(payment);
 
 	}
 
-	void createFranchise() throws Exception {
-		String key = createFranchisor("mc");
-		Franchisor franchisor = franchisors.get(key);
-		List<Franchisee> franchisees = addFranchiseesToFranchisor(key, franchisor, 2);
-		for (Franchisee franchisee : franchisees) {
-			createInvoice(franchisor, franchisee, 100);
-		}
-	}
-
-	String createFranchisor(String key) {
-		franchisors.put(key,
-			 Franchisor.builder()
-					.name("McDonald's Corporation")
-					.website("mcdonalds.com")
-					.description("Fast food company")
-					.franchiseFee(30000.0)
-					.liquidCapitalRequirement(200000.0)
-					.royaltyFee(.08)
-					.marketingFee(.02)
-					.feeFrequency(12)
-					.build()
-		);
-		return key;
-	}
 
 	Invoice createInvoice(Company seller, Company customer, double balance) {
 		Invoice invoice = Invoice.builder()
@@ -99,7 +105,6 @@ public class InsertDemoData {
 
 	private void clearDBTables() {
 		accessTokenRepo.deleteAll();
-
 		userRepo.deleteAll();
 		paymentRepo.deleteAll();
 		franchisorRepo.deleteAll();
@@ -107,16 +112,13 @@ public class InsertDemoData {
 	}
 
 
-	public List<Franchisee> addFranchiseesToFranchisor(String shortName,
-	                                                   Franchisor franchisor, int numOfFranchisees) throws Exception {
+	public void addFranchiseesToFranchisor(String shortName, Franchisor franchisor, int numOfFranchisees) throws Exception {
 		shortName = shortName.toLowerCase();
 		setupFranchisorInDB(shortName, franchisor);
-
-		List<Franchisee> franchisees = new ArrayList<>();
 		for (int i = 1; i <= numOfFranchisees; i++) {
-			franchisees.add(setupFranchiseeInDB(shortName, franchisor, i));
+			setupFranchiseeInDB(shortName, franchisor, i);
 		}
-		return franchisees;
+
 	}
 
 	private void setupFranchisorInDB(String shortName, Franchisor franchisor) throws Exception {

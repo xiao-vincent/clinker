@@ -1,4 +1,4 @@
-package com.vince.retailmanager.web.controller;
+package com.vince.retailmanager.web.controller.utils;
 
 import com.vince.retailmanager.entity.AccessToken;
 import com.vince.retailmanager.service.UserService;
@@ -6,7 +6,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
@@ -14,23 +13,23 @@ import javax.validation.Validator;
 import java.util.Set;
 
 @Component
-class ControllerUtils {
+public class ControllerUtils {
 
-	static void addActiveUsername(
+	public static void addActiveUsername(
 		 Model model,
 		 @AuthenticationPrincipal User authenticatedUser,
-		 @PathVariable(value = "id", required = false) Integer id,
+		 Integer id,
 		 UserService userService
 	) {
 		String authenticatedUsername = authenticatedUser.getUsername();
 
 		AccessToken accessToken = userService.findAccessToken(authenticatedUsername, id);
-		if (accessToken != null) {
+		if (id != null && accessToken != null) {
 			model.addAttribute("activeUsername", accessToken.getUser().getUsername());
 		}
 	}
 
-	static void validate(Validator validator, Object object) {
+	public static void validate(Validator validator, Object object) {
 		Set<ConstraintViolation<Object>> violations = validator.validate(object);
 		System.out.println(violations);
 		if (!violations.isEmpty()) {

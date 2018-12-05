@@ -46,6 +46,17 @@ public class PaymentServiceImpl implements PaymentService {
 		if (invoice == null) {
 			throw new EntityNotFoundException(Invoice.class, "id", String.valueOf(id));
 		}
+
 		return invoice;
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Payment findPaymentById(int id) throws EntityNotFoundException {
+		Payment payment = paymentRepository.findById(id).orElse(null);
+		if (payment == null) {
+			throw new EntityNotFoundException(Payment.class, "id", String.valueOf(id));
+		}
+		return payment;
 	}
 }

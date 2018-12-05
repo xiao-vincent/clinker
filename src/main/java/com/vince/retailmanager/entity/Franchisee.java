@@ -1,7 +1,7 @@
 package com.vince.retailmanager.entity;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.vince.retailmanager.web.controller.validator.ValidFranchisee;
+import com.vince.retailmanager.web.controller.Franchisee.ValidFranchisee;
 import lombok.*;
 
 import javax.persistence.*;

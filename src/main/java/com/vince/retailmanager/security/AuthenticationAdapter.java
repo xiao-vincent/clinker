@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
 
 import javax.sql.DataSource;
 
@@ -47,6 +48,13 @@ public class AuthenticationAdapter extends WebSecurityConfigurerAdapter {
 			 .dataSource(dataSource)
 			 .usersByUsernameQuery("select username,password,enabled from users where username=?")
 			 .authoritiesByUsernameQuery("select username,role from roles where username=?");
+	}
+
+	@Bean
+	public StrictHttpFirewall httpFirewall() {
+		StrictHttpFirewall firewall = new StrictHttpFirewall();
+		firewall.setAllowSemicolon(true);
+		return firewall;
 	}
 
 
