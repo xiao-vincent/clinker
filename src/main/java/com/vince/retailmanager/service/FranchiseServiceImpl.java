@@ -1,8 +1,6 @@
 package com.vince.retailmanager.service;
 
-import com.vince.retailmanager.entity.Company;
-import com.vince.retailmanager.entity.Franchisee;
-import com.vince.retailmanager.entity.Franchisor;
+import com.vince.retailmanager.entity.*;
 import com.vince.retailmanager.exception.ObjectStateException;
 import com.vince.retailmanager.repository.*;
 import com.vince.retailmanager.web.exception.EntityNotFoundException;
@@ -22,24 +20,33 @@ import static com.vince.retailmanager.utils.StringUtils.singlePlural;
 public class FranchiseServiceImpl implements FranchiseService {
 
 	private UserService userService;
+	private FinancialService financialService;
+
 	private AccessTokensRepository accessTokensRepository;
 	private CompanyRepository companyRepository;
 	private FranchisorRepository franchisorRepository;
 	private FranchiseeRepository franchiseeRepository;
+	private PercentageFeeRepository percentageFeeRepository;
 
 	@Autowired
 	public FranchiseServiceImpl(
 		 UserService userService,
+		 FinancialService financialService,
+
 		 AccessTokensRepository accessTokensRepository,
 		 CompanyRepository companyRepository,
 		 FranchisorRepository franchisorRepository,
 		 FranchiseeRepository franchiseeRepository,
-		 PaymentRepository paymentRepository) {
+		 PercentageFeeRepository percentageFeeRepository
+	) {
 		this.userService = userService;
+		this.financialService = financialService;
+
 		this.accessTokensRepository = accessTokensRepository;
 		this.companyRepository = companyRepository;
 		this.franchisorRepository = franchisorRepository;
 		this.franchiseeRepository = franchiseeRepository;
+		this.percentageFeeRepository = percentageFeeRepository;
 	}
 
 
@@ -138,4 +145,27 @@ public class FranchiseServiceImpl implements FranchiseService {
 		companyRepository.save(company);
 	}
 
+
+	@Override
+	@Transactional
+	public Royalty saveRoyalty(Royalty royalty) {
+		return percentageFeeRepository.save(royalty);
+	}
+
+	@Override
+	@Transactional
+	public MarketingFee saveMarketingFee(MarketingFee marketingFee) {
+		return percentageFeeRepository.save(marketingFee);
+	}
+
+	@Override
+	@Transactional
+	public PercentageFee savePercentageFee(PercentageFee percentageFee) {
+		return percentageFeeRepository.save(percentageFee);
+	}
+
+//	public IncomeStatement triggerFranchiseFees(IncomeStatement incomeStatement) {
+//		//trigger royalty and marketing fees
+//		return null;
+//	}
 }

@@ -7,7 +7,7 @@ import com.vince.retailmanager.web.exception.EntityNotFoundException;
 public interface PaymentService {
 	void savePayment(Payment payment);
 
-//	void saveInvoice(Company seller, Company customer);
+//	void saveInvoice(Company sender, Company customer);
 
 	void saveInvoice(Invoice invoice);
 

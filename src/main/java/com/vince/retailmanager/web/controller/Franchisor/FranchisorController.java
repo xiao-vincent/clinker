@@ -1,9 +1,7 @@
 package com.vince.retailmanager.web.controller.Franchisor;
 
-import com.vince.retailmanager.entity.Franchisee;
-import com.vince.retailmanager.entity.Franchisor;
-import com.vince.retailmanager.entity.Invoice;
-import com.vince.retailmanager.entity.User;
+import com.vince.retailmanager.entity.*;
+import com.vince.retailmanager.service.FinancialService;
 import com.vince.retailmanager.service.FranchiseService;
 import com.vince.retailmanager.service.PaymentService;
 import com.vince.retailmanager.service.UserService;
@@ -20,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.Validator;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -32,6 +32,8 @@ public class FranchisorController {
 	@Autowired
 	public PaymentService paymentService;
 	@Autowired
+	public FinancialService financialService;
+	@Autowired
 	public Validator validator;
 
 	@ModelAttribute
@@ -39,7 +41,8 @@ public class FranchisorController {
 		 Model model,
 		 @AuthenticationPrincipal org.springframework.security.core.userdetails.User authenticatedUser,
 		 @PathVariable(value = "id", required = false) Integer id,
-		 @PathVariable(value = "franchiseeId", required = false) Integer franchiseeId
+		 @PathVariable(value = "franchiseeId", required = false) Integer franchiseeId,
+		 @PathVariable(value = "incomeStatementId", required = false) Integer incomeStatementId
 	) throws EntityNotFoundException {
 		if (id != null) {
 			model.addAttribute("franchisor", franchiseService.findFranchisorById(id));
@@ -48,6 +51,10 @@ public class FranchisorController {
 
 		if (franchiseeId != null) {
 			model.addAttribute("franchisee", franchiseService.findFranchiseeById(franchiseeId));
+		}
+
+		if (incomeStatementId != null) {
+			model.addAttribute("incomeStatement", financialService.findIncomeStatementById(incomeStatementId));
 		}
 	}
 
@@ -68,8 +75,8 @@ public class FranchisorController {
 	}
 
 	@PostMapping("/new")
-	public ResponseEntity<Franchisor> createCompany(@Valid @RequestBody Franchisor franchisor,
-	                                                User user
+	public ResponseEntity<Franchisor> createFranchisor(@Valid @RequestBody Franchisor franchisor,
+	                                                   User user
 	) {
 		user.addAccessToken(franchisor);
 		Franchisor savedFranchisor = franchiseService.saveFranchisor(franchisor);
@@ -116,14 +123,32 @@ public class FranchisorController {
 	) {
 		double due = (double) body.get("due");
 		Invoice invoice = Invoice.builder()
-			 .seller(franchisor)
-			 .customer(franchisee)
-			 .balance(due)
+			 .sender(franchisor)
+			 .recipient(franchisee)
+			 .due(due)
 			 .description("requesting royalty payment")
 			 .build();
 		ControllerUtils.validate(validator, invoice);
 		paymentService.saveInvoice(invoice);
 		return new ResponseEntity<>(invoice, HttpStatus.OK);
 	}
+
+	//	Auth: franchisees.getIncomeStatements . contains incomeStatement
+	@PostMapping("/{id}/franchisees/{franchiseeId}/request-fees/financials/{incomeStatementId}")
+	public ResponseEntity<Object> requestMonthlyFranchiseFees(Franchisor franchisor,
+	                                                          Franchisee franchisee,
+	                                                          IncomeStatement incomeStatement
+	) {
+		List<PercentageFee> fees = new ArrayList<>();
+		fees.add(new Royalty(franchisor, incomeStatement));
+		fees.add(new MarketingFee(franchisor, incomeStatement));
+		fees.forEach(fee -> {
+			ControllerUtils.validate(validator, fee);
+			fee = franchiseService.savePercentageFee(fee);
+		});
+
+		return new ResponseEntity<>(fees, HttpStatus.OK);
+	}
+
 
 }

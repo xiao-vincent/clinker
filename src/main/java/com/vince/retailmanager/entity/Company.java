@@ -26,17 +26,54 @@ public abstract class Company extends BaseEntity {
 	@Column
 	private BigDecimal cashBalance = BigDecimal.valueOf(0);
 
-	@OneToMany(mappedBy = "customer")
+	@OneToMany(mappedBy = "recipient")
+	@JsonIgnore
 	private Set<Invoice> invoicesReceived = new HashSet<>();
 
-	@OneToMany(mappedBy = "seller")
+	@OneToMany(mappedBy = "sender")
+	@JsonIgnore
 	private Set<Invoice> invoicesSent = new HashSet<>();
 
 	@OneToMany(mappedBy = "recipient")
+	@JsonIgnore
 	private Set<Payment> paymentsReceived = new HashSet<>();
 
 	@OneToMany(mappedBy = "sender")
+	@JsonIgnore
 	private Set<Payment> paymentsSent = new HashSet<>();
 
+	@OneToMany(mappedBy = "company")
+	@JsonIgnore
+	private Set<IncomeStatement> incomeStatements = new HashSet<>();
+
+	public void addInvoiceReceived(Invoice invoice) {
+		invoicesReceived.add(invoice);
+		invoice.setRecipient(this);
+	}
+
+	public void addInvoiceSent(Invoice invoice) {
+		invoicesSent.add(invoice);
+		invoice.setSender(this);
+	}
+
+	public void addPaymentReceived(Payment payment) {
+		paymentsReceived.add(payment);
+		payment.setRecipient(this);
+	}
+
+	public void addPaymentSent(Payment payment) {
+		paymentsSent.add(payment);
+		payment.setSender(this);
+	}
+
+
+	public void addIncomeStatement(IncomeStatement incomeStatement) {
+		incomeStatements.add(incomeStatement);
+		incomeStatement.setCompany(this);
+		setCashBalance(
+			 this.getCashBalance()
+					.add(incomeStatement.getNetIncome())
+		);
+	}
 
 }

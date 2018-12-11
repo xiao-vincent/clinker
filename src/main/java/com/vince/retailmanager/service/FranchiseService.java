@@ -1,8 +1,6 @@
 package com.vince.retailmanager.service;
 
-import com.vince.retailmanager.entity.Company;
-import com.vince.retailmanager.entity.Franchisee;
-import com.vince.retailmanager.entity.Franchisor;
+import com.vince.retailmanager.entity.*;
 import com.vince.retailmanager.web.exception.EntityNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,7 +15,6 @@ public interface FranchiseService {
 
 	Company saveCompany(Company company);
 
-	@Transactional
 	Company findCompanyById(int id) throws EntityNotFoundException;
 
 	Franchisor findFranchisorById(int id) throws EntityNotFoundException;
@@ -28,6 +25,12 @@ public interface FranchiseService {
 
 	List<Franchisor> findAllFranchisors();
 
-
 	Franchisee findFranchiseeById(int franchiseeId) throws EntityNotFoundException;
+
+	Royalty saveRoyalty(Royalty royalty);
+
+	MarketingFee saveMarketingFee(MarketingFee marketingFee);
+
+	@Transactional
+	PercentageFee savePercentageFee(PercentageFee percentageFee);
 }

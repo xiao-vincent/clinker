@@ -1,7 +1,6 @@
 package com.vince.retailmanager.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.*;
 
@@ -16,7 +15,7 @@ import java.util.Set;
 @Table(name = "invoices")
 @Data
 @EqualsAndHashCode(callSuper = true, of = {""})
-@Builder
+@Builder(builderClassName = "ObjectBuilder")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Invoice extends BaseEntity {
@@ -26,23 +25,24 @@ public class Invoice extends BaseEntity {
 	private BigDecimal due;
 
 	@JsonView(View.Public.class)
-	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
+//	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
+	@Transient
 	private BigDecimal balance;
 
 	@JsonView(View.Public.class)
 	private String description;
 
 	@OneToOne
-	@JoinColumn(name = "seller_id")
+	@JoinColumn(name = "sender_id")
 	@NotNull
 	@JsonView(View.Public.class)
-	private Company seller;
+	private Company sender;
 
 	@OneToOne
-	@JoinColumn(name = "customer_id")
+	@JoinColumn(name = "recipient_id")
 	@NotNull
 	@JsonView(View.Public.class)
-	private Company customer;
+	private Company recipient;
 
 	@OneToMany(mappedBy = "invoice")
 	@JsonView(View.Summary.class)
@@ -65,6 +65,7 @@ public class Invoice extends BaseEntity {
 				 .reduce(BigDecimal.ZERO, BigDecimal::add);
 			return due.subtract(total);
 		}
+
 	}
 
 	public boolean isFullyPaid() {
@@ -72,9 +73,14 @@ public class Invoice extends BaseEntity {
 	}
 
 
-	public static class InvoiceBuilder {
-		public InvoiceBuilder balance(Double amountDue) {
+	public static class ObjectBuilder {
+		public ObjectBuilder due(Double amountDue) {
 			this.due = BigDecimal.valueOf(amountDue);
+			return this;
+		}
+
+		//Prevent direct access to the internal private field
+		private ObjectBuilder balance() {
 			return this;
 		}
 	}

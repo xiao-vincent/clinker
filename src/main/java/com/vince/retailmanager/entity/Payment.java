@@ -3,6 +3,7 @@ package com.vince.retailmanager.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.vince.retailmanager.web.controller.ValidPayment;
 import lombok.*;
 
 import javax.persistence.*;
@@ -17,14 +18,14 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ValidPayment
 public class Payment extends BaseEntity {
-	@Column
+
 	@DecimalMin("0.00")
 	@JsonView(View.Public.class)
 	private BigDecimal amount;
 
 	@Builder.Default
-	@Column
 	@JsonView(View.Public.class)
 	private String currency = "USD";
 
@@ -41,10 +42,6 @@ public class Payment extends BaseEntity {
 	@JsonView(View.Summary.class)
 	private Company recipient;
 
-//	@Setter(AccessLevel.NONE)
-//	@JsonView(View.Public.class)
-//	private boolean isRefund;
-
 	@OneToOne
 	@JsonView(View.Public.class)
 	private Payment refundedPayment;
@@ -59,13 +56,6 @@ public class Payment extends BaseEntity {
 
 	public void addInvoice(Invoice invoice) {
 		this.invoice = invoice;
-		//check if this payment is a refund
-//		if (getRecipient().equals(invoice.getCustomer()) && getSender().equals(invoice.getSeller())) {
-//			isRefund = true;
-//			invoice.getRefunds().add(this);
-//		} else {
-//			invoice.getPayments().add(this);
-//		}
 		if (refundedPayment == null) {
 			invoice.getPayments().add(this);
 		} else {

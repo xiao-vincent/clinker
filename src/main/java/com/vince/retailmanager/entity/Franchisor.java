@@ -25,8 +25,6 @@ import java.util.Set;
 @AllArgsConstructor
 @ValidFranchisor
 public class Franchisor extends Company {
-
-
 	@Column(unique = true)
 	@NotNull
 	@JsonView(View.Public.class)
@@ -62,12 +60,12 @@ public class Franchisor extends Company {
 	@NotNull
 	@Range(min = 0, max = 1)
 	@JsonView(View.Franchisor.class)
-	private double royaltyFee;
+	private double royaltyFeePercent;
 
 	@NotNull
 	@Range(min = 0, max = 1)
 	@JsonView(View.Franchisor.class)
-	private double marketingFee;
+	private double marketingFeePercent;
 
 	@NotNull
 	@Range(min = 1, max = 365)
@@ -86,7 +84,6 @@ public class Franchisor extends Company {
 	public BigDecimal getCashBalance() {
 		return super.getCashBalance();
 	}
-
 
 //	protected Set<Franchisee> getFranchiseesInternal() {
 //		if (this.franchisees == null) {

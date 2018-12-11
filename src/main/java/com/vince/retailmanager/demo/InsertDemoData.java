@@ -35,6 +35,8 @@ public class InsertDemoData {
 	private PaymentRepository paymentRepo;
 	@Autowired
 	private InvoiceRepository invoiceRepo;
+	@Autowired
+	private IncomeStatementRepository incomeStatementRepo;
 
 	private Map<String, Franchisor> franchisors = new HashMap<>();
 
@@ -63,8 +65,8 @@ public class InsertDemoData {
 			 .description("Fast food company")
 			 .franchiseFee(30000.0)
 			 .liquidCapitalRequirement(200000.0)
-			 .royaltyFee(.08)
-			 .marketingFee(.02)
+			 .royaltyFeePercent(.08)
+			 .marketingFeePercent(.02)
 			 .feeFrequency(12)
 			 .build();
 		franchisors.put(shortNameKey, franchisor);
@@ -74,25 +76,43 @@ public class InsertDemoData {
 		Invoice invoice = createInvoice(franchisor, firstFranchisee, BEGINNING_BALANCE);
 		Payment payment = Payment.builder()
 			 .amount(PAYMENT_AMOUNT)
-			 .sender(firstFranchisee)
-			 .recipient(franchisor)
 			 .invoice(invoice)
 			 .build();
+		firstFranchisee.addPaymentSent(payment);
+		franchisor.addPaymentReceived(payment);
 		paymentRepo.save(payment);
+
+		IncomeStatement incomeStatement = createIncomeStatement(firstFranchisee);
+		incomeStatementRepo.save(incomeStatement);
+
+//		Royalty royalty = franchiseService.saveRoyalty();
+//		System.out.println("royalty = " + royalty);
+//		MarketingFee marketingFee = franchiseService.requestMarketingFee(franchisor, incomeStatement);
+//		System.out.println("marketingFee = " + marketingFee);
 
 	}
 
-
-	Invoice createInvoice(Company seller, Company customer, double balance) {
+	Invoice createInvoice(Company sender, Company recipient, double balance) {
 		Invoice invoice = Invoice.builder()
-			 .seller(seller)
-			 .customer(customer)
-			 .balance(balance)
-			 .description("royalty payment")
+			 .due(balance)
+			 .description("sample invoice description")
 			 .build();
-
+		sender.addInvoiceSent(invoice);
+		recipient.addInvoiceReceived(invoice);
 		invoiceRepo.save(invoice);
 		return invoice;
+	}
+
+	IncomeStatement createIncomeStatement(Company company) {
+		IncomeStatement incomeStatement = IncomeStatement.builder()
+			 .sales(1000.0)
+			 .costOfGoodsSold(200.0)
+			 .operatingExpenses(100.0)
+			 .generalAndAdminExpenses(100.0)
+			 .date(2018, 11)
+			 .build();
+		company.addIncomeStatement(incomeStatement);
+		return incomeStatement;
 	}
 
 	private void setupAdmin() throws Exception {

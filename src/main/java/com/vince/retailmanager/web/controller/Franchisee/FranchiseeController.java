@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Validator;
 
-
 @RestController
 @RequestMapping("/{franchisorId}/franchisees/{franchiseeId}")
 public class FranchiseeController {
@@ -48,7 +47,6 @@ public class FranchiseeController {
 		model.addAttribute("franchisee", franchiseService.findFranchiseeById(franchiseeId));
 		ControllerUtils.addActiveUsername(model, authenticatedUser, franchiseeId, userService);
 	}
-
 
 	@InitBinder("franchisor")
 	public void initFranchisorBinder(WebDataBinder dataBinder) {
@@ -99,7 +97,7 @@ public class FranchiseeController {
 //    }
 
 //    @PostMapping
-//    public Franchisor createCompany(@Valid @RequestBody Franchisor franchisor) {
+//    public Franchisor createFranchisor(@Valid @RequestBody Franchisor franchisor) {
 //        System.out.println(franchisor);
 //        if (franchiseService.findFranchisorById(franchisor.getId()).isPresent()) {
 //            // refactor, should return 'already exists' error

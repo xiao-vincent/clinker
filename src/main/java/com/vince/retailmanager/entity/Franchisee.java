@@ -5,6 +5,7 @@ import com.vince.retailmanager.web.controller.Franchisee.ValidFranchisee;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.StringJoiner;
 
@@ -22,6 +23,7 @@ public class Franchisee extends Company {
 	@JoinColumn(name = "franchisor_id")
 	@EqualsAndHashCode.Exclude
 	@JsonView(View.Franchisee.class)
+	@NotNull
 	private Franchisor franchisor;
 
 	@Override

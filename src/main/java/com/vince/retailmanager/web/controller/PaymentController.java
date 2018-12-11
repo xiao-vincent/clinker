@@ -119,13 +119,6 @@ public class PaymentController {
 		return Collections.emptySet();
 	}
 
-
-//	@GetMapping("/invoices/invoice/{invoiceId}")
-//	@JsonView(View.Summary.class)
-//	public ResponseEntity<Invoice> getInvoice(Invoice invoice) {
-//		return new ResponseEntity<>(invoice, HttpStatus.OK);
-//	}
-
 	//preauth invoice.getCustomer == authentication.name
 	@JsonView(View.Payment.class)
 	@PostMapping("/invoices/{invoiceId}/pay")
@@ -134,13 +127,14 @@ public class PaymentController {
 	                                          Company company
 	) {
 		double paymentAmount = (double) ((Integer) body.get("amount"));
+		Company recipient = invoice.getSender();
 
 		Payment payment = Payment.builder()
-			 .sender(company)
-			 .recipient(invoice.getSeller())
 			 .amount(paymentAmount)
 			 .build();
 		payment.addInvoice(invoice);
+		company.addPaymentSent(payment);
+		recipient.addPaymentReceived(payment);
 		ControllerUtils.validate(validator, payment);
 		paymentService.savePayment(payment);
 		return new ResponseEntity<>(payment, HttpStatus.OK);
@@ -148,16 +142,22 @@ public class PaymentController {
 
 	@JsonView(View.Payment.class)
 	@PostMapping("/refunds/{paymentId}")
-	public ResponseEntity<Payment> refundPayment(Payment payment) {
+	public ResponseEntity<Payment> refundPayment(Payment paymentToRefund) {
 		// check if payment has already been refunded
 		Payment refund = Payment.builder()
-			 .refundedPayment(payment)
+			 .refundedPayment(paymentToRefund)
 			 //can be simplified by method
-			 .sender(payment.getRecipient())
-			 .recipient(payment.getSender())
-			 .amount(payment.getAmount().doubleValue())
+//			 .sender(paymentToRefund.getRecipient())
+//			 .recipient(paymentToRefund.getSender())
+			 .amount(paymentToRefund.getAmount().doubleValue())
 			 .build();
-		refund.addInvoice(payment.getInvoice());
+		refund.addInvoice(paymentToRefund.getInvoice());
+
+		Company refundSender = paymentToRefund.getRecipient();
+		Company refundRecipient = paymentToRefund.getSender();
+
+		refundSender.addPaymentSent(refund);
+		refundRecipient.addPaymentReceived(refund);
 
 		ControllerUtils.validate(validator, refund);
 		paymentService.savePayment(refund);

@@ -29,8 +29,8 @@ public class ControllerUtils {
 		}
 	}
 
-	public static void validate(Validator validator, Object object) {
-		Set<ConstraintViolation<Object>> violations = validator.validate(object);
+	public static void validate(Validator validator, Object object, Class<?>... groups) {
+		Set<ConstraintViolation<Object>> violations = validator.validate(object, groups);
 		System.out.println(violations);
 		if (!violations.isEmpty()) {
 			throw new ConstraintViolationException(violations);
