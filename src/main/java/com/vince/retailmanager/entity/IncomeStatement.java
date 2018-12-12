@@ -1,12 +1,12 @@
 package com.vince.retailmanager.entity;
 
+import com.vince.retailmanager.YearMonthConverter;
 import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.YearMonth;
 
 @Entity
 @Table(name = "income_statements")
@@ -29,18 +29,21 @@ public class IncomeStatement extends BaseEntity {
 	private BigDecimal costOfGoodsSold;
 
 	@Transient
+	@Setter(AccessLevel.NONE)
 	private BigDecimal grossProfit;
 
 	@NotNull
 	private BigDecimal operatingExpenses;
 
 	@Transient
+	@Setter(AccessLevel.NONE)
 	private BigDecimal operatingIncome;
 
 	@NotNull
 	private BigDecimal generalAndAdminExpenses;
 
 	@Transient
+	@Setter(AccessLevel.NONE)
 	private BigDecimal netIncome;
 
 	@NotNull(groups = {Validation.Entity.class})
@@ -59,11 +62,7 @@ public class IncomeStatement extends BaseEntity {
 	}
 
 	public void setDate(int year, int month) {
-		this.date = createEndOfMonthDate(year, month);
-	}
-
-	private static LocalDate createEndOfMonthDate(int year, int month) {
-		return YearMonth.of(year, month).atEndOfMonth();
+		this.date = YearMonthConverter.createEndOfMonthDate(year, month);
 	}
 
 	public static class IncomeStatementBuilder {
@@ -88,7 +87,7 @@ public class IncomeStatement extends BaseEntity {
 		}
 
 		public IncomeStatementBuilder date(int year, int month) {
-			this.date = createEndOfMonthDate(year, month);
+			this.date = YearMonthConverter.createEndOfMonthDate(year, month);
 			return this;
 		}
 	}

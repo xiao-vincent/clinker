@@ -10,17 +10,19 @@ import javax.persistence.Entity;
 @NoArgsConstructor
 public class Royalty extends PercentageFee {
 
-	public Royalty(Franchisor franchisor, IncomeStatement incomeStatement) {
-		super(franchisor, incomeStatement);
+	public Royalty(IncomeStatement incomeStatement) {
+		super(incomeStatement);
+		setDescription("royalty fee");
+		setFeePercent(getFranchisor().getRoyaltyFeePercent());
 	}
 
-	@Override
-	public String getDescription() {
-		return "royalty fee";
-	}
+//	@Override
+//	public String getDescription() {
+//		return "royalty fee";
+//	}
 
-	@Override
-	public double getFeePercent() {
-		return getFranchisor().getRoyaltyFeePercent();
-	}
+//	@Override
+//	public double getFeePercent() {
+//		return getFranchisor().getRoyaltyFeePercent();
+//	}
 }

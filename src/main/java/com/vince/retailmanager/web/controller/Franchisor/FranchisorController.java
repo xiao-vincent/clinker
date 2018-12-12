@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.Validator;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -139,14 +138,7 @@ public class FranchisorController {
 	                                                          Franchisee franchisee,
 	                                                          IncomeStatement incomeStatement
 	) {
-		List<PercentageFee> fees = new ArrayList<>();
-		fees.add(new Royalty(franchisor, incomeStatement));
-		fees.add(new MarketingFee(franchisor, incomeStatement));
-		fees.forEach(fee -> {
-			ControllerUtils.validate(validator, fee);
-			fee = franchiseService.savePercentageFee(fee);
-		});
-
+		List<PercentageFee> fees = franchiseService.createMonthlyFranchiseFees(incomeStatement);
 		return new ResponseEntity<>(fees, HttpStatus.OK);
 	}
 

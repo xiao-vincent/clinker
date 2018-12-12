@@ -33,7 +33,6 @@ public class AuthenticationAdapter extends WebSecurityConfigurerAdapter {
 		;
 
 	}
-
 //	@Override
 //	public void configure(AuthenticationManagerBuilder builder)
 //		 throws Exception {

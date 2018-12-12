@@ -31,6 +31,9 @@ public interface FranchiseService {
 
 	MarketingFee saveMarketingFee(MarketingFee marketingFee);
 
-	@Transactional
 	PercentageFee savePercentageFee(PercentageFee percentageFee);
+
+
+	@Transactional
+	List<PercentageFee> createMonthlyFranchiseFees(IncomeStatement incomeStatement);
 }

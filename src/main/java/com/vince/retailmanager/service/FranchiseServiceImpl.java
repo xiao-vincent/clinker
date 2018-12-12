@@ -3,16 +3,15 @@ package com.vince.retailmanager.service;
 import com.vince.retailmanager.entity.*;
 import com.vince.retailmanager.exception.ObjectStateException;
 import com.vince.retailmanager.repository.*;
+import com.vince.retailmanager.web.controller.utils.ControllerUtils;
 import com.vince.retailmanager.web.exception.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import javax.validation.Validator;
+import java.util.*;
 
 import static com.vince.retailmanager.utils.StringUtils.singlePlural;
 
@@ -28,6 +27,8 @@ public class FranchiseServiceImpl implements FranchiseService {
 	private FranchiseeRepository franchiseeRepository;
 	private PercentageFeeRepository percentageFeeRepository;
 
+	private Validator validator;
+
 	@Autowired
 	public FranchiseServiceImpl(
 		 UserService userService,
@@ -37,7 +38,8 @@ public class FranchiseServiceImpl implements FranchiseService {
 		 CompanyRepository companyRepository,
 		 FranchisorRepository franchisorRepository,
 		 FranchiseeRepository franchiseeRepository,
-		 PercentageFeeRepository percentageFeeRepository
+		 PercentageFeeRepository percentageFeeRepository,
+		 Validator validator
 	) {
 		this.userService = userService;
 		this.financialService = financialService;
@@ -47,6 +49,7 @@ public class FranchiseServiceImpl implements FranchiseService {
 		this.franchisorRepository = franchisorRepository;
 		this.franchiseeRepository = franchiseeRepository;
 		this.percentageFeeRepository = percentageFeeRepository;
+		this.validator = validator;
 	}
 
 
@@ -161,11 +164,27 @@ public class FranchiseServiceImpl implements FranchiseService {
 	@Override
 	@Transactional
 	public PercentageFee savePercentageFee(PercentageFee percentageFee) {
+		ControllerUtils.validate(validator, percentageFee);
 		return percentageFeeRepository.save(percentageFee);
 	}
 
-//	public IncomeStatement triggerFranchiseFees(IncomeStatement incomeStatement) {
-//		//trigger royalty and marketing fees
-//		return null;
-//	}
+
+	@Override
+	@Transactional
+	public List<PercentageFee> createMonthlyFranchiseFees(IncomeStatement incomeStatement) {
+		//if incomeStatement.get company is not an instance of Franchisee, throw exception
+
+		List<PercentageFee> fees = new ArrayList<>();
+
+		fees.add(new Royalty(incomeStatement));
+		fees.add(new MarketingFee(incomeStatement));
+
+
+		fees.forEach(fee -> {
+			fee = savePercentageFee(fee);
+			System.out.println("fee = " + fee);
+		});
+		return fees;
+
+	}
 }

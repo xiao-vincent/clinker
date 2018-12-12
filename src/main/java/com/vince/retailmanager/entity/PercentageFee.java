@@ -21,13 +21,14 @@ import javax.validation.constraints.NotNull;
 public abstract class PercentageFee extends BaseEntity {
 
 
-	public PercentageFee(Franchisor franchisor, IncomeStatement incomeStatement) {
-		this.setFranchisor(franchisor);
-		if (incomeStatement != null) {
-			this.setIncomeStatement(incomeStatement);
-			this.setFranchisee((Franchisee) incomeStatement.getCompany());
-			this.setDefaultInvoice();
-		}
+	public PercentageFee(IncomeStatement incomeStatement) {
+		if (incomeStatement == null) throw new NullPointerException();
+
+		Franchisee franchisee = (Franchisee) incomeStatement.getCompany();
+		this.setFranchisee(franchisee);
+		this.setFranchisor(franchisee.getFranchisor());
+		this.setIncomeStatement(incomeStatement);
+		this.setDefaultInvoice();
 	}
 
 
@@ -53,6 +54,7 @@ public abstract class PercentageFee extends BaseEntity {
 	@NotNull
 	private double feePercent;
 
+	@NotNull
 	private String description;
 
 	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})

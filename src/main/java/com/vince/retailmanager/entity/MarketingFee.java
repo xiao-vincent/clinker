@@ -11,17 +11,19 @@ import javax.persistence.Entity;
 @NoArgsConstructor
 public class MarketingFee extends PercentageFee {
 
-	public MarketingFee(Franchisor franchisor, IncomeStatement incomeStatement) {
-		super(franchisor, incomeStatement);
+	public MarketingFee(IncomeStatement incomeStatement) {
+		super(incomeStatement);
+		setDescription("marketing fee");
+		setFeePercent(getFranchisor().getMarketingFeePercent());
 	}
 
-	@Override
-	public String getDescription() {
-		return "marketing fee";
-	}
-
-	@Override
-	public double getFeePercent() {
-		return getFranchisor().getMarketingFeePercent();
-	}
+//	@Override
+//	public String getDescription() {
+//		return "marketing fee";
+//	}
+//
+//	@Override
+//	public double getFeePercent() {
+//		return getFranchisor().getMarketingFeePercent();
+//	}
 }

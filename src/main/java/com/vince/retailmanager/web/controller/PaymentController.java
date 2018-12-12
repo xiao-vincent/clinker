@@ -95,14 +95,16 @@ public class PaymentController {
 		 @MatrixVariable(required = false, name = "fully-paid") final Boolean isFullyPaid
 	) throws EntityNotFoundException {
 		Set<Invoice> invoices = getInvoicesByType(type, company);
-		invoices = (isFullyPaid != null) ? filterInvoicesByFullyPaid(invoices, isFullyPaid) : invoices;
+		invoices = filterInvoicesByFullyPaid(invoices, isFullyPaid);
 		return new ResponseEntity<>(invoices, HttpStatus.OK);
 	}
 
-	private Set<Invoice> filterInvoicesByFullyPaid(Set<Invoice> invoices, boolean isFullyPaid) {
-		return invoices.stream()
-			 .filter(invoice -> invoice.isFullyPaid() == isFullyPaid)
-			 .collect(Collectors.toSet());
+	private Set<Invoice> filterInvoicesByFullyPaid(Set<Invoice> invoices, Boolean isFullyPaid) {
+		if (isFullyPaid == null) return invoices;
+		else
+			return invoices.stream()
+				 .filter(invoice -> invoice.isFullyPaid() == isFullyPaid)
+				 .collect(Collectors.toSet());
 	}
 
 	private Set<Invoice> getInvoicesByType(String distributionTypeStr, Company company) throws EntityNotFoundException {
