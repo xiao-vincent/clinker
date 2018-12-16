@@ -36,4 +36,7 @@ public interface FranchiseService {
 
 	@Transactional
 	List<PercentageFee> createMonthlyFranchiseFees(IncomeStatement incomeStatement);
+
+	@Transactional
+	List<PercentageFee> getPercentageFees(Franchisor franchisor);
 }

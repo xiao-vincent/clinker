@@ -20,6 +20,7 @@ import javax.validation.Valid;
 import javax.validation.Validator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = {"/franchisors"})
@@ -37,12 +38,12 @@ public class FranchisorController {
 
 	@ModelAttribute
 	public void populateModel(
-		 Model model,
-		 @AuthenticationPrincipal org.springframework.security.core.userdetails.User authenticatedUser,
-		 @PathVariable(value = "id", required = false) Integer id,
-		 @PathVariable(value = "franchiseeId", required = false) Integer franchiseeId,
-		 @PathVariable(value = "incomeStatementId", required = false) Integer incomeStatementId
-	) throws EntityNotFoundException {
+			 Model model,
+			 @AuthenticationPrincipal org.springframework.security.core.userdetails.User authenticatedUser,
+			 @PathVariable(value = "id", required = false) Integer id,
+			 @PathVariable(value = "franchiseeId", required = false) Integer franchiseeId,
+			 @PathVariable(value = "incomeStatementId", required = false) Integer incomeStatementId
+													 ) throws EntityNotFoundException {
 		if (id != null) {
 			model.addAttribute("franchisor", franchiseService.findFranchisorById(id));
 			ControllerUtils.addActiveUsername(model, authenticatedUser, id, userService);
@@ -75,8 +76,8 @@ public class FranchisorController {
 
 	@PostMapping("/new")
 	public ResponseEntity<Franchisor> createFranchisor(@Valid @RequestBody Franchisor franchisor,
-	                                                   User user
-	) {
+																										 User user
+																										) {
 		user.addAccessToken(franchisor);
 		Franchisor savedFranchisor = franchiseService.saveFranchisor(franchisor);
 		return new ResponseEntity<>(savedFranchisor, HttpStatus.CREATED);
@@ -85,9 +86,9 @@ public class FranchisorController {
 	@PutMapping("/{id}")
 	@PreAuthorize("authentication.name == #activeUsername")
 	public ResponseEntity<Franchisor> updateCompany(Franchisor franchisor,
-	                                                @RequestBody Franchisor updatedFranchisor,
-	                                                @ModelAttribute("activeUsername") String activeUsername
-	) {
+																									@RequestBody Franchisor updatedFranchisor,
+																									@ModelAttribute("activeUsername") String activeUsername
+																								 ) {
 		franchisor.setName(updatedFranchisor.getName());
 		franchisor.setDescription(updatedFranchisor.getDescription());
 		franchisor.setWebsite(updatedFranchisor.getWebsite());
@@ -98,8 +99,8 @@ public class FranchisorController {
 	@PostMapping("/{id}/franchisees/new")
 	@PreAuthorize("authentication.name == #activeUsername")
 	public ResponseEntity<?> createFranchisee(Franchisor franchisor,
-	                                          @ModelAttribute("activeUsername") String activeUsername
-	) {
+																						@ModelAttribute("activeUsername") String activeUsername
+																					 ) {
 		Franchisee franchisee = Franchisee.builder().build();
 		franchisor.addFranchisee(franchisee);
 		ControllerUtils.validate(validator, franchisee);
@@ -116,17 +117,17 @@ public class FranchisorController {
 
 	@PostMapping("/{id}/franchisees/{franchiseeId}/request-payment")
 	public ResponseEntity<Invoice> requestPaymentFromFranchisee(
-		 Franchisor franchisor,
-		 Franchisee franchisee,
-		 @RequestBody Map<String, Object> body
-	) {
+			 Franchisor franchisor,
+			 Franchisee franchisee,
+			 @RequestBody Map<String, Object> body
+																														 ) {
 		double due = (double) body.get("due");
 		Invoice invoice = Invoice.builder()
-			 .sender(franchisor)
-			 .recipient(franchisee)
-			 .due(due)
-			 .description("requesting royalty payment")
-			 .build();
+				 .sender(franchisor)
+				 .recipient(franchisee)
+				 .due(due)
+				 .description("requesting royalty payment")
+				 .build();
 		ControllerUtils.validate(validator, invoice);
 		paymentService.saveInvoice(invoice);
 		return new ResponseEntity<>(invoice, HttpStatus.OK);
@@ -135,12 +136,50 @@ public class FranchisorController {
 	//	Auth: franchisees.getIncomeStatements . contains incomeStatement
 	@PostMapping("/{id}/franchisees/{franchiseeId}/request-fees/financials/{incomeStatementId}")
 	public ResponseEntity<Object> requestMonthlyFranchiseFees(Franchisor franchisor,
-	                                                          Franchisee franchisee,
-	                                                          IncomeStatement incomeStatement
-	) {
+																														Franchisee franchisee,
+																														IncomeStatement incomeStatement
+																													 ) {
 		List<PercentageFee> fees = franchiseService.createMonthlyFranchiseFees(incomeStatement);
 		return new ResponseEntity<>(fees, HttpStatus.OK);
 	}
 
+	// get fees payments
+	@GetMapping("{id}/fees/{feeType}")
+	public ResponseEntity<List<PercentageFee>> getFees(
+			 Franchisor franchisor,
+			 @PathVariable(name = "feeType") String type,
+			 @RequestParam(required = false, name = "fully-paid") final Boolean isFullyPaid
+																										) {
+		List<PercentageFee> fees = franchiseService.getPercentageFees(franchisor);
+		fees = isFullyPaid == null ? fees : filterPercentageFeesByFullyPaid(fees, isFullyPaid);
+
+		System.out.println("fees.get(0).getFeeType() = " + fees.get(0).getFeeType());
+
+		return new ResponseEntity<>(fees, HttpStatus.OK);
+	}
+
+//	private Set<PercentageFee> getPercentageFeeByType(String type, Franchisor franchisor) throws EntityNotFoundException {
+//		// all case
+//
+////		if (!DistributionType.contains(distributionTypeStr)) {
+////			throw new EntityNotFoundException(DistributionType.class, "type", distributionTypeStr);
+////		}
+//		Class<?> cls = Class.forName();
+//		DistributionType type = DistributionType.valueOf(distributionTypeStr.toUpperCase());
+//		switch (type) {
+//			case SENT:
+//				return company.getInvoicesSent();
+//			case RECEIVED:
+//				return company.getInvoicesReceived();
+//		}
+//		return Collections.emptySet();
+//	}
+
+	private List<PercentageFee> filterPercentageFeesByFullyPaid(List<PercentageFee> fees, boolean isFullyPaid) {
+		fees = fees.stream()
+				 .filter(fee -> fee.getInvoice().isFullyPaid() == isFullyPaid)
+				 .collect(Collectors.toList());
+		return fees;
+	}
 
 }

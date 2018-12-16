@@ -1,7 +1,6 @@
 package com.vince.retailmanager.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.vince.retailmanager.web.controller.Franchisor.ValidFranchisor;
 import lombok.*;
@@ -40,9 +39,8 @@ public class Franchisor extends Company {
 	private String description;
 
 	@OneToMany(mappedBy = "franchisor", fetch = FetchType.EAGER)
-	@JsonIgnoreProperties(value = {"franchisor", "cashBalance"})
+	@JsonIgnoreProperties(value = {"franchisor"})
 	@Builder.Default
-	@JsonProperty("franchisees")
 	@JsonView(View.Franchisor.class)
 	private Set<Franchisee> franchisees = new HashSet<>();
 
@@ -72,6 +70,14 @@ public class Franchisor extends Company {
 	@Builder.Default
 	@JsonView(View.Franchisor.class)
 	private int feeFrequency = 12; //per year
+
+
+//	@OneToMany(mappedBy = "franchisor")
+//	@JsonIgnoreProperties(value = {"franchisor"})
+//	@Builder.Default
+//	@JsonIgnore
+//	@ToString.Exclude
+//	private Set<PercentageFee> feesSent = new HashSet<>();
 
 	public void addFranchisee(Franchisee franchisee) {
 //		if (franchisees == null) franchisees = new HashSet<>();

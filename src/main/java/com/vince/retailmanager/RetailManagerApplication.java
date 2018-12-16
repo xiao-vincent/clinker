@@ -9,18 +9,6 @@ import org.springframework.web.util.UrlPathHelper;
 
 @SpringBootApplication
 public class RetailManagerApplication implements WebMvcConfigurer {
-//
-//	@Bean
-//	public Validator validator() {
-//		return new LocalValidatorFactoryBean();
-//	}
-//
-//	@Bean
-//	public MethodValidationPostProcessor methodValidationPostProcessor() {
-//		MethodValidationPostProcessor methodValidationPostProcessor = new MethodValidationPostProcessor();
-//		methodValidationPostProcessor.setValidator(validator());
-//		return methodValidationPostProcessor;
-//	}
 
 	public static void main(String[] args) {
 		SpringApplication.run(RetailManagerApplication.class, args);
@@ -36,6 +24,9 @@ public class RetailManagerApplication implements WebMvcConfigurer {
 	@Override
 	public void addFormatters(FormatterRegistry registry) {
 		registry.addConverter(new YearMonthConverter());
+		registry.addConverter(new DistributionTypeConverter());
+
+
 	}
 
 }

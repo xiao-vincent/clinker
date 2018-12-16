@@ -15,14 +15,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Validator;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/payments/{companyId}")
-public class PaymentController {
+@RequestMapping("transactions/{companyId}")
+public class TransactionsController {
 
 	@Autowired
 	private FranchiseService franchiseService;
@@ -37,12 +36,12 @@ public class PaymentController {
 
 	@ModelAttribute
 	public void populateModel(
-		 Model model,
-		 @AuthenticationPrincipal org.springframework.security.core.userdetails.User authenticatedUser,
-		 @PathVariable("companyId") Integer companyId,
-		 @PathVariable(value = "invoiceId", required = false) Integer invoiceId,
-		 @PathVariable(value = "paymentId", required = false) Integer paymentId
-	) throws EntityNotFoundException {
+			 Model model,
+			 @AuthenticationPrincipal org.springframework.security.core.userdetails.User authenticatedUser,
+			 @PathVariable("companyId") Integer companyId,
+			 @PathVariable(value = "invoiceId", required = false) Integer invoiceId,
+			 @PathVariable(value = "paymentId", required = false) Integer paymentId
+													 ) throws EntityNotFoundException {
 
 		addCompany(model, companyId);
 		ControllerUtils.addActiveUsername(model, authenticatedUser, companyId, userService);
@@ -62,78 +61,48 @@ public class PaymentController {
 		if (invoiceId != null) model.addAttribute("invoice", paymentService.findInvoiceById(invoiceId));
 	}
 
-
-	@GetMapping("/received")
+	@GetMapping("/payments")
 	@JsonView(View.Public.class)
-	public ResponseEntity<Set<Payment>> getPaymentsReceived(Company company) {
-		return new ResponseEntity<>(company.getPaymentsReceived(), HttpStatus.OK);
+	public ResponseEntity<Collection<Payment>> getPayments(Company company, @RequestParam(name = "type") DistributionType type) {
+		Collection<Payment> payments = paymentService.getPayments(company, type);
+		return new ResponseEntity<>(payments, HttpStatus.OK);
 	}
 
-	@GetMapping("/sent")
-	@JsonView(View.Public.class)
-	public ResponseEntity<Set<Payment>> getPaymentsSent(Company company) {
-		return new ResponseEntity<>(company.getPaymentsSent(), HttpStatus.OK);
-	}
 
-	@GetMapping("/sent/{paymentId}")
+	@GetMapping("/{paymentId}")
 	@JsonView(View.Summary.class)
-	public ResponseEntity<Payment> getPaymentSent(Payment payment) {
+	public ResponseEntity<Payment> getPayment(Payment payment) {
 		return new ResponseEntity<>(payment, HttpStatus.OK);
 	}
 
-	@GetMapping("/received/{paymentId}")
-	@JsonView(View.Summary.class)
-	public ResponseEntity<Payment> getPaymentReceived(Payment payment) {
-		return new ResponseEntity<>(payment, HttpStatus.OK);
-	}
-
-	@GetMapping("/invoices/{distributionType}")
+	@GetMapping("/invoices")
 	@JsonView(View.Public.class)
-	public ResponseEntity<Set<Invoice>> getInvoices(
-		 Company company,
-		 @PathVariable("distributionType") String type,
-		 @MatrixVariable(required = false, name = "fully-paid") final Boolean isFullyPaid
-	) throws EntityNotFoundException {
-		Set<Invoice> invoices = getInvoicesByType(type, company);
-		invoices = filterInvoicesByFullyPaid(invoices, isFullyPaid);
+	public ResponseEntity<Collection<Invoice>> getInvoices(
+			 Company company,
+			 @RequestParam("type") DistributionType type,
+			 @RequestParam(required = false, name = "fully-paid") final Boolean isFullyPaid) {
+		Collection<Invoice> invoices = paymentService.getInvoices(company, type);
+		invoices = isFullyPaid == null ? invoices : filterInvoicesByFullyPaid(invoices, isFullyPaid);
 		return new ResponseEntity<>(invoices, HttpStatus.OK);
 	}
 
-	private Set<Invoice> filterInvoicesByFullyPaid(Set<Invoice> invoices, Boolean isFullyPaid) {
-		if (isFullyPaid == null) return invoices;
-		else
-			return invoices.stream()
+	private Collection<Invoice> filterInvoicesByFullyPaid(Collection<Invoice> invoices, boolean isFullyPaid) {
+		return invoices.stream()
 				 .filter(invoice -> invoice.isFullyPaid() == isFullyPaid)
 				 .collect(Collectors.toSet());
 	}
 
-	private Set<Invoice> getInvoicesByType(String distributionTypeStr, Company company) throws EntityNotFoundException {
-		if (!DistributionType.contains(distributionTypeStr)) {
-			throw new EntityNotFoundException(DistributionType.class, "type", distributionTypeStr);
-		}
-		DistributionType type = DistributionType.valueOf(distributionTypeStr.toUpperCase());
-		switch (type) {
-			case SENT:
-				return company.getInvoicesSent();
-			case RECEIVED:
-				return company.getInvoicesReceived();
-		}
-		return Collections.emptySet();
-	}
 
 	//preauth invoice.getCustomer == authentication.name
 	@JsonView(View.Payment.class)
 	@PostMapping("/invoices/{invoiceId}/pay")
-	public ResponseEntity<Payment> payInvoice(@RequestBody Map<String, Object> body,
-	                                          Invoice invoice,
-	                                          Company company
-	) {
+	public ResponseEntity<Payment> payInvoice(@RequestBody Map<String, Object> body, Invoice invoice, Company company) {
 		double paymentAmount = (double) ((Integer) body.get("amount"));
 		Company recipient = invoice.getSender();
 
 		Payment payment = Payment.builder()
-			 .amount(paymentAmount)
-			 .build();
+				 .amount(paymentAmount)
+				 .build();
 		payment.addInvoice(invoice);
 		company.addPaymentSent(payment);
 		recipient.addPaymentReceived(payment);
@@ -147,12 +116,10 @@ public class PaymentController {
 	public ResponseEntity<Payment> refundPayment(Payment paymentToRefund) {
 		// check if payment has already been refunded
 		Payment refund = Payment.builder()
-			 .refundedPayment(paymentToRefund)
-			 //can be simplified by method
-//			 .sender(paymentToRefund.getRecipient())
-//			 .recipient(paymentToRefund.getSender())
-			 .amount(paymentToRefund.getAmount().doubleValue())
-			 .build();
+				 .refundedPayment(paymentToRefund)
+				 //can be simplified by method
+				 .amount(paymentToRefund.getAmount().doubleValue())
+				 .build();
 		refund.addInvoice(paymentToRefund.getInvoice());
 
 		Company refundSender = paymentToRefund.getRecipient();

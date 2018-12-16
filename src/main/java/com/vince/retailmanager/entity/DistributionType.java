@@ -1,27 +1,37 @@
 package com.vince.retailmanager.entity;
 
+import com.vince.retailmanager.exception.InvalidEnumArgumentException;
+
+import java.util.Arrays;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 public enum DistributionType {
-	RECEIVED("received"),
-	SENT("sent");
+	RECEIVED(),
+	SENT();
 
-	private final String name;
+	private static final Map<String, DistributionType> NAME_MAP = Stream.of(values())
+			 .collect(Collectors.toMap(DistributionType::toString, Function.identity()));
 
-	DistributionType(String name) {
-		this.name = name;
+	public static DistributionType fromString(String name) {
+		name = name.toLowerCase();
+		DistributionType distributionType = NAME_MAP.get(name);
+		if (distributionType == null) {
+			throw new InvalidEnumArgumentException(String.format(
+					 "'%s' has no corresponding value. Accepted values: %s",
+					 name,
+					 Arrays.asList(values())
+																													)
+			);
+		}
+		return distributionType;
 	}
 
 	@Override
 	public String toString() {
-		return name;
+		return this.name().toLowerCase();
 	}
 
-	public static boolean contains(String test) {
-		for (DistributionType type : DistributionType.values()) {
-			if (type.name().equalsIgnoreCase(test)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
 }

@@ -44,23 +44,25 @@ public class FinancialController {
 
 	@ModelAttribute
 	public void populateModel(
-		 Model model,
-		 @AuthenticationPrincipal org.springframework.security.core.userdetails.User authenticatedUser,
-		 @PathVariable("companyId") Integer companyId,
-		 @PathVariable(value = "incomeStatementId", required = false) Integer incomeStatementId
-	) throws EntityNotFoundException {
+			 Model model,
+			 @AuthenticationPrincipal org.springframework.security.core.userdetails.User authenticatedUser,
+			 @PathVariable("companyId") Integer companyId,
+			 @PathVariable(value = "incomeStatementId", required = false) Integer incomeStatementId
+													 ) throws EntityNotFoundException {
 		addCompany(model, companyId);
 		ControllerUtils.addActiveUsername(model, authenticatedUser, companyId, userService);
+
 		addIncomeStatement(model, incomeStatementId);
 
 
 	}
 
-	private void addCompany(Model model, @PathVariable("companyId") Integer companyId) throws EntityNotFoundException {
+	private void addCompany(Model model, Integer companyId) throws EntityNotFoundException {
 		if (companyId != null) model.addAttribute("company", franchiseService.findCompanyById(companyId));
 	}
 
-	private void addIncomeStatement(Model model, @PathVariable("incomeStatementId") Integer incomeStatementId) throws EntityNotFoundException {
+
+	private void addIncomeStatement(Model model, Integer incomeStatementId) throws EntityNotFoundException {
 		if (incomeStatementId != null)
 			model.addAttribute("incomeStatement", financialService.findIncomeStatementById(incomeStatementId));
 	}
@@ -71,11 +73,12 @@ public class FinancialController {
 	}
 
 	@PutMapping("/income-statements/{incomeStatementId}")
-	public ResponseEntity<IncomeStatement> updateIncomeStatement(IncomeStatement incomeStatement,
-	                                                             @RequestBody @Validated IncomeStatement update,
-	                                                             @ModelAttribute("activeUsername") String activeUsername,
-	                                                             @RequestParam @DateTimeFormat(pattern = Date.DATE_FORMAT) LocalDate date
-	) {
+	public ResponseEntity<IncomeStatement> updateIncomeStatement(
+			 IncomeStatement incomeStatement,
+			 @RequestBody @Validated IncomeStatement update,
+			 @ModelAttribute("activeUsername") String activeUsername,
+			 @RequestParam @DateTimeFormat(pattern = Date.DATE_FORMAT) LocalDate date
+																															) {
 		incomeStatement.setSales(update.getSales());
 		incomeStatement.setCostOfGoodsSold(update.getCostOfGoodsSold());
 		incomeStatement.setOperatingExpenses(update.getSales());
@@ -88,30 +91,33 @@ public class FinancialController {
 
 	@PostMapping("/income-statements/new")
 	public ResponseEntity<IncomeStatement> createIncomeStatement(
-		 Company company,
-		 @RequestBody @Validated IncomeStatement incomeStatement,
-		 @RequestParam @DateTimeFormat(pattern = Date.DATE_FORMAT) LocalDate date) {
+			 Company company,
+			 @RequestBody @Validated IncomeStatement incomeStatement,
+			 @RequestParam @DateTimeFormat(pattern = Date.DATE_FORMAT) LocalDate date) {
 		company.addIncomeStatement(incomeStatement);
 		incomeStatement.setDate(date);
 		ControllerUtils.validate(validator, incomeStatement, Validation.Entity.class);
 		incomeStatement = financialService.saveIncomeStatement(incomeStatement);
+
 		if (incomeStatement.getCompany() instanceof Franchisee) {
-//			franchiseService.createMonthlyFranchiseFees(incomeStatement);
+			franchiseService.createMonthlyFranchiseFees(incomeStatement);
 		}
+
 		return new ResponseEntity<>(incomeStatement, HttpStatus.OK);
 	}
 
 	@GetMapping("/income-statements")
 	public ResponseEntity<Collection<IncomeStatement>> getIncomeStatements(
-		 Company company,
-		 @RequestParam @DateTimeFormat(pattern = Date.DATE_FORMAT) LocalDate startDate,
-		 @RequestParam @DateTimeFormat(pattern = Date.DATE_FORMAT) LocalDate endDate
-	) {
+			 Company company,
+			 @RequestParam @DateTimeFormat(pattern = Date.DATE_FORMAT) LocalDate startDate,
+			 @RequestParam @DateTimeFormat(pattern = Date.DATE_FORMAT) LocalDate endDate
+																																				) {
 		Set<IncomeStatement> incomeStatements = company.getIncomeStatements()
-			 .stream()
-			 .filter(incomeStatement -> DateUtils.checkBetween(incomeStatement.getDate(), startDate, endDate))
-			 .collect(Collectors.toSet());
+				 .stream()
+				 .filter(incomeStatement -> DateUtils.checkBetween(incomeStatement.getDate(), startDate, endDate))
+				 .collect(Collectors.toSet());
 		return new ResponseEntity<>(incomeStatements, HttpStatus.OK);
 	}
+
 
 }

@@ -20,15 +20,16 @@ import javax.validation.constraints.NotNull;
 @DiscriminatorColumn(name = "fee_type")
 public abstract class PercentageFee extends BaseEntity {
 
+	@Column(name = "fee_type", insertable = false, updatable = false)
+	private String feeType;
 
-	public PercentageFee(IncomeStatement incomeStatement) {
+	void setAttributes(IncomeStatement incomeStatement) {
 		if (incomeStatement == null) throw new NullPointerException();
 
 		Franchisee franchisee = (Franchisee) incomeStatement.getCompany();
 		this.setFranchisee(franchisee);
 		this.setFranchisor(franchisee.getFranchisor());
 		this.setIncomeStatement(incomeStatement);
-		this.setDefaultInvoice();
 	}
 
 
@@ -57,6 +58,7 @@ public abstract class PercentageFee extends BaseEntity {
 	@NotNull
 	private String description;
 
+
 	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
 	@JoinColumn(name = "invoice_id")
 	@NotNull
@@ -83,7 +85,8 @@ public abstract class PercentageFee extends BaseEntity {
 			 .recipient(this.getFranchisee())
 			 .build());
 	}
+
+	protected void init() {
+		this.setDefaultInvoice();
+	}
 }
-
-
-

@@ -173,18 +173,21 @@ public class FranchiseServiceImpl implements FranchiseService {
 	@Transactional
 	public List<PercentageFee> createMonthlyFranchiseFees(IncomeStatement incomeStatement) {
 		//if incomeStatement.get company is not an instance of Franchisee, throw exception
-
 		List<PercentageFee> fees = new ArrayList<>();
+		fees.add(Royalty.create(incomeStatement));
+		fees.add(MarketingFee.create(incomeStatement));
 
-		fees.add(new Royalty(incomeStatement));
-		fees.add(new MarketingFee(incomeStatement));
-
-
-		fees.forEach(fee -> {
-			fee = savePercentageFee(fee);
-			System.out.println("fee = " + fee);
-		});
+		fees.forEach(fee -> savePercentageFee(fee));
 		return fees;
 
 	}
+
+	@Override
+	@Transactional
+	public List<PercentageFee> getPercentageFees(Franchisor franchisor) {
+		if (franchisor == null) return Collections.emptyList();
+
+		return percentageFeeRepository.findAllByFranchisorId(franchisor.getId());
+	}
 }
+

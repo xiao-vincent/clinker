@@ -21,7 +21,7 @@ import java.util.Set;
 @Data
 @JsonTypeName("api_error")
 @JsonTypeInfo(include = JsonTypeInfo.As.WRAPPER_OBJECT, use = JsonTypeInfo.Id.NAME, property =
-	 "error", visible = true)
+		 "error", visible = true)
 class ApiError {
 	private HttpStatus status;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
@@ -70,10 +70,11 @@ class ApiError {
 
 	private void addValidationError(FieldError fieldError) {
 		this.addValidationError(
-			 fieldError.getObjectName(),
-			 fieldError.getField(),
-			 fieldError.getRejectedValue(),
-			 fieldError.getDefaultMessage());
+				 fieldError.getObjectName(),
+				 fieldError.getField(),
+				 fieldError.getRejectedValue(),
+				 fieldError.getDefaultMessage()
+													 );
 	}
 
 
@@ -83,8 +84,9 @@ class ApiError {
 
 	private void addValidationError(ObjectError objectError) {
 		this.addValidationError(
-			 objectError.getObjectName(),
-			 objectError.getDefaultMessage());
+				 objectError.getObjectName(),
+				 objectError.getDefaultMessage()
+													 );
 	}
 
 	void addValidationError(List<ObjectError> globalErrors) {
@@ -102,10 +104,11 @@ class ApiError {
 	 */
 	private void addValidationError(ConstraintViolation<?> cv) {
 		this.addValidationError(
-			 cv.getRootBeanClass().getSimpleName(),
-			 ((PathImpl) cv.getPropertyPath()).getLeafNode().asString(),
-			 cv.getInvalidValue(),
-			 cv.getMessage());
+				 cv.getRootBeanClass().getSimpleName(),
+				 ((PathImpl) cv.getPropertyPath()).getLeafNode().asString(),
+				 cv.getInvalidValue(),
+				 cv.getMessage()
+													 );
 	}
 
 	void addValidationErrors(Set<ConstraintViolation<?>> constraintViolations) {

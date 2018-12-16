@@ -10,12 +10,23 @@ import javax.persistence.Entity;
 @NoArgsConstructor
 public class Royalty extends PercentageFee {
 
-	public Royalty(IncomeStatement incomeStatement) {
-		super(incomeStatement);
-		setDescription("royalty fee");
-		setFeePercent(getFranchisor().getRoyaltyFeePercent());
+//	private Royalty(IncomeStatement incomeStatement) {
+//		super(incomeStatement);
+//	}
+
+	public static Royalty create(IncomeStatement incomeStatement) {
+		Royalty royalty = new Royalty();
+		royalty.setAttributes(incomeStatement);
+		royalty.setDescription("royalty fee");
+		royalty.setFeePercent(royalty.getFranchisor().getRoyaltyFeePercent());
+
+		royalty.init();
+		return royalty;
 	}
 
+//	private void init() {
+//		this.setDefaultInvoice();
+//	}
 //	@Override
 //	public String getDescription() {
 //		return "royalty fee";
