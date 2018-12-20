@@ -1,14 +1,15 @@
 package com.vince.retailmanager.service;
 
-import com.vince.retailmanager.entity.AccessToken;
-import com.vince.retailmanager.entity.User;
+import com.vince.retailmanager.model.entity.AccessToken;
+import com.vince.retailmanager.model.entity.User;
 
 public interface UserService {
-	void saveUser(User user) throws Exception;
 
-	User findUser(String username);
+  void saveUser(User user) throws Exception;
 
-	AccessToken findAccessToken(int companyId);
+  User findUser(String username);
 
-	AccessToken findAccessToken(String username, int companyId);
+  AccessToken findAccessToken(int companyId);
+
+  AccessToken findAccessToken(String username, int companyId);
 }

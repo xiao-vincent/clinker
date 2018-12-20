@@ -1,42 +1,47 @@
 package com.vince.retailmanager.service;
 
-import com.vince.retailmanager.entity.*;
+import com.vince.retailmanager.model.entity.Company;
+import com.vince.retailmanager.model.entity.Franchisee;
+import com.vince.retailmanager.model.entity.Franchisor;
+import com.vince.retailmanager.model.entity.IncomeStatement;
+import com.vince.retailmanager.model.entity.MarketingFee;
+import com.vince.retailmanager.model.entity.PercentageFee;
+import com.vince.retailmanager.model.entity.Royalty;
 import com.vince.retailmanager.web.exception.EntityNotFoundException;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface FranchiseService {
 //	void saveCompany(Franchisor franchisor);
 
-	Franchisor saveFranchisor(Franchisor franchisor);
+  Franchisor saveFranchisor(Franchisor franchisor);
 
-	void saveFranchisee(Franchisee franchisee);
+  void saveFranchisee(Franchisee franchisee);
 
-	Company saveCompany(Company company);
+  Company saveCompany(Company company);
 
-	Company findCompanyById(int id) throws EntityNotFoundException;
+  Company findCompanyById(int id) throws EntityNotFoundException;
 
-	Franchisor findFranchisorById(int id) throws EntityNotFoundException;
+  Franchisor findFranchisorById(int id) throws EntityNotFoundException;
 
-	void disableFranchisor(Franchisor franchisor) throws Exception;
+  void disableFranchisor(Franchisor franchisor) throws Exception;
 
-	void disableCompany(Company company);
+  void disableCompany(Company company);
 
-	List<Franchisor> findAllFranchisors();
+  List<Franchisor> findAllFranchisors();
 
-	Franchisee findFranchiseeById(int franchiseeId) throws EntityNotFoundException;
+  Franchisee findFranchiseeById(int franchiseeId) throws EntityNotFoundException;
 
-	Royalty saveRoyalty(Royalty royalty);
+  Royalty saveRoyalty(Royalty royalty);
 
-	MarketingFee saveMarketingFee(MarketingFee marketingFee);
+  MarketingFee saveMarketingFee(MarketingFee marketingFee);
 
-	PercentageFee savePercentageFee(PercentageFee percentageFee);
+  PercentageFee savePercentageFee(PercentageFee percentageFee);
 
 
-	@Transactional
-	List<PercentageFee> createMonthlyFranchiseFees(IncomeStatement incomeStatement);
+  @Transactional
+  List<PercentageFee> createMonthlyFranchiseFees(IncomeStatement incomeStatement);
 
-	@Transactional
-	List<PercentageFee> getPercentageFees(Franchisor franchisor);
+  @Transactional
+  List<PercentageFee> getPercentageFees(Franchisor franchisor);
 }

@@ -1,13 +1,13 @@
 package com.vince.retailmanager.repository;
 
-import com.vince.retailmanager.entity.Invoice;
+import com.vince.retailmanager.model.entity.Invoice;
+import java.util.Collection;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Collection;
-
 public interface InvoiceRepository extends JpaRepository<Invoice, Integer> {
-	Collection<Invoice> findAllByRecipientId(int id);
 
-	Collection<Invoice> findAllBySenderId(int id);
+  Collection<Invoice> findAllByRecipientId(int id);
+
+  Collection<Invoice> findAllBySenderId(int id);
 
 }

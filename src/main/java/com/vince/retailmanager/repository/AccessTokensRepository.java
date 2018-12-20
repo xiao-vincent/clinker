@@ -1,18 +1,18 @@
 package com.vince.retailmanager.repository;
 
-import com.vince.retailmanager.entity.AccessToken;
-import com.vince.retailmanager.entity.Company;
+import com.vince.retailmanager.model.entity.AccessToken;
+import com.vince.retailmanager.model.entity.Company;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Optional;
-
 public interface AccessTokensRepository extends JpaRepository<AccessToken, Integer> {
-	Optional<AccessToken> findByCompanyId(Integer id);
 
-	Optional<AccessToken> findByUser_UsernameAndCompany_Id(String username, int companyId);
+  Optional<AccessToken> findByCompanyId(Integer id);
 
-	void deleteAccessTokensByCompany_Id(Integer id);
+  Optional<AccessToken> findByUser_UsernameAndCompany_Id(String username, int companyId);
 
-	void deleteAccessTokensByCompany(Company company);
+  void deleteAccessTokensByCompany_Id(Integer id);
+
+  void deleteAccessTokensByCompany(Company company);
 
 }

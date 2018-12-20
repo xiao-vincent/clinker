@@ -1,9 +1,8 @@
-package com.vince.retailmanager.entity;
-
-import lombok.NoArgsConstructor;
+package com.vince.retailmanager.model.entity;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import lombok.NoArgsConstructor;
 
 @Entity
 @DiscriminatorValue("royalty")
@@ -14,15 +13,15 @@ public class Royalty extends PercentageFee {
 //		super(incomeStatement);
 //	}
 
-	public static Royalty create(IncomeStatement incomeStatement) {
-		Royalty royalty = new Royalty();
-		royalty.setAttributes(incomeStatement);
-		royalty.setDescription("royalty fee");
-		royalty.setFeePercent(royalty.getFranchisor().getRoyaltyFeePercent());
+  public static Royalty create(IncomeStatement incomeStatement) {
+    Royalty royalty = new Royalty();
+    royalty.setAttributes(incomeStatement);
+    royalty.setDescription("royalty fee");
+    royalty.setFeePercent(royalty.getFranchisor().getRoyaltyFeePercent());
 
-		royalty.init();
-		return royalty;
-	}
+    royalty.init();
+    return royalty;
+  }
 
 //	private void init() {
 //		this.setDefaultInvoice();
