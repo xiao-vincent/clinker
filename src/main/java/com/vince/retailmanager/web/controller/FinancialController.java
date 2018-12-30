@@ -17,6 +17,7 @@ import com.vince.retailmanager.web.exception.EntityNotFoundException;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -133,8 +134,8 @@ public class FinancialController {
       Company company,
       DateRange dateRange
   ) {
-    Set<IncomeStatement> incomeStatements = IncomeStatementUtils
-        .getIncomeStatementsInDateRange(company, dateRange);
+    List<IncomeStatement> incomeStatements = IncomeStatementUtils
+        .getSortedIncomeStatementsInDateRange(company, dateRange);
     return new ResponseEntity<>(incomeStatements, HttpStatus.OK);
   }
 

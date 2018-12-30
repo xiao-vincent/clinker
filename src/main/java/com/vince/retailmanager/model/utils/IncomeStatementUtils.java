@@ -5,19 +5,22 @@ import com.vince.retailmanager.model.entity.Company;
 import com.vince.retailmanager.model.entity.IncomeStatement;
 import com.vince.retailmanager.utils.DateUtils;
 import java.time.YearMonth;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class IncomeStatementUtils {
 
-  public static Set<IncomeStatement> getIncomeStatementsInDateRange(Company company,
+  public static List<IncomeStatement> getSortedIncomeStatementsInDateRange(Company company,
       DateRange dateRange
   ) {
     return company.getIncomeStatements()
         .stream()
         .filter(incomeStatement -> DateUtils
             .checkBetween(incomeStatement.getDate(), dateRange))
-        .collect(Collectors.toSet());
+        .sorted(Comparator.comparing(IncomeStatement::getDate))
+        .collect(Collectors.toList());
   }
 
   public static Set<YearMonth> getMissingIncomeStatementDates(

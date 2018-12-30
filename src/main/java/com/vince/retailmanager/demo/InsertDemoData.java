@@ -1,5 +1,7 @@
 package com.vince.retailmanager.demo;
 
+import com.vince.retailmanager.model.DateRange;
+import com.vince.retailmanager.model.IncomeStatementStatistics;
 import com.vince.retailmanager.model.entity.Company;
 import com.vince.retailmanager.model.entity.Franchisee;
 import com.vince.retailmanager.model.entity.Franchisor;
@@ -17,6 +19,7 @@ import com.vince.retailmanager.repository.PaymentRepository;
 import com.vince.retailmanager.repository.UserRepository;
 import com.vince.retailmanager.service.FranchiseService;
 import com.vince.retailmanager.service.UserService;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -96,10 +99,12 @@ public class InsertDemoData {
 
     createIncomeStatements(firstFranchisee, 3);
 
-//    IncomeStatementStatistics total = new IncomeStatementStatistics(
-//        createIncomeStatements(firstFranchisee, 3));
-//    System.out.println("total = " + total);
-
+    LocalDate startDate = LocalDate.of(2018, 10, 1);
+    LocalDate endDate = LocalDate.of(2018, 12, 31);
+    DateRange dateRange = new DateRange(startDate, endDate);
+    IncomeStatementStatistics statistics = IncomeStatementStatistics
+        .create(firstFranchisee, dateRange);
+    System.out.println("statistics = " + statistics);
 //		Royalty royalty = franchiseService.saveRoyalty();
 //		System.out.println("royalty = " + royalty);
 //		MarketingFee marketingFee = franchiseService.requestMarketingFee(franchisor, incomeStatement);
@@ -123,13 +128,13 @@ public class InsertDemoData {
   Collection<IncomeStatement> createIncomeStatements(Company company,
       int numOfIncomeStatements) {
     List<IncomeStatement> incomeStatements = new ArrayList<>();
-    for (int i = 0; i < numOfIncomeStatements; i++) {
+    for (int i = 1; i <= numOfIncomeStatements; i++) {
       IncomeStatement incomeStatement = IncomeStatement.builder()
           .sales(1000.0 * i)
           .costOfGoodsSold(200.0 * i)
           .operatingExpenses(100.0 * i)
           .generalAndAdminExpenses(50.0 * i)
-          .date(2018, 10 + i)
+          .date(2018, 10 + i - 1)
           .build();
       company.addIncomeStatement(incomeStatement);
       incomeStatementRepo.save(incomeStatement);
