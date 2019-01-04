@@ -3,9 +3,9 @@ package com.vince.retailmanager.model.entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.vince.retailmanager.exception.InvalidOperationException;
 import com.vince.retailmanager.model.View.Public;
 import com.vince.retailmanager.model.View.Summary;
-import com.vince.retailmanager.web.controller.ValidPayment;
 import java.math.BigDecimal;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -27,7 +27,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ValidPayment
+//@ValidPayment
 public class Payment extends BaseEntity {
 
   @DecimalMin("0.00")
@@ -65,10 +65,24 @@ public class Payment extends BaseEntity {
 
   public void addInvoice(Invoice invoice) {
     this.invoice = invoice;
-    if (refundedPayment == null) {
-      invoice.getPayments().add(this);
-    } else {
-      invoice.getRefunds().add(this);
+    ensureInvoiceNotVoid();
+    ensureValidAmount();
+    invoice.getPayments().add(this);
+  }
+
+  private void ensureValidAmount() {
+    BigDecimal invoiceBalance = this.invoice.getBalance();
+    if (amount.compareTo(invoiceBalance) > 0) {
+      String msg =
+          "Payment amount of " + amount + " is greater than remaining invoice balance of "
+              + invoiceBalance;
+      throw new InvalidOperationException(msg);
+    }
+  }
+
+  private void ensureInvoiceNotVoid() {
+    if (this.invoice.isVoid()) {
+      throw new InvalidOperationException("Invoice is void");
     }
   }
 
@@ -77,8 +91,6 @@ public class Payment extends BaseEntity {
 
     public PaymentBuilder amount(Double amount) {
       this.amount = BigDecimal.valueOf(amount);
-//			CurrencyUnit usd = CurrencyUnit.of("USD");
-//			this.amount = Money.of(usd, amount);
       return this;
     }
   }

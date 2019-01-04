@@ -1,7 +1,10 @@
 package com.vince.retailmanager.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.vince.retailmanager.model.View.Public;
+import com.vince.retailmanager.model.View;
+import com.vince.retailmanager.utils.EnumUtils;
+import java.util.Map;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
@@ -29,36 +32,68 @@ import lombok.NoArgsConstructor;
 @DiscriminatorColumn(name = "fee_type")
 public abstract class PercentageFee extends BaseEntity {
 
+  public enum FeeType {
+    ROYALTY(Constants.ROYALTY),
+    MARKETING(Constants.MARKETING);
+
+    FeeType(String val) {
+      // force equality between name of enum instance, and value of constant
+      if (!this.name().equals(val)) {
+        throw new IllegalArgumentException("Incorrect use of FeeType");
+      }
+    }
+
+    public static final Map<String, FeeType> NAME_MAP = EnumUtils.createNameMap(FeeType.class);
+
+    public static FeeType fromString(String name) {
+      return EnumUtils.fromString(NAME_MAP, name);
+    }
+
+    public static class Constants {
+
+      public static final String ROYALTY = "ROYALTY";
+      public static final String MARKETING = "MARKETING";
+    }
+  }
+
   @Column(name = "fee_type", insertable = false, updatable = false)
   private String feeType;
+
+  @NotNull
+  @JsonView(View.PercentageFee.class)
+  private double feePercent;
+
+  @NotNull
+  @JsonView(View.Summary.class)
+  private String description;
+
   @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
       CascadeType.REFRESH})
   @JoinColumn(name = "franchisor_id")
   @NotNull
-  @JsonView(Public.class)
+  @JsonView(View.PercentageFee.class)
   private Franchisor franchisor;
+
   @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
       CascadeType.REFRESH})
   @JoinColumn(name = "franchisee_id")
   @NotNull
-  @JsonView(Public.class)
+  @JsonView(View.PercentageFee.class)
   private Franchisee franchisee;
+
   @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
       CascadeType.REFRESH})
   @JoinColumn(name = "income_statement_id")
   @NotNull
-  @JsonView(Public.class)
+  @JsonView(View.PercentageFee.class)
   private IncomeStatement incomeStatement;
-  @NotNull
-  private double feePercent;
-  @NotNull
-  private String description;
+
   @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
       CascadeType.REFRESH})
   @JoinColumn(name = "invoice_id")
   @NotNull
   @Valid
-  @JsonView(Public.class)
+  @JsonView(View.PercentageFee.class)
   private Invoice invoice;
 
   void setAttributes(IncomeStatement incomeStatement) {
@@ -81,13 +116,15 @@ public abstract class PercentageFee extends BaseEntity {
     }
   }
 
-  public double getFee() {
+  @JsonProperty("feeAmount")
+  @JsonView(View.Summary.class)
+  public double getFeeAmount() {
     return this.getFeePercent() * this.getBaseAmount();
   }
 
   public void setDefaultInvoice() {
     this.setInvoice(Invoice.builder()
-        .due(this.getFee())
+        .due(this.getFeeAmount())
         .description(this.getDescription())
         .sender(this.getFranchisor())
         .recipient(this.getFranchisee())

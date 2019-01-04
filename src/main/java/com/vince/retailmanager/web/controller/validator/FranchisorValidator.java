@@ -1,4 +1,4 @@
-package com.vince.retailmanager.web.controller.Franchisor;
+package com.vince.retailmanager.web.controller.validator;
 
 import com.vince.retailmanager.model.entity.Franchisor;
 import com.vince.retailmanager.repository.FranchisorRepository;
@@ -13,29 +13,15 @@ public class FranchisorValidator implements ConstraintValidator<ValidFranchisor,
   private FranchisorRepository franchisorRepo;
 
   @Override
-  public void initialize(ValidFranchisor constraintAnnotation) {
-  }
-
-  @Override
   public boolean isValid(Franchisor franchisor,
       ConstraintValidatorContext context) {
-    if (franchisor == null) {
-      return true;
-    }
-
-    boolean isValid = ValidatorUtils.applyValidators(franchisor, context,
+    return ValidatorUtils.isValid(franchisor, context,
         this::isNameValid,
         this::isWebsiteValid
     );
-
-    if (!isValid) {
-      context.disableDefaultConstraintViolation();
-    }
-    return isValid;
   }
 
 //	private boolean isDisableValid(Franchisor franchisor, ConstraintValidatorContext context) {
-//		System.out.println("VALIDATING DISABLED");
 //		if (!franchisor.getFranchisees().isEmpty()) {
 //			context
 //				 .buildConstraintViolationWithTemplate("franchisees rely on this franchisor")
@@ -48,7 +34,7 @@ public class FranchisorValidator implements ConstraintValidator<ValidFranchisor,
 
   private boolean isNameValid(Franchisor franchisor, ConstraintValidatorContext context) {
     if (franchisorRepo.existsByNameIgnoreCase(franchisor.getName())) {
-      addExistsViolation(context, "name");
+      ValidatorUtils.addExistsViolation(context, "name");
       return false;
     }
     return true;
@@ -57,21 +43,14 @@ public class FranchisorValidator implements ConstraintValidator<ValidFranchisor,
 
   private boolean isWebsiteValid(Franchisor franchisor, ConstraintValidatorContext context) {
     if (franchisorRepo.existsByWebsiteIgnoreCase(franchisor.getWebsite())) {
-      addExistsViolation(context, "website");
+      ValidatorUtils.addExistsViolation(context, "website");
       return false;
     }
     return true;
   }
 
-  private void addExistsViolation(ConstraintValidatorContext context, String name) {
-    context
-        .buildConstraintViolationWithTemplate(name + " already exists")
-        .addPropertyNode(name)
-        .addConstraintViolation();
-  }
-
-//	@SafeVarargs
-//	private final boolean applyValidators(Franchisor franchisor, ConstraintValidatorContext context,
+  //	@SafeVarargs
+//	private final boolean isValid(Franchisor franchisor, ConstraintValidatorContext context,
 //	                                      BiFunction<Franchisor, ConstraintValidatorContext, Boolean>... fns) {
 //		boolean isValid = true;
 //		for (BiFunction<Franchisor, ConstraintValidatorContext, Boolean> fn : fns) {

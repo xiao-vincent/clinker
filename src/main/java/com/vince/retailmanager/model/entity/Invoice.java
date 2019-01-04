@@ -2,6 +2,7 @@ package com.vince.retailmanager.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.vince.retailmanager.model.View;
 import com.vince.retailmanager.model.View.Public;
 import com.vince.retailmanager.model.View.Summary;
 import java.math.BigDecimal;
@@ -33,7 +34,7 @@ import lombok.Setter;
 public class Invoice extends BaseEntity {
 
   @DecimalMin("0.00")
-  @JsonView(Public.class)
+  @JsonView(Summary.class)
   private BigDecimal due;
 
   @JsonView(Public.class)
@@ -41,46 +42,36 @@ public class Invoice extends BaseEntity {
   @Transient
   private BigDecimal balance;
 
+  @JsonView(Summary.class)
   private boolean isVoid;
 
   @NotNull
-  @JsonView(Public.class)
+  @JsonView(Summary.class)
   private String description;
 
   @OneToOne
   @JoinColumn(name = "sender_id")
   @NotNull
-  @JsonView(Public.class)
+  @JsonView(View.Invoice.class)
   private Company sender;
 
   @OneToOne
   @JoinColumn(name = "recipient_id")
   @NotNull
-  @JsonView(Public.class)
+  @JsonView(View.Invoice.class)
   private Company recipient;
 
   @OneToMany(mappedBy = "invoice")
-  @JsonView(Summary.class)
   @Builder.Default
   @JsonManagedReference
   private Set<Payment> payments = new HashSet<>();
 
-  @OneToMany(mappedBy = "invoice")
-  @JsonView(Summary.class)
-  @Builder.Default
-//	@JsonBackReference(value = "secondParent")
-  private Set<Payment> refunds = new HashSet<>();
-
   public BigDecimal getBalance() {
-    if (payments.isEmpty()) {
-      return due;
-    } else {
-      BigDecimal total = payments.stream()
-          .map(Payment::getAmount)
-          .reduce(BigDecimal.ZERO, BigDecimal::add);
-      return due.subtract(total);
-    }
-
+    BigDecimal total = payments.stream()
+        .filter(payment -> payment.getRefundedPayment() == null)
+        .map(Payment::getAmount)
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
+    return due.subtract(total);
   }
 
 
@@ -96,7 +87,6 @@ public class Invoice extends BaseEntity {
       return this;
     }
 
-    //Prevent direct access to the internal private field
     private ObjectBuilder balance() {
       return this;
     }

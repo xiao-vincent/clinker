@@ -2,16 +2,12 @@ package com.vince.retailmanager.web.controller;
 
 import com.vince.retailmanager.model.entity.User;
 import com.vince.retailmanager.service.UserService;
-import com.vince.retailmanager.web.exception.BindingErrorsResponse;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,25 +20,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/users")
 public class UserController {
 
-
   @Autowired
   private UserService userService;
 
-  @PreAuthorize("hasRole('ROLE_ADMIN')")
   @PostMapping
-  public ResponseEntity<User> addUser(@RequestBody @Valid User user, BindingResult bindingResult)
+//  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  public ResponseEntity<User> addUser(@RequestBody @Valid User user)
       throws Exception {
-    BindingErrorsResponse errors = new BindingErrorsResponse();
-    HttpHeaders headers = new HttpHeaders();
-    if (bindingResult.hasErrors() || (user == null)) {
-      errors.addAllErrors(bindingResult);
-      headers.add("errors", errors.toJSON());
-      return new ResponseEntity<User>(user, headers, HttpStatus.BAD_REQUEST);
-    }
-
     this.userService.saveUser(user);
     user.setPassword("");
-    return new ResponseEntity<User>(user, headers, HttpStatus.CREATED);
+    return new ResponseEntity<>(user, HttpStatus.CREATED);
   }
 
   @GetMapping("/test")
@@ -51,4 +38,5 @@ public class UserController {
     System.out.println(authentication);
     return authentication.toString();
   }
+
 }

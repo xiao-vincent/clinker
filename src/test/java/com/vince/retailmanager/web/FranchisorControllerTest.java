@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.vince.retailmanager.model.entity.Franchisor;
 import com.vince.retailmanager.service.FranchiseService;
 import com.vince.retailmanager.service.businessService.ApplicationTestConfig;
-import com.vince.retailmanager.web.controller.Franchisor.FranchisorController;
+import com.vince.retailmanager.web.controller.FranchisorController;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;

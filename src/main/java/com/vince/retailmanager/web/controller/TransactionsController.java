@@ -9,6 +9,7 @@ import com.vince.retailmanager.model.entity.Payment;
 import com.vince.retailmanager.service.FranchiseService;
 import com.vince.retailmanager.service.TransactionService;
 import com.vince.retailmanager.service.UserService;
+import com.vince.retailmanager.utils.ValidatorUtils;
 import com.vince.retailmanager.web.controller.utils.ControllerUtils;
 import com.vince.retailmanager.web.exception.EntityNotFoundException;
 import java.math.BigDecimal;
@@ -38,13 +39,15 @@ public class TransactionsController {
   @Autowired
   public UserService userService;
   @Autowired
+  private FranchiseService franchiseService;
+  @Autowired
   public TransactionService transactionService;
   @Autowired
   public Validator validator;
   @Autowired
   public ControllerUtils controllerUtils;
   @Autowired
-  private FranchiseService franchiseService;
+  public ValidatorUtils validatorUtils;
 
   @ModelAttribute
   public void populateModel(
@@ -82,7 +85,6 @@ public class TransactionsController {
     }
   }
 
-
   @GetMapping("/payments/{paymentId}")
   @JsonView(View.Summary.class)
   public ResponseEntity<Payment> getPayment(Payment payment) {
@@ -110,91 +112,69 @@ public class TransactionsController {
   }
 
 
-  private Collection<Invoice> filterInvoicesByFullyPaid(Collection<Invoice> invoices,
-      boolean isFullyPaid) {
-    return invoices.stream()
-        .filter(invoice -> invoice.isFullyPaid() == isFullyPaid)
-        .collect(Collectors.toSet());
-  }
-
   @GetMapping("/invoices/{invoiceId}")
+  @JsonView(View.Invoice.class)
   public ResponseEntity<Invoice> getInvoice(Invoice invoice) {
     return new ResponseEntity<>(invoice, HttpStatus.OK);
   }
 
   @PostMapping("/invoices/{recipientId}")
+  @JsonView(View.Invoice.class)
   public ResponseEntity<Invoice> createInvoice(Company company,
       @RequestBody Invoice invoice,
       @PathVariable("recipientId") int recipientId
   ) throws EntityNotFoundException {
     invoice.setSender(company);
     invoice.setRecipient(franchiseService.findCompanyById(recipientId));
-    controllerUtils.validate(invoice);
+    validatorUtils.validate(invoice);
     transactionService.saveInvoice(invoice);
     return new ResponseEntity<>(invoice, HttpStatus.OK);
-
   }
 
   @PutMapping("/invoices/{invoiceId}")
+  @JsonView(View.Invoice.class)
   public ResponseEntity<Invoice> updateInvoice(Invoice invoice,
       @RequestBody Invoice updatedInvoice) {
     invoice.setDescription(updatedInvoice.getDescription());
     invoice.setDue(updatedInvoice.getDue());
-    controllerUtils.validate(invoice);
+    validatorUtils.validate(invoice);
     transactionService.saveInvoice(invoice);
-    return new ResponseEntity<>(invoice, HttpStatus.NO_CONTENT);
-  }
-
-  @PostMapping("/invoices/{invoiceId}/void")
-  public ResponseEntity<Invoice> voidInvoice(Invoice invoice) {
-    invoice.setVoid(true);
-    invoice.setDue(BigDecimal.ZERO);
     return new ResponseEntity<>(invoice, HttpStatus.OK);
   }
 
+  @PostMapping("/invoices/{invoiceId}/void")
+  @JsonView(View.Invoice.class)
+  public ResponseEntity<Invoice> voidInvoice(Invoice invoice) {
+    invoice.setVoid(true);
+    invoice.setDue(BigDecimal.ZERO);
+    validatorUtils.validate(invoice);
+    transactionService.saveInvoice(invoice);
+    return new ResponseEntity<>(invoice, HttpStatus.OK);
+  }
 
-  //preauth invoice.getCustomer == authentication.name
-  @JsonView(View.Payment.class)
   @PostMapping("/invoices/{invoiceId}/pay")
+  @JsonView(View.Payment.class)
   public ResponseEntity<Payment> payInvoice(@RequestBody Map<String, Object> body,
       Invoice invoice,
       Company company) {
     double paymentAmount = (double) ((Integer) body.get("amount"));
-    Company recipient = invoice.getSender();
-
-    Payment payment = Payment.builder()
-        .amount(paymentAmount)
-        .build();
-    payment.addInvoice(invoice);
-    company.addPaymentSent(payment);
-    recipient.addPaymentReceived(payment);
-    ControllerUtils.validate(validator, payment);
-    transactionService.savePayment(payment);
+    Payment payment = transactionService.payInvoice(company, invoice, paymentAmount);
     return new ResponseEntity<>(payment, HttpStatus.OK);
   }
 
-  @JsonView(View.Payment.class)
+
   @PostMapping("/refunds/{paymentId}")
+  @JsonView(View.Payment.class)
   public ResponseEntity<Payment> refundPayment(Payment paymentToRefund) {
-    // check if payment has already been refunded
-    Payment refund = Payment.builder()
-        .refundedPayment(paymentToRefund)
-        //can be simplified by method
-        .amount(paymentToRefund.getAmount().doubleValue())
-        .build();
-    refund.addInvoice(paymentToRefund.getInvoice());
-
-    Company refundSender = paymentToRefund.getRecipient();
-    Company refundRecipient = paymentToRefund.getSender();
-
-    refundSender.addPaymentSent(refund);
-    refundRecipient.addPaymentReceived(refund);
-
-    ControllerUtils.validate(validator, refund);
-    transactionService.savePayment(refund);
-
-    return new ResponseEntity<>(refund, HttpStatus.OK);
+    Payment refundPayment = transactionService.refundPayment(paymentToRefund);
+    return new ResponseEntity<>(refundPayment, HttpStatus.OK);
   }
 
+  private Collection<Invoice> filterInvoicesByFullyPaid(Collection<Invoice> invoices,
+      boolean isFullyPaid) {
+    return invoices.stream()
+        .filter(invoice -> invoice.isFullyPaid() == isFullyPaid)
+        .collect(Collectors.toSet());
+  }
 
 }

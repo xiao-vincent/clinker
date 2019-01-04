@@ -1,11 +1,11 @@
 package com.vince.retailmanager.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.vince.retailmanager.model.View;
 import com.vince.retailmanager.model.View.Public;
 import com.vince.retailmanager.model.View.Summary;
-import com.vince.retailmanager.web.controller.Franchisor.ValidFranchisor;
+import com.vince.retailmanager.web.controller.validator.ValidFranchisor;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
@@ -25,8 +25,6 @@ import org.hibernate.validator.constraints.Range;
 
 @Entity
 @Table(name = "franchisors")
-//@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-//@JsonIdentityReference(alwaysAsId = true) // otherwise first ref as POJO, others as id
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Builder
@@ -50,9 +48,9 @@ public class Franchisor extends Company {
   private String description;
 
   @OneToMany(mappedBy = "franchisor", fetch = FetchType.EAGER)
-  @JsonIgnoreProperties(value = {"franchisor"})
+//  @JsonIgnoreProperties(value = {"franchisor"})
+  @JsonIgnore
   @Builder.Default
-  @JsonView(View.Franchisor.class)
   private Set<Franchisee> franchisees = new HashSet<>();
 
 

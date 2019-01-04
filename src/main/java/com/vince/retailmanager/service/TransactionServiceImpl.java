@@ -1,11 +1,13 @@
 package com.vince.retailmanager.service;
 
+import com.vince.retailmanager.exception.InvalidOperationException;
 import com.vince.retailmanager.model.DistributionType;
 import com.vince.retailmanager.model.entity.Company;
 import com.vince.retailmanager.model.entity.Invoice;
 import com.vince.retailmanager.model.entity.Payment;
 import com.vince.retailmanager.repository.InvoiceRepository;
 import com.vince.retailmanager.repository.PaymentRepository;
+import com.vince.retailmanager.utils.ValidatorUtils;
 import com.vince.retailmanager.web.exception.EntityNotFoundException;
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -20,22 +22,26 @@ public class TransactionServiceImpl implements TransactionService {
 
   private PaymentRepository paymentRepository;
   private InvoiceRepository invoiceRepository;
+  private ValidatorUtils validatorUtils;
 
   @Autowired
   public TransactionServiceImpl(
       PaymentRepository paymentRepository,
-      InvoiceRepository invoiceRepository) {
+      InvoiceRepository invoiceRepository,
+      ValidatorUtils validatorUtils) {
     this.paymentRepository = paymentRepository;
     this.invoiceRepository = invoiceRepository;
+    this.validatorUtils = validatorUtils;
   }
 
   @Override
   @Transactional
-  public void savePayment(Payment payment) {
+  public Payment savePayment(Payment payment) {
     Company sender = payment.getSender();
     BigDecimal newCashBalance = sender.getCashBalance().subtract(payment.getAmount());
     sender.setCashBalance(newCashBalance);
-    paymentRepository.save(payment);
+
+    return paymentRepository.save(payment);
   }
 
   @Override
@@ -81,6 +87,45 @@ public class TransactionServiceImpl implements TransactionService {
         invoiceRepository::findAllBySenderId,
         invoiceRepository::findAllByRecipientId
     );
+  }
+
+  @Override
+  public Payment refundPayment(Payment paymentToRefund) {
+    Company refundSender = paymentToRefund.getRecipient();
+    Company refundRecipient = paymentToRefund.getSender();
+    Payment refundPayment = Payment.builder()
+        .refundedPayment(paymentToRefund)
+        .sender(refundSender)
+        .recipient(refundRecipient)
+        .amount(paymentToRefund.getAmount().doubleValue())
+        .build();
+    refundPayment.addInvoice(paymentToRefund.getInvoice());
+    if (this.findRefund(paymentToRefund) != null) {
+      throw new InvalidOperationException("Payment already refunded");
+    }
+    validatorUtils.validate(refundPayment);
+    this.savePayment(refundPayment);
+    return refundPayment;
+  }
+
+  @Override
+  public Payment findRefund(Payment payment) {
+    return paymentRepository.findByRefundedPaymentId(payment.getId()).orElse(null);
+  }
+
+  @Override
+  public Payment payInvoice(Company sender, Invoice invoice, double paymentAmount) {
+    Company recipient = invoice.getSender();
+    Payment payment = Payment.builder()
+        .amount(paymentAmount)
+        .sender(sender)
+        .recipient(recipient)
+        .build();
+    payment.addInvoice(invoice);
+    validatorUtils.validate(payment);
+    return this.savePayment(payment);
+
+
   }
 
   private <T> Collection<T> getItemsByDistributionType(

@@ -93,8 +93,8 @@ public class InsertDemoData {
         .amount(PAYMENT_AMOUNT)
         .invoice(invoice)
         .build();
-    firstFranchisee.addPaymentSent(payment);
-    franchisor.addPaymentReceived(payment);
+    payment.setSender(firstFranchisee);
+    payment.setRecipient(franchisor);
     paymentRepo.save(payment);
 
     createIncomeStatements(firstFranchisee, 3);
@@ -175,8 +175,7 @@ public class InsertDemoData {
       Franchisor franchisor) throws Exception {
     User franchisorUser = new User(shortName + "_franchisor", dummyPassword);
     franchisorRepo.save(franchisor);
-
-    franchisorUser.addAccessToken(franchisor);
+//    franchisorUser.addAccessToken(franchisor);
     userService.saveUser(franchisorUser);
   }
 
@@ -190,7 +189,7 @@ public class InsertDemoData {
     franchiseeRepo.save(franchisee);
     franchisor.addFranchisee(franchisee);
 
-    franchiseeUser.addAccessToken(franchisee);
+//    franchiseeUser.addAccessToken(franchisee);
     userService.saveUser(franchiseeUser);
     System.out.println("saving " + franchisee);
     return franchisee;

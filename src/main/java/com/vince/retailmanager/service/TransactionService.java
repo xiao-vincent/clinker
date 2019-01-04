@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface TransactionService {
 
-  void savePayment(Payment payment);
+  Payment savePayment(Payment payment);
 
 //	void saveInvoice(Company sender, Company customer);
 
@@ -25,4 +25,10 @@ public interface TransactionService {
 
   @Transactional(readOnly = true)
   Collection<Invoice> getInvoices(Company company, DistributionType type);
+
+  Payment refundPayment(Payment paymentToRefund);
+
+  Payment findRefund(Payment payment);
+
+  Payment payInvoice(Company sender, Invoice invoice, double paymentAmount);
 }

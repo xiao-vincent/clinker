@@ -92,6 +92,8 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     ApiError apiError = new ApiError(BAD_REQUEST);
     apiError.setMessage("Validation error");
     apiError.addValidationErrors(ex.getBindingResult().getFieldErrors());
+    System.out.println(
+        "ex.getBindingResult().getFieldErrors() = " + ex.getBindingResult().getFieldErrors());
     apiError.addValidationError(ex.getBindingResult().getGlobalErrors());
     return buildResponseEntity(apiError);
   }
@@ -235,8 +237,8 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
   protected ResponseEntity<Object> handleObjectStateViolation(
       InvalidOperationException ex) {
     ApiError apiError = new ApiError(BAD_REQUEST);
-    apiError.setMessage("Invalid object state");
-    apiError.addStateError(ex.getObjectName(), ex.getMessage(), ex.getInvalidValue());
+    apiError.setMessage(ex.getMessage());
+    apiError.setDetail(ex.getDetail());
     return buildResponseEntity(apiError);
   }
 

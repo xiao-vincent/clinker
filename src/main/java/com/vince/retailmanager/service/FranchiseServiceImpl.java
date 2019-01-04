@@ -10,12 +10,11 @@ import com.vince.retailmanager.model.entity.IncomeStatement;
 import com.vince.retailmanager.model.entity.MarketingFee;
 import com.vince.retailmanager.model.entity.PercentageFee;
 import com.vince.retailmanager.model.entity.Royalty;
-import com.vince.retailmanager.repository.AccessTokensRepository;
 import com.vince.retailmanager.repository.CompanyRepository;
 import com.vince.retailmanager.repository.FranchiseeRepository;
 import com.vince.retailmanager.repository.FranchisorRepository;
 import com.vince.retailmanager.repository.PercentageFeeRepository;
-import com.vince.retailmanager.web.controller.utils.ControllerUtils;
+import com.vince.retailmanager.utils.ValidatorUtils;
 import com.vince.retailmanager.web.exception.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,7 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.validation.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -32,38 +30,25 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class FranchiseServiceImpl implements FranchiseService {
 
-  private UserService userService;
-  private FinancialService financialService;
-
-  private AccessTokensRepository accessTokensRepository;
   private CompanyRepository companyRepository;
   private FranchisorRepository franchisorRepository;
   private FranchiseeRepository franchiseeRepository;
   private PercentageFeeRepository percentageFeeRepository;
 
-  private Validator validator;
+  private ValidatorUtils validatorUtils;
 
   @Autowired
   public FranchiseServiceImpl(
-      UserService userService,
-      FinancialService financialService,
-
-      AccessTokensRepository accessTokensRepository,
       CompanyRepository companyRepository,
       FranchisorRepository franchisorRepository,
       FranchiseeRepository franchiseeRepository,
       PercentageFeeRepository percentageFeeRepository,
-      Validator validator
-  ) {
-    this.userService = userService;
-    this.financialService = financialService;
-
-    this.accessTokensRepository = accessTokensRepository;
+      ValidatorUtils validatorUtils) {
     this.companyRepository = companyRepository;
     this.franchisorRepository = franchisorRepository;
     this.franchiseeRepository = franchiseeRepository;
     this.percentageFeeRepository = percentageFeeRepository;
-    this.validator = validator;
+    this.validatorUtils = validatorUtils;
   }
 
 
@@ -127,13 +112,13 @@ public class FranchiseServiceImpl implements FranchiseService {
   public void disableFranchisor(Franchisor franchisor) throws InvalidOperationException {
     Set<Franchisee> franchisees = franchisor.getFranchisees();
     if (!franchisees.isEmpty()) {
-      throwObjectStateException(franchisor, franchisees);
+      throwActiveFranchiseesException(franchisor, franchisees);
       return;
     }
     disableCompany(franchisor);
   }
 
-  private void throwObjectStateException(Franchisor franchisor, Set<Franchisee> franchisees) {
+  private void throwActiveFranchiseesException(Franchisor franchisor, Set<Franchisee> franchisees) {
     Map<String, Set<Franchisee>> invalidValues = new HashMap<>();
     invalidValues.put("franchisees", franchisees);
     String franchisorClassName = franchisor.getClass().getSimpleName();
@@ -147,7 +132,6 @@ public class FranchiseServiceImpl implements FranchiseService {
 
     throw new InvalidOperationException(
         errorMsg,
-        franchisorClassName,
         invalidValues
     );
   }
@@ -156,8 +140,6 @@ public class FranchiseServiceImpl implements FranchiseService {
   @Override
   @Transactional
   public void disableCompany(Company company) {
-    //check if there are any franchisees dependendent on franchisor
-    //remove all access tokens associated with company /// but throw exception in constraint validator
     company.setEnabled(false);
     companyRepository.save(company);
   }
@@ -178,7 +160,7 @@ public class FranchiseServiceImpl implements FranchiseService {
   @Override
   @Transactional
   public PercentageFee savePercentageFee(PercentageFee percentageFee) {
-    ControllerUtils.validate(validator, percentageFee);
+    validatorUtils.validate(percentageFee);
     return percentageFeeRepository.save(percentageFee);
   }
 
@@ -202,7 +184,6 @@ public class FranchiseServiceImpl implements FranchiseService {
     if (franchisor == null) {
       return Collections.emptyList();
     }
-
     return percentageFeeRepository.findAllByFranchisorId(franchisor.getId());
   }
 }

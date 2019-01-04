@@ -4,8 +4,8 @@ import com.vince.retailmanager.model.IncomeStatementStatistics;
 import com.vince.retailmanager.model.utils.IncomeStatementUtils;
 import com.vince.retailmanager.service.FinancialService;
 import com.vince.retailmanager.web.controller.utils.ValidatorUtils;
-import java.time.YearMonth;
-import java.util.Set;
+import java.time.LocalDate;
+import java.util.Collection;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ public class IncomeStatementStatsValidator implements
       return true;
     }
 
-    boolean isValid = ValidatorUtils.applyValidators(incomeStatementStatistics, context,
+    boolean isValid = ValidatorUtils.isValid(incomeStatementStatistics, context,
         this::noMissingStatementsInDateRange
     );
 
@@ -42,7 +42,7 @@ public class IncomeStatementStatsValidator implements
   private boolean noMissingStatementsInDateRange(
       IncomeStatementStatistics incomeStatementStatistics,
       ConstraintValidatorContext context) {
-    Set<YearMonth> missingDates = IncomeStatementUtils.getMissingIncomeStatementDates(
+    Collection<LocalDate> missingDates = IncomeStatementUtils.getMissingIncomeStatementDates(
         incomeStatementStatistics.getCompany(),
         incomeStatementStatistics.getDateRange()
     );
@@ -53,7 +53,6 @@ public class IncomeStatementStatsValidator implements
           .addConstraintViolation();
       return false;
     }
-    System.out.println("hi");
     return true;
   }
 

@@ -1,8 +1,7 @@
 package com.vince.retailmanager.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.vince.retailmanager.model.View;
-import com.vince.retailmanager.web.controller.Franchisee.ValidFranchisee;
+import com.vince.retailmanager.web.controller.validator.ValidFranchisee;
 import java.math.BigDecimal;
 import java.util.StringJoiner;
 import javax.persistence.CascadeType;
@@ -31,16 +30,15 @@ public class Franchisee extends Company {
       CascadeType.REFRESH})
   @JoinColumn(name = "franchisor_id")
   @EqualsAndHashCode.Exclude
-  @JsonView(View.Franchisee.class)
+  @JsonView(Franchisee.class)
   @NotNull
   private Franchisor franchisor;
 
   @Override
-  @JsonView(View.Franchisee.class)
+  @JsonView(Franchisee.class)
   public BigDecimal getCashBalance() {
     return super.getCashBalance();
   }
-
 
   @Override
   public String toString() {

@@ -25,6 +25,7 @@ public class RetailManagerApplication implements WebMvcConfigurer {
   public void addFormatters(FormatterRegistry registry) {
     registry.addConverter(new YearMonthConverter());
     registry.addConverter(new DistributionTypeConverter());
+    registry.addConverter(new FeeTypeConverter());
 
 
   }

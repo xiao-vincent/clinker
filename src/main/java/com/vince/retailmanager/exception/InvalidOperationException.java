@@ -2,41 +2,26 @@ package com.vince.retailmanager.exception;
 
 public class InvalidOperationException extends IllegalStateException {
 
-  private final String objectName;
-  private final Object invalidValue;
+  private Object detail;
 
-  public InvalidOperationException(String objectName, Object invalidValue) {
-    super();
-    this.objectName = objectName;
-    this.invalidValue = invalidValue;
-  }
-
-  public InvalidOperationException(String message, Throwable cause, String objectName,
-      Object invalidValue) {
-    super(message, cause);
-    this.objectName = objectName;
-    this.invalidValue = invalidValue;
-  }
-
-  public InvalidOperationException(String message, String objectName, Object invalidValue) {
+  public InvalidOperationException(String message) {
     super(message);
-    this.objectName = objectName;
-    this.invalidValue = invalidValue;
   }
 
 
-  public InvalidOperationException(Throwable cause, String objectName, Object invalidValue) {
-    super(cause);
-    this.objectName = objectName;
-    this.invalidValue = invalidValue;
+  public InvalidOperationException(String message, Object detail) {
+    super(message);
+    this.detail = detail;
   }
 
-
-  public Object getInvalidValue() {
-    return invalidValue;
+  public InvalidOperationException(String message, Throwable cause,
+      Object detail) {
+    super(message, cause);
+    this.detail = detail;
   }
 
-  public String getObjectName() {
-    return objectName;
+  public Object getDetail() {
+    return detail;
   }
+
 }

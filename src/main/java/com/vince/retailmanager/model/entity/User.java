@@ -1,6 +1,8 @@
 package com.vince.retailmanager.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.vince.retailmanager.web.controller.validator.ValidUser;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -17,6 +19,7 @@ import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "users")
+@ValidUser
 public class User {
 
   @Id
@@ -28,6 +31,7 @@ public class User {
 
   @Column(name = "password")
   @Size(min = 8, max = 128)
+  @JsonIgnore
   @NotNull
   private String password;
 
@@ -37,14 +41,6 @@ public class User {
   @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.EAGER)
   private Set<Role> roles = new HashSet<>();
 
-  @OneToMany(cascade = {CascadeType.REFRESH, CascadeType.DETACH, CascadeType.MERGE,
-      CascadeType.REMOVE}, mappedBy = "user", fetch = FetchType.EAGER)
-  private Set<AccessToken> accessTokens = new HashSet<>();
-
-//    @OneToOne()
-//    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
-//    @JoinColumn(name = "franchisor_id")
-//    private Franchisor franchisor;
 
   public User() {
     //add default  role
@@ -90,11 +86,6 @@ public class User {
     return roles;
   }
 
-  public Set<AccessToken> getAccessTokens() {
-    return accessTokens;
-  }
-
-
   public void addRole(String roleName) {
     Role role = new Role();
     role.setUser(this);
@@ -102,18 +93,6 @@ public class User {
     this.roles.add(role);
   }
 
-  public void addAccessToken(Company company) {
-    AccessToken token = new AccessToken();
-    token.setUser(this);
-    token.setCompany(company);
-    this.accessTokens.add(token);
-  }
-
-  public void removeAccessToken(AccessToken accessToken) {
-    accessTokens.remove(accessToken);
-    accessToken.setUser(null);
-    accessToken.setCompany(null);
-  }
 
   @Override
   public String toString() {
@@ -122,7 +101,6 @@ public class User {
         .add("password='" + password + "'")
         .add("enabled=" + enabled)
         .add("roles=" + roles)
-        .add("accessTokens=" + accessTokens)
         .toString();
   }
 

@@ -1,7 +1,13 @@
 package com.vince.retailmanager.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.vince.retailmanager.YearMonthConverter;
 import com.vince.retailmanager.model.Validation;
+import com.vince.retailmanager.model.View.Public;
+import com.vince.retailmanager.model.View.Summary;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import javax.persistence.CascadeType;
@@ -23,11 +29,14 @@ import lombok.Setter;
 @Entity
 @Table(name = "income_statements", uniqueConstraints = @UniqueConstraint(columnNames = {"company",
     "date"}))
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+@JsonIdentityReference
 @Data
 @EqualsAndHashCode(callSuper = true, of = {"company", "date"})
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonView(Summary.class)
 public class IncomeStatement extends BaseEntity {
 
   @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
@@ -61,6 +70,7 @@ public class IncomeStatement extends BaseEntity {
   private BigDecimal netIncome;
 
   @NotNull(groups = {Validation.Entity.class})
+  @JsonView(Public.class)
   private LocalDate date;
 
   public BigDecimal getGrossProfit() {
@@ -108,17 +118,17 @@ public class IncomeStatement extends BaseEntity {
       return this;
     }
 
-    private void grossProfit(BigDecimal grossProfit) {
-      this.grossProfit = grossProfit;
-    }
-
-    private void operatingIncome(BigDecimal operatingIncome) {
-      this.operatingIncome = operatingIncome;
-    }
-
-    private void netIncome(BigDecimal netIncome) {
-      this.netIncome = netIncome;
-    }
+//    private void grossProfit(BigDecimal grossProfit) {
+//      this.grossProfit = grossProfit;
+//    }
+//
+//    private void operatingIncome(BigDecimal operatingIncome) {
+//      this.operatingIncome = operatingIncome;
+//    }
+//
+//    private void netIncome(BigDecimal netIncome) {
+//      this.netIncome = netIncome;
+//    }
   }
 
 

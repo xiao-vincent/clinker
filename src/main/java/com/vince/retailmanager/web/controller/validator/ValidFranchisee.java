@@ -1,4 +1,4 @@
-package com.vince.retailmanager.web.controller.Franchisee;
+package com.vince.retailmanager.web.controller.validator;
 
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.TYPE;

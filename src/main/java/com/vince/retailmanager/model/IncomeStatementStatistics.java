@@ -1,18 +1,21 @@
 package com.vince.retailmanager.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.vince.retailmanager.exception.InvalidOperationException;
+import com.vince.retailmanager.model.View.Summary;
 import com.vince.retailmanager.model.entity.Company;
 import com.vince.retailmanager.model.entity.IncomeStatement;
 import com.vince.retailmanager.model.utils.IncomeStatementUtils;
 import java.math.BigDecimal;
-import java.time.YearMonth;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.StringJoiner;
 import java.util.function.Function;
 import javax.validation.constraints.NotNull;
@@ -25,20 +28,27 @@ import lombok.ToString.Exclude;
 
 @Getter
 @ToString
+@JsonView(Summary.class)
 public class IncomeStatementStatistics {
 
   @JsonIgnore
   private final DateRange dateRange;
 
   @NotNull
+  @JsonIgnore
   private final Company company;
 
   @JsonIgnore
   @Exclude
   private Collection<IncomeStatement> incomeStatements;
 
-  //  private IncomeStatement aggregateIncomeStatement;
   private UnitStatistics sales;
+  private UnitStatistics costOfGoodsSold;
+  private UnitStatistics grossProfit;
+  private UnitStatistics operatingExpenses;
+  private UnitStatistics operatingIncome;
+  private UnitStatistics generalAndAdminExpenses;
+  private UnitStatistics netIncome;
 
 
   public static IncomeStatementStatistics create(Company company, DateRange dateRange) {
@@ -57,29 +67,23 @@ public class IncomeStatementStatistics {
     this.incomeStatements = IncomeStatementUtils
         .getSortedIncomeStatementsInDateRange(this.company, this.dateRange);
     this.sales = new UnitStatistics(IncomeStatement::getSales);
+    this.costOfGoodsSold = new UnitStatistics(IncomeStatement::getCostOfGoodsSold);
+    this.grossProfit = new UnitStatistics(IncomeStatement::getGrossProfit);
+    this.operatingExpenses = new UnitStatistics(IncomeStatement::getOperatingExpenses);
+    this.operatingIncome = new UnitStatistics(IncomeStatement::getOperatingIncome);
+    this.generalAndAdminExpenses = new UnitStatistics(IncomeStatement::getGeneralAndAdminExpenses);
+    this.netIncome = new UnitStatistics(IncomeStatement::getNetIncome);
   }
 
   private void checkMissingIncomeStatements() {
-    Set<YearMonth> missingDates = IncomeStatementUtils
+    Collection<LocalDate> missingDates = IncomeStatementUtils
         .getMissingIncomeStatementDates(this.company, this.dateRange);
     if (!missingDates.isEmpty()) {
       throw new InvalidOperationException(
-          "Missing income statements between " + dateRange
-              .getStartDate() + " and " + dateRange.getEndDate(),
-          IncomeStatementStatistics.class.getSimpleName(),
+          "Missing income statement dates in date range",
           Map.of("missingIncomeStatementDates", missingDates)
       );
     }
-  }
-
-  private IncomeStatement getIncomeStatementsTotals(Company company) {
-    return IncomeStatement.builder()
-        .company(company)
-        .sales(sum(IncomeStatement::getSales))
-        .costOfGoodsSold(sum(IncomeStatement::getCostOfGoodsSold))
-        .operatingExpenses(sum(IncomeStatement::getOperatingExpenses))
-        .generalAndAdminExpenses(sum(IncomeStatement::getGeneralAndAdminExpenses))
-        .build();
   }
 
   private Double sum(Function<IncomeStatement, BigDecimal> mapper) {
@@ -93,9 +97,11 @@ public class IncomeStatementStatistics {
 
   @Getter
   @ToString
+  @JsonView(Summary.class)
   class UnitStatistics {
 
     @Exclude
+    @JsonIgnore
     private List<Double> values = new ArrayList<>();
     private double total;
     private double average;
@@ -148,8 +154,10 @@ public class IncomeStatementStatistics {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @JsonView(Summary.class)
     class Entry {
 
+      @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
       @JsonIdentityReference(alwaysAsId = true)
       private IncomeStatement incomeStatement;
       private double value;

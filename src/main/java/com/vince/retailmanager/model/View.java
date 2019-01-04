@@ -10,11 +10,15 @@ public class View {
 
   }
 
-  public interface Franchisor extends Summary {
+  public interface Company extends Summary {
 
   }
 
-  public interface Franchisee extends Summary {
+  public interface Franchisor extends Company {
+
+  }
+
+  public interface Franchisee extends Company {
 
   }
 
@@ -23,6 +27,10 @@ public class View {
   }
 
   public interface Payment extends Summary {
+
+  }
+
+  public interface PercentageFee extends Summary {
 
   }
 

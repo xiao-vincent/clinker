@@ -1,7 +1,10 @@
 package com.vince.retailmanager.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.vince.retailmanager.model.View.Summary;
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -20,6 +23,8 @@ import lombok.EqualsAndHashCode;
 @Inheritance(strategy = InheritanceType.JOINED)
 @Data
 @EqualsAndHashCode(callSuper = true, of = {""})
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+@JsonIdentityReference
 public abstract class Company extends BaseEntity {
 
   @JsonIgnore
@@ -29,23 +34,16 @@ public abstract class Company extends BaseEntity {
   private String type = getClass().getSimpleName();
 
   @Column
+  @JsonView(Company.class)
   private BigDecimal cashBalance = BigDecimal.valueOf(0);
 
-//	@OneToMany(mappedBy = "recipient")
-//	@JsonIgnore
-//	private Set<Invoice> invoicesReceived = new HashSet<>();
-
-//	@OneToMany(mappedBy = "sender")
-//	@JsonIgnore
-//	private Set<Invoice> invoicesSent = new HashSet<>();
-
-  @OneToMany(mappedBy = "recipient")
-  @JsonIgnore
-  private Set<Payment> paymentsReceived = new HashSet<>();
-
-  @OneToMany(mappedBy = "sender")
-  @JsonIgnore
-  private Set<Payment> paymentsSent = new HashSet<>();
+//  @OneToMany(mappedBy = "recipient")
+//  @JsonIgnore
+//  private Set<Payment> paymentsReceived = new HashSet<>();
+//
+//  @OneToMany(mappedBy = "sender")
+//  @JsonIgnore
+//  private Set<Payment> paymentsSent = new HashSet<>();
 
   @OneToMany(mappedBy = "company")
   @JsonIgnore
@@ -61,15 +59,15 @@ public abstract class Company extends BaseEntity {
     invoice.setSender(this);
   }
 
-  public void addPaymentReceived(Payment payment) {
-    paymentsReceived.add(payment);
-    payment.setRecipient(this);
-  }
+//  public void addPaymentReceived(Payment payment) {
+////    paymentsReceived.add(payment);
+//    payment.setRecipient(this);
+//  }
 
-  public void addPaymentSent(Payment payment) {
-    paymentsSent.add(payment);
-    payment.setSender(this);
-  }
+//  public void addPaymentSent(Payment payment) {
+////    paymentsSent.add(payment);
+//    payment.setSender(this);
+//  }
 
 
   public void addIncomeStatement(IncomeStatement incomeStatement) {

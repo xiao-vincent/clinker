@@ -1,6 +1,8 @@
 package com.vince.retailmanager.web.exception;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.jsontype.impl.TypeIdResolverBase;
@@ -21,6 +23,7 @@ import org.springframework.validation.ObjectError;
 @JsonTypeName("api_error")
 @JsonTypeInfo(include = JsonTypeInfo.As.WRAPPER_OBJECT, use = JsonTypeInfo.Id.NAME, property =
     "error", visible = true)
+@JsonInclude(Include.NON_NULL)
 class ApiError {
 
   private HttpStatus status;
@@ -28,6 +31,7 @@ class ApiError {
   private LocalDateTime timestamp;
   private String message;
   private String debugMessage;
+  private Object detail;
   private List<ApiSubError> subErrors;
 
   private ApiError() {
@@ -60,7 +64,7 @@ class ApiError {
     subErrors.add(subError);
   }
 
-  private void addValidationError(String object, String field, Object rejectedValue,
+  public void addValidationError(String object, String field, Object rejectedValue,
       String message) {
     addSubError(new ApiValidationError(object, field, rejectedValue, message));
   }
@@ -94,9 +98,6 @@ class ApiError {
     globalErrors.forEach(this::addValidationError);
   }
 
-  void addStateError(String object, String message, Object details) {
-    addSubError(new ApiObjectStateError(object, message, details));
-  }
 
   /**
    * Utility method for adding error of ConstraintViolation. Usually when a @Validated validation
@@ -141,15 +142,12 @@ class ApiError {
   @Data
   @EqualsAndHashCode(callSuper = false)
   @AllArgsConstructor
-  class ApiObjectStateError extends ApiSubError {
+  public class ApiInvalidOperationError extends ApiError {
 
-    private String object;
-    private String message;
     private Object detail;
 
-    ApiObjectStateError(String object, String message) {
-      this.object = object;
-      this.message = message;
+    public ApiInvalidOperationError(HttpStatus status) {
+      super(status);
     }
   }
 

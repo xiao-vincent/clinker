@@ -40,7 +40,10 @@ public class AuthenticationAdapter extends WebSecurityConfigurerAdapter {
         .authorizeRequests()
         .antMatchers("/", "/login", "/mobile/login", "/api/auth/**", "/reservations/**").permitAll()
         .anyRequest().authenticated().and()
-        .httpBasic().and()
+        .formLogin().loginProcessingUrl("/login")
+        .and()
+        .httpBasic()
+        .and()
         .csrf().disable()
     ;
 

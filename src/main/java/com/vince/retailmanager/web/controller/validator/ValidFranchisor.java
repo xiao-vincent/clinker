@@ -1,4 +1,4 @@
-package com.vince.retailmanager.web.controller;
+package com.vince.retailmanager.web.controller.validator;
 
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.TYPE;
@@ -12,9 +12,9 @@ import javax.validation.Payload;
 
 @Target({TYPE, ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = PaymentValidator.class)
+@Constraint(validatedBy = FranchisorValidator.class)
 @Documented
-public @interface ValidPayment {
+public @interface ValidFranchisor {
 
   String message() default "";
 

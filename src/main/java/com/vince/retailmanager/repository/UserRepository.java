@@ -10,4 +10,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
   //    void save(User user) throws DataAccessException;
   Optional<User> findByUsername(String username);
+
+  boolean existsByUsernameIgnoreCase(String username);
 }

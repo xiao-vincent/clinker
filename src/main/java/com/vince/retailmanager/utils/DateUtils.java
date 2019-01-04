@@ -17,7 +17,6 @@ public class DateUtils {
   }
 
   public static Set<YearMonth> getInclusiveRange(DateRange dateRange) {
-
     LocalDate startDate = dateRange.getStartDate();
     LocalDate endDate = dateRange.getEndDate();
     int initCapacity = ((int) ChronoUnit.MONTHS.between(startDate, endDate)) + 1;
