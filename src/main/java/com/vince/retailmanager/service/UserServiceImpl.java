@@ -8,6 +8,7 @@ import com.vince.retailmanager.model.entity.User;
 import com.vince.retailmanager.repository.AccessTokensRepository;
 import com.vince.retailmanager.repository.UserRepository;
 import com.vince.retailmanager.utils.ValidatorUtils;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,11 +25,10 @@ public class UserServiceImpl implements UserService {
 
   @Override
   @Transactional
-  public void saveUser(User user) throws InvalidOperationException {
+  public void saveUser(User user) {
     if (user.getRoles() == null || user.getRoles().isEmpty()) {
       throw new InvalidOperationException("User must have at least one role set");
     }
-
     for (Role role : user.getRoles()) {
       if (!role.getName().startsWith("ROLE_")) {
         role.setName("ROLE_" + role.getName());
@@ -37,7 +37,6 @@ public class UserServiceImpl implements UserService {
         role.setUser(user);
       }
     }
-
     validatorUtils.validate(user);
     userRepository.save(user);
 
@@ -61,15 +60,16 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public AccessToken findAccessToken(int companyId) {
-    return accessTokensRepository.findByCompanyId(companyId).orElse(null);
-  }
-
-  @Override
   public AccessToken findAccessToken(String username, int companyId) {
-    return accessTokensRepository.findByUser_UsernameAndCompany_Id(username, companyId)
+    return accessTokensRepository.findByUserUsernameAndCompanyId(username, companyId)
         .orElse(null);
   }
 
+
+  @Override
+  public AccessToken findAccessToken(String username, Set<Company> companies) {
+    return accessTokensRepository.findFirstByUserUsernameAndCompanyIn(username, companies)
+        .orElse(null);
+  }
 }
 

@@ -5,7 +5,6 @@ import com.vince.retailmanager.model.View;
 import com.vince.retailmanager.model.entity.Franchisee;
 import com.vince.retailmanager.model.entity.Franchisor;
 import com.vince.retailmanager.model.entity.IncomeStatement;
-import com.vince.retailmanager.model.entity.Invoice;
 import com.vince.retailmanager.model.entity.PercentageFee;
 import com.vince.retailmanager.model.entity.PercentageFee.FeeType;
 import com.vince.retailmanager.service.FinancialService;
@@ -13,20 +12,18 @@ import com.vince.retailmanager.service.FranchiseService;
 import com.vince.retailmanager.service.TransactionService;
 import com.vince.retailmanager.service.UserService;
 import com.vince.retailmanager.utils.ValidatorUtils;
+import com.vince.retailmanager.web.controller.constants.ModelValue;
 import com.vince.retailmanager.web.controller.utils.ControllerUtils;
 import com.vince.retailmanager.web.exception.EntityNotFoundException;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,7 +48,6 @@ public class FranchisorController {
   public FinancialService financialService;
   @Autowired
   private FranchiseService franchiseService;
-
   @Autowired
   public ControllerUtils controllerUtils;
   @Autowired
@@ -60,18 +56,14 @@ public class FranchisorController {
   @ModelAttribute
   public void populateModel(
       Model model,
-      @AuthenticationPrincipal org.springframework.security.core.userdetails.User authenticatedUser,
       @PathVariable(value = "franchisorId", required = false) Integer franchisorId,
       @PathVariable(value = "franchiseeId", required = false) Integer franchiseeId,
       @PathVariable(value = "incomeStatementId", required = false) Integer incomeStatementId
   ) throws EntityNotFoundException {
-    if (franchisorId != null) {
-      ControllerUtils.addActiveUsername(model, authenticatedUser, franchisorId, userService);
-      controllerUtils.addUsername(model, authenticatedUser, franchisorId, userService);
-    }
-    controllerUtils.addFranchisorToModel(model, franchisorId);
-    controllerUtils.addFranchiseeToModel(model, franchiseeId);
-    controllerUtils.addIncomeStatementToModel(model, incomeStatementId);
+    controllerUtils.setModel(model);
+    controllerUtils.addFranchisor(franchisorId);
+    controllerUtils.addFranchisee(franchiseeId);
+    controllerUtils.addIncomeStatement(incomeStatementId);
   }
 
   @GetMapping("/{franchisorId}")
@@ -83,116 +75,89 @@ public class FranchisorController {
   @PostMapping("/new")
   @JsonView(View.Franchisor.class)
   public ResponseEntity<Franchisor> createFranchisor(
-      @Valid @RequestBody Franchisor franchisor
+      @Valid @RequestBody Franchisor franchisor,
+      @AuthenticationPrincipal org.springframework.security.core.userdetails.User authenticatedUser
   ) {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String currentPrincipalName = authentication.getName();
     franchisor = franchiseService.saveFranchisor(franchisor);
-    userService.addAccessToken(currentPrincipalName, franchisor);
+    userService.addAccessToken(authenticatedUser.getUsername(), franchisor);
     return new ResponseEntity<>(franchisor, HttpStatus.CREATED);
   }
 
   @PutMapping("/{franchisorId}")
-  @PreAuthorize("authentication.name == #activeUsername")
+  @PreAuthorize("@controllerUtils.isAuthorized(#franchisor)")
   @JsonView(View.Summary.class)
   public ResponseEntity<Franchisor> updateCompany(
       Franchisor franchisor,
-      @RequestBody Franchisor updatedFranchisor,
-      @ModelAttribute("activeUsername") String activeUsername
+      @RequestBody Franchisor updatedFranchisor
   ) {
     franchisor.setName(updatedFranchisor.getName());
     franchisor.setDescription(updatedFranchisor.getDescription());
     franchisor.setWebsite(updatedFranchisor.getWebsite());
-
-    franchiseService.saveCompany(franchisor);
     validatorUtils.validate(franchisor);
+    franchiseService.saveCompany(franchisor);
     return new ResponseEntity<>(franchisor, HttpStatus.OK);
   }
 
   @PostMapping("/{franchisorId}/franchisees/new")
-  @PreAuthorize("@controllerUtils.hasAccessTo(#franchisor)")
+  @PreAuthorize("#controllerUtils.isAuthorized(#franchisor)")
   @JsonView(View.Summary.class)
   public ResponseEntity<Franchisee> createFranchisee(
       Franchisor franchisor,
-      @RequestBody Franchisee franchisee
+      @RequestBody Franchisee franchisee,
+      @AuthenticationPrincipal org.springframework.security.core.userdetails.User authenticatedUser
   ) {
     franchisor.addFranchisee(franchisee);
     validatorUtils.validate(franchisee);
-    this.franchiseService.saveFranchisee(franchisee);
+    franchisee = this.franchiseService.saveFranchisee(franchisee);
+    userService.addAccessToken(authenticatedUser.getUsername(), franchisee);
     return new ResponseEntity<>(franchisee, HttpStatus.CREATED);
   }
 
   @GetMapping("/{franchisorId}/franchisees")
+  @PreAuthorize("#controllerUtils.isAuthorized(#franchisor)")
   @JsonView(View.Public.class)
   public ResponseEntity<Collection<Franchisee>> getFranchisees(Franchisor franchisor) {
     return new ResponseEntity<>(franchisor.getFranchisees(), HttpStatus.OK);
   }
 
   @DeleteMapping("/{franchisorId}")
-  @PreAuthorize("authentication.name == #activeUsername")
+  @PreAuthorize("#controllerUtils.isAuthorized(#franchisor)")
   public ResponseEntity<Void> deleteFranchisor(Franchisor franchisor) throws Exception {
     franchiseService.disableFranchisor(franchisor);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
-  @PostMapping("/{franchisorId}/franchisees/{franchiseeId}/request-payment")
-  @JsonView(View.Invoice.class)
-  public ResponseEntity<Invoice> requestPaymentFromFranchisee(
-      Franchisor franchisor,
-      Franchisee franchisee,
-      @RequestBody Map<String, Object> body
-  ) {
-    double due = (double) body.get("due");
-    Invoice invoice = Invoice.builder()
-        .sender(franchisor)
-        .recipient(franchisee)
-        .due(due)
-        .description("requesting royalty payment")
-        .build();
-    validatorUtils.validate(invoice);
-    transactionService.saveInvoice(invoice);
-    return new ResponseEntity<>(invoice, HttpStatus.OK);
-  }
-
-  //	Auth: franchisees.getIncomeStatements . contains incomeStatement
   @PostMapping("/{franchisorId}/franchisees/{franchiseeId}/request-fees/financials/{incomeStatementId}")
+  @PreAuthorize("#controllerUtils.isAuthorized(#franchisor)")
   @JsonView(View.Summary.class)
   public ResponseEntity<Collection<PercentageFee>> requestMonthlyFranchiseFees(
       Franchisor franchisor,
-      Franchisee franchisee,
       IncomeStatement incomeStatement
   ) {
     List<PercentageFee> fees = franchiseService.createMonthlyFranchiseFees(incomeStatement);
     return new ResponseEntity<>(fees, HttpStatus.OK);
   }
 
-  // get fees payments
   @GetMapping("{franchisorId}/fees")
+  @PreAuthorize("#controllerUtils.isAuthorized(#franchisor)")
   @JsonView(View.Summary.class)
   public ResponseEntity<Collection<PercentageFee>> getFees(
       Franchisor franchisor,
-      @RequestParam(name = "fee-type", required = false) FeeType type,
-      //see if we can refactor fullyPaid
-      @RequestParam(required = false, name = "fully-paid") final Boolean isFullyPaid
+      @RequestParam(name = "fee-type", required = false) final FeeType type,
+      @RequestParam(required = false, name = ModelValue.FULLY_PAID) final Boolean isFullyPaid
   ) {
-    List<PercentageFee> fees = franchiseService.getPercentageFees(franchisor);
-    fees = isFullyPaid == null ? fees : filterPercentageFeesByFullyPaid(fees, isFullyPaid);
-    if (type != null) {
-      fees = fees.stream()
-          .filter(percentageFee -> percentageFee.getFeeType().equalsIgnoreCase(type.toString()))
-          .collect(
-              Collectors.toList());
-    }
+    Collection<PercentageFee> fees = franchiseService.getPercentageFees(franchisor, type);
+    fees = isFullyPaid == null ? fees
+        : filterPercentageFeesByFullyPaid(fees, isFullyPaid);
     return new ResponseEntity<>(fees, HttpStatus.OK);
-
-
   }
 
-  private List<PercentageFee> filterPercentageFeesByFullyPaid(List<PercentageFee> fees,
+  private Collection<PercentageFee> filterPercentageFeesByFullyPaid(Collection<PercentageFee> fees,
       boolean isFullyPaid) {
     fees = fees.stream()
         .filter(fee -> fee.getInvoice().isFullyPaid() == isFullyPaid)
-        .collect(Collectors.toList());
+        .collect(Collectors.toSet());
     return fees;
   }
+
 }

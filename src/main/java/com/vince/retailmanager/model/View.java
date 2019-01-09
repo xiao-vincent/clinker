@@ -34,5 +34,7 @@ public class View {
 
   }
 
+  public interface Financials extends Summary {
 
+  }
 }

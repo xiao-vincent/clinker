@@ -6,6 +6,7 @@ import com.vince.retailmanager.model.entity.Franchisor;
 import com.vince.retailmanager.model.entity.IncomeStatement;
 import com.vince.retailmanager.model.entity.MarketingFee;
 import com.vince.retailmanager.model.entity.PercentageFee;
+import com.vince.retailmanager.model.entity.PercentageFee.FeeType;
 import com.vince.retailmanager.model.entity.Royalty;
 import com.vince.retailmanager.web.exception.EntityNotFoundException;
 import java.util.List;
@@ -16,7 +17,7 @@ public interface FranchiseService {
 
   Franchisor saveFranchisor(Franchisor franchisor);
 
-  void saveFranchisee(Franchisee franchisee);
+  Franchisee saveFranchisee(Franchisee franchisee);
 
   Company saveCompany(Company company);
 
@@ -42,6 +43,7 @@ public interface FranchiseService {
   @Transactional
   List<PercentageFee> createMonthlyFranchiseFees(IncomeStatement incomeStatement);
 
+
   @Transactional
-  List<PercentageFee> getPercentageFees(Franchisor franchisor);
+  List<PercentageFee> getPercentageFees(Franchisor franchisor, FeeType type);
 }

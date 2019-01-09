@@ -3,7 +3,6 @@ package com.vince.retailmanager.web.controller;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.vince.retailmanager.model.View;
 import com.vince.retailmanager.model.entity.Franchisee;
-import com.vince.retailmanager.service.FranchiseService;
 import com.vince.retailmanager.service.UserService;
 import com.vince.retailmanager.web.controller.utils.ControllerUtils;
 import com.vince.retailmanager.web.exception.EntityNotFoundException;
@@ -25,8 +24,6 @@ public class FranchiseeController {
   @Autowired
   public UserService userService;
   @Autowired
-  private FranchiseService franchiseService;
-  @Autowired
   private ControllerUtils controllerUtils;
 
   @ModelAttribute
@@ -36,13 +33,9 @@ public class FranchiseeController {
       @PathVariable("franchisorId") Integer franchisorId,
       @PathVariable("franchiseeId") Integer franchiseeId
   ) throws EntityNotFoundException {
-    if (franchisorId == null || franchiseeId == null) {
-      return;
-    }
-    ControllerUtils.addActiveUsername(model, authenticatedUser, franchiseeId, userService);
-
-    model.addAttribute("franchisor", franchiseService.findFranchisorById(franchisorId));
-    model.addAttribute("franchisee", franchiseService.findFranchiseeById(franchiseeId));
+    controllerUtils.setModel(model);
+    controllerUtils.addFranchisor(franchisorId);
+    controllerUtils.addFranchisee(franchiseeId);
   }
 
   @GetMapping

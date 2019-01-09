@@ -11,23 +11,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class MarketingFee extends PercentageFee {
 
-  public static MarketingFee create(IncomeStatement incomeStatement) {
-    MarketingFee marketingFee = new MarketingFee();
-    marketingFee.setAttributes(incomeStatement);
-    marketingFee.setDescription("marketing fee");
-    marketingFee.setFeePercent(marketingFee.getFranchisor().getMarketingFeePercent());
-
-    marketingFee.init();
-    return marketingFee;
+  private MarketingFee(String description, IncomeStatement incomeStatement) {
+    super(description, incomeStatement);
   }
 
-//	@Override
-//	public String getDescription() {
-//		return "marketing fee";
-//	}
-//
-//	@Override
-//	public double getFeePercent() {
-//		return getFranchisor().getMarketingFeePercent();
-//	}
+  public static MarketingFee create(IncomeStatement incomeStatement) {
+    return new MarketingFee("marketing fee", incomeStatement);
+  }
 }
+

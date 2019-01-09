@@ -16,7 +16,6 @@ public class ValidatorUtils {
   public void validate(Object object,
       Class<?>... groups) {
     Set<ConstraintViolation<Object>> violations = validator.validate(object, groups);
-    System.out.println(violations);
     if (!violations.isEmpty()) {
       throw new ConstraintViolationException(violations);
     }

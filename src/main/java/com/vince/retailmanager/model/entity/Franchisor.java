@@ -6,16 +6,16 @@ import com.vince.retailmanager.model.View;
 import com.vince.retailmanager.model.View.Public;
 import com.vince.retailmanager.model.View.Summary;
 import com.vince.retailmanager.web.controller.validator.ValidFranchisor;
-import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,24 +35,26 @@ public class Franchisor extends Company {
 
   @Column(unique = true)
   @NotNull
+  @Size(min = 3, max = 35)
   @JsonView(Public.class)
   private String name;
 
   @Column(unique = true)
   @NotNull
+  @Size(min = 2)
   @JsonView(Public.class)
   private String website;
 
   @NotNull
+  @Size(min = 3, max = 280)
   @JsonView(Summary.class)
   private String description;
 
-  @OneToMany(mappedBy = "franchisor", fetch = FetchType.EAGER)
-//  @JsonIgnoreProperties(value = {"franchisor"})
+  @OneToMany(mappedBy = "franchisor", cascade = {CascadeType.PERSIST, CascadeType.MERGE,
+      CascadeType.REFRESH, CascadeType.DETACH})
   @JsonIgnore
   @Builder.Default
   private Set<Franchisee> franchisees = new HashSet<>();
-
 
   @NotNull
   @Min(0)
@@ -80,29 +82,14 @@ public class Franchisor extends Company {
   @JsonView(View.Franchisor.class)
   private int feeFrequency = 12; //per year
 
-//	@OneToMany(mappedBy = "franchisor")
-//	@JsonIgnoreProperties(value = {"franchisor"})
-//	@Builder.Default
-//	@JsonIgnore
-//	@ToString.Exclude
-//	private Set<PercentageFee> feesSent = new HashSet<>();
-
   public void addFranchisee(Franchisee franchisee) {
-//		if (franchisees == null) franchisees = new HashSet<>();
     franchisees.add(franchisee);
     franchisee.setFranchisor(this);
   }
 
-  @Override
-  @JsonView(View.Franchisor.class)
-  public BigDecimal getCashBalance() {
-    return super.getCashBalance();
-  }
-
-//	protected Set<Franchisee> getFranchiseesInternal() {
-//		if (this.franchisees == null) {
-//			this.franchisees = new HashSet<>();
-//		}
-//		return this.franchisees;
-//	}
+//  @Override
+//  @JsonView(View.Franchisor.class)
+//  public BigDecimal getCashBalance() {
+//    return super.getCashBalance();
+//  }
 }

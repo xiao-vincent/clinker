@@ -1,98 +1,110 @@
 package com.vince.retailmanager.web.controller.utils;
 
+import com.vince.retailmanager.model.DateRange;
 import com.vince.retailmanager.model.entity.AccessToken;
 import com.vince.retailmanager.model.entity.Company;
+import com.vince.retailmanager.model.entity.Franchisee;
+import com.vince.retailmanager.model.entity.Franchisor;
 import com.vince.retailmanager.service.FinancialService;
 import com.vince.retailmanager.service.FranchiseService;
+import com.vince.retailmanager.service.TransactionService;
 import com.vince.retailmanager.service.UserService;
 import com.vince.retailmanager.web.exception.EntityNotFoundException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import java.time.LocalDate;
+import java.util.Set;
+import lombok.Setter;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 
 @Component
 public class ControllerUtils {
 
+  @Setter
+  private Model model;
+
   private FranchiseService franchiseService;
   private FinancialService financialService;
   private UserService userService;
-  private String activeUsername;
+  private TransactionService transactionService;
 
   public ControllerUtils(FranchiseService franchiseService,
-      FinancialService financialService, UserService userService) {
+      FinancialService financialService, UserService userService,
+      TransactionService transactionService) {
     this.franchiseService = franchiseService;
     this.financialService = financialService;
     this.userService = userService;
+    this.transactionService = transactionService;
   }
 
-  public static void addActiveUsername(
-      Model model,
-      @AuthenticationPrincipal User authenticatedUser,
-      Integer id,
-      UserService userService
-  ) {
-    String authenticatedUsername = authenticatedUser.getUsername();
-    AccessToken accessToken = userService.findAccessToken(authenticatedUsername, id);
-    if (accessToken != null) {
-      model.addAttribute("activeUsername", accessToken.getUser().getUsername());
+
+  public void addCompany(Integer companyId) throws EntityNotFoundException {
+    if (companyId != null) {
+      model.addAttribute("company", franchiseService.findCompanyById(companyId));
     }
   }
 
-  public boolean hasAccessTo(
-      Company company
-  ) {
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    AccessToken accessToken = userService
-        .findAccessToken(auth.getName(), company.getId());
+  public void addDateRange(Model model,
+      LocalDate startDate,
+      LocalDate endDate) {
+    DateRange dateRange = new DateRange(startDate, endDate);
+    model.addAttribute("dateRange", dateRange);
+  }
+
+  public void addPayment(Integer paymentId) throws EntityNotFoundException {
+    if (paymentId != null) {
+      model.addAttribute("payment", transactionService.findPaymentById(paymentId));
+    }
+  }
+
+  public void addInvoice(Integer invoiceId) throws EntityNotFoundException {
+    if (invoiceId != null) {
+      model.addAttribute("invoice", transactionService.findInvoiceById(invoiceId));
+    }
+  }
+
+//  public void addAuthenticatedUsername(User authenticatedUser) {
+//    if (authenticatedUser == null) {
+//      return;
+//    }
+//    this.model.addAttribute(ModelValue.AUTH_USERNAME, authenticatedUser.getUsername());
+//  }
+
+  public boolean isAuthorized(Company... companies) {
+    String username = SecurityContextHolder.getContext().getAuthentication().getName();
+    AccessToken accessToken = userService.findAccessToken(username, Set.of(companies));
     return accessToken != null;
   }
 
-  public void addUser(Model model) {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String username = authentication.getName();
-    com.vince.retailmanager.model.entity.User user = userService.findUser(username);
-    model.addAttribute("user", user);
-  }
-
-  public void addUsername(
-      Model model,
-      @AuthenticationPrincipal User authenticatedUser,
-      Integer id,
-      UserService userService
-  ) {
-    String authenticatedUsername = authenticatedUser.getUsername();
-    AccessToken accessToken = userService.findAccessToken(authenticatedUsername, id);
-    if (accessToken != null) {
-//      model.addAttribute("activeUsername", accessToken.getUser().getUsername());
-      this.activeUsername = accessToken.getUser().getUsername();
+  //if company is a franchisee, authorizes its franchisor
+  //or just authorizes the company
+  public boolean isAuthorizedInFranchise(Company company) {
+    try {
+      Franchisee franchisee = (Franchisee) company;
+      Franchisor franchisor = franchisee.getFranchisor();
+      return this.isAuthorized(franchisor, franchisee);
+    } catch (ClassCastException e) {
+      return this.isAuthorized(company);
     }
+
   }
 
 
-  public boolean fakeFunc() {
-    System.out.println("hello");
-    return true;
-  }
-
-
-  public void addFranchiseeToModel(Model model, Integer franchiseeId)
+  public void addFranchisee(Integer franchiseeId)
       throws EntityNotFoundException {
     if (franchiseeId != null) {
       model.addAttribute("franchisee", franchiseService.findFranchiseeById(franchiseeId));
     }
   }
 
-  public void addFranchisorToModel(Model model, Integer franchisorId)
+  public void addFranchisor(Integer franchisorId)
       throws EntityNotFoundException {
     if (franchisorId != null) {
       model.addAttribute("franchisor", franchiseService.findFranchisorById(franchisorId));
     }
   }
 
-  public void addIncomeStatementToModel(Model model, Integer incomeStatementId)
+  public void addIncomeStatement(Integer incomeStatementId)
       throws EntityNotFoundException {
     if (incomeStatementId != null) {
       model.addAttribute("incomeStatement",

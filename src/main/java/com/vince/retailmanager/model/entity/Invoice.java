@@ -14,7 +14,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -33,7 +33,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Invoice extends BaseEntity {
 
-  @DecimalMin("0.00")
+  @Min(0)
   @JsonView(Summary.class)
   private BigDecimal due;
 
@@ -67,27 +67,25 @@ public class Invoice extends BaseEntity {
   private Set<Payment> payments = new HashSet<>();
 
   public BigDecimal getBalance() {
-    BigDecimal total = payments.stream()
-        .filter(payment -> payment.getRefundedPayment() == null)
-        .map(Payment::getAmount)
-        .reduce(BigDecimal.ZERO, BigDecimal::add);
+    BigDecimal total = BigDecimal.ZERO;
+    for (Payment payment : payments) {
+      if (payment.getRefundedPayment() != null) {
+        total = total.subtract(payment.getAmount());
+      } else {
+        total = total.add(payment.getAmount());
+      }
+    }
     return due.subtract(total);
   }
-
 
   public boolean isFullyPaid() {
     return this.getBalance().compareTo(BigDecimal.ZERO) <= 0;
   }
 
-
   public static class ObjectBuilder {
 
     public ObjectBuilder due(Double amountDue) {
       this.due = BigDecimal.valueOf(amountDue);
-      return this;
-    }
-
-    private ObjectBuilder balance() {
       return this;
     }
   }

@@ -6,10 +6,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,19 +21,11 @@ public class UserController {
   private UserService userService;
 
   @PostMapping
-//  @PreAuthorize("hasRole('ROLE_ADMIN')")
   public ResponseEntity<User> addUser(@RequestBody @Valid User user)
       throws Exception {
     this.userService.saveUser(user);
     user.setPassword("");
     return new ResponseEntity<>(user, HttpStatus.CREATED);
-  }
-
-  @GetMapping("/test")
-  public String getAuthenticationInfo() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    System.out.println(authentication);
-    return authentication.toString();
   }
 
 }

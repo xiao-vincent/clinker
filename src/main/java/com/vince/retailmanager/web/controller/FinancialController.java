@@ -26,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,7 +40,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/financials/{companyId}")
+@RequestMapping("/financial/{companyId}")
 public class FinancialController {
 
   @Autowired
@@ -59,42 +59,32 @@ public class FinancialController {
   @ModelAttribute
   public void populateModel(
       Model model,
-      @AuthenticationPrincipal org.springframework.security.core.userdetails.User authenticatedUser,
       @PathVariable("companyId") Integer companyId,
       @PathVariable(value = "incomeStatementId", required = false) Integer incomeStatementId
   ) throws EntityNotFoundException {
-    ControllerUtils.addActiveUsername(model, authenticatedUser, companyId, userService);
-
-    addCompany(model, companyId);
-    addIncomeStatement(model, incomeStatementId);
+    controllerUtils.setModel(model);
+    controllerUtils.addCompany(companyId);
+    controllerUtils.addIncomeStatement(incomeStatementId);
   }
+
 
   @ModelAttribute("/income-statements")
-  public void populateModel_IncomeStatements(
+  public void populateModelIncomeStatements(
       Model model,
       @RequestParam(required = false) @DateTimeFormat(pattern = Date.DATE_FORMAT) LocalDate startDate,
-      @RequestParam(required = false) @DateTimeFormat(pattern = Date.DATE_FORMAT) LocalDate endDate
-  ) {
-    DateRange dateRange = new DateRange(startDate, endDate);
-    model.addAttribute("dateRange", dateRange);
+      @RequestParam(required = false) @DateTimeFormat(pattern = Date.DATE_FORMAT) LocalDate endDate) {
+    controllerUtils.addDateRange(model, startDate, endDate);
   }
 
-  private void addCompany(Model model,
-      Integer companyId) throws EntityNotFoundException {
-    if (companyId != null) {
-      model.addAttribute("company", franchiseService.findCompanyById(companyId));
-    }
-  }
-
-  private void addIncomeStatement(Model model, Integer incomeStatementId)
-      throws EntityNotFoundException {
-    if (incomeStatementId != null) {
-      model.addAttribute("incomeStatement",
-          financialService.findIncomeStatementById(incomeStatementId));
-    }
+  @GetMapping("/info")
+  @JsonView(View.Financials.class)
+  @PreAuthorize("@controllerUtils.isAuthorized(#company)")
+  public ResponseEntity<Company> getFinancials(Company company) {
+    return new ResponseEntity<>(company, HttpStatus.OK);
   }
 
   @GetMapping("/income-statements/{incomeStatementId}")
+  @PreAuthorize("@controllerUtils.isAuthorizedInFranchise(#company)")
   @JsonView(View.Summary.class)
   public ResponseEntity<IncomeStatement> getIncomeStatement(Company company,
       IncomeStatement incomeStatement) {
@@ -102,11 +92,12 @@ public class FinancialController {
   }
 
   @PutMapping("/income-statements/{incomeStatementId}")
+  @PreAuthorize("@controllerUtils.isAuthorized(#company)")
   @JsonView(View.Summary.class)
   public ResponseEntity<IncomeStatement> updateIncomeStatement(
+      Company company,
       IncomeStatement incomeStatement,
-      @RequestBody @Validated IncomeStatement update,
-      @ModelAttribute("activeUsername") String activeUsername
+      @RequestBody @Validated IncomeStatement update
   ) {
     incomeStatement.setSales(update.getSales());
     incomeStatement.setCostOfGoodsSold(update.getCostOfGoodsSold());
@@ -118,6 +109,7 @@ public class FinancialController {
   }
 
   @PostMapping("/income-statements/new")
+  @PreAuthorize("@controllerUtils.isAuthorized(#company)")
   @JsonView(View.Summary.class)
   public ResponseEntity<IncomeStatement> createIncomeStatement(
       Company company,
@@ -127,7 +119,6 @@ public class FinancialController {
     incomeStatement.setDate(date);
     validatorUtils.validate(incomeStatement, Validation.Entity.class);
     incomeStatement = financialService.saveIncomeStatement(incomeStatement);
-
     if (incomeStatement.getCompany() instanceof Franchisee) {
       franchiseService.createMonthlyFranchiseFees(incomeStatement);
     }
@@ -135,6 +126,7 @@ public class FinancialController {
   }
 
   @GetMapping("/income-statements")
+  @PreAuthorize("@controllerUtils.isAuthorizedInFranchise(#company)")
   @JsonView(Public.class)
   public ResponseEntity<Collection<IncomeStatement>> getIncomeStatements(
       Company company,
@@ -146,6 +138,7 @@ public class FinancialController {
   }
 
   @PostMapping("/income-statements/missing")
+  @PreAuthorize("@controllerUtils.isAuthorizedInFranchise(#company)")
   public ResponseEntity<Collection<LocalDate>> getMissingIncomeStatementDates(
       Company company,
       DateRange dateRange
@@ -157,6 +150,7 @@ public class FinancialController {
 
 
   @GetMapping("/income-statements/statistics")
+  @PreAuthorize("@controllerUtils.isAuthorizedInFranchise(#company)")
   @JsonView(Summary.class)
   public ResponseEntity<IncomeStatementStatistics> getIncomeStatementStats(
       Company company,
@@ -167,4 +161,6 @@ public class FinancialController {
     return new ResponseEntity<>(stats, HttpStatus.OK);
   }
 
+
 }
+

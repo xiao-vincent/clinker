@@ -10,30 +10,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Royalty extends PercentageFee {
 
-//	private Royalty(IncomeStatement incomeStatement) {
-//		super(incomeStatement);
-//	}
-
-  public static Royalty create(IncomeStatement incomeStatement) {
-    Royalty royalty = new Royalty();
-    royalty.setAttributes(incomeStatement);
-    royalty.setDescription("royalty fee");
-    royalty.setFeePercent(royalty.getFranchisor().getRoyaltyFeePercent());
-
-    royalty.init();
-    return royalty;
+  private Royalty(String description, IncomeStatement incomeStatement) {
+    super(description, incomeStatement);
   }
 
-//	private void init() {
-//		this.setDefaultInvoice();
-//	}
-//	@Override
-//	public String getDescription() {
-//		return "royalty fee";
-//	}
-
-//	@Override
-//	public double getFeePercent() {
-//		return getFranchisor().getRoyaltyFeePercent();
-//	}
+  public static Royalty create(IncomeStatement incomeStatement) {
+    return new Royalty("royalty fee", incomeStatement);
+  }
 }

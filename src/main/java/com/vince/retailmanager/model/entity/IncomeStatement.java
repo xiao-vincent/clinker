@@ -10,13 +10,13 @@ import com.vince.retailmanager.model.View.Public;
 import com.vince.retailmanager.model.View.Summary;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -33,22 +33,23 @@ import lombok.Setter;
 @JsonIdentityReference
 @Data
 @EqualsAndHashCode(callSuper = true, of = {"company", "date"})
-@Builder
+@Builder(builderClassName = "ObjectBuilder")
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonView(Summary.class)
 public class IncomeStatement extends BaseEntity {
 
-  @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
-      CascadeType.REFRESH})
+  @ManyToOne
   @JoinColumn(name = "company")
   @NotNull(groups = {Validation.Entity.class})
   private Company company;
 
   @NotNull
+  @Min(0)
   private BigDecimal sales;
 
   @NotNull
+  @Min(0)
   private BigDecimal costOfGoodsSold;
 
   @Transient
@@ -56,6 +57,7 @@ public class IncomeStatement extends BaseEntity {
   private BigDecimal grossProfit;
 
   @NotNull
+  @Min(0)
   private BigDecimal operatingExpenses;
 
   @Transient
@@ -63,6 +65,7 @@ public class IncomeStatement extends BaseEntity {
   private BigDecimal operatingIncome;
 
   @NotNull
+  @Min(0)
   private BigDecimal generalAndAdminExpenses;
 
   @Transient
@@ -85,50 +88,35 @@ public class IncomeStatement extends BaseEntity {
     return getOperatingIncome().subtract(generalAndAdminExpenses);
   }
 
-  public void setDate(int year,
-      int month) {
-    this.date = YearMonthConverter.createEndOfMonthDate(year, month);
-  }
 
-  public static class IncomeStatementBuilder {
+  public static class ObjectBuilder {
 
-    public IncomeStatementBuilder sales(Double amt) {
+    public ObjectBuilder sales(Double amt) {
       this.sales = BigDecimal.valueOf(amt);
       return this;
     }
 
-    public IncomeStatementBuilder costOfGoodsSold(Double amt) {
+    public ObjectBuilder costOfGoodsSold(Double amt) {
       this.costOfGoodsSold = BigDecimal.valueOf(amt);
       return this;
     }
 
-    public IncomeStatementBuilder operatingExpenses(Double amt) {
+    public ObjectBuilder operatingExpenses(Double amt) {
       this.operatingExpenses = BigDecimal.valueOf(amt);
       return this;
     }
 
-    public IncomeStatementBuilder generalAndAdminExpenses(Double amt) {
+    public ObjectBuilder generalAndAdminExpenses(Double amt) {
       this.generalAndAdminExpenses = BigDecimal.valueOf(amt);
       return this;
     }
 
-    public IncomeStatementBuilder date(int year,
+    public ObjectBuilder date(int year,
         int month) {
       this.date = YearMonthConverter.createEndOfMonthDate(year, month);
       return this;
     }
 
-//    private void grossProfit(BigDecimal grossProfit) {
-//      this.grossProfit = grossProfit;
-//    }
-//
-//    private void operatingIncome(BigDecimal operatingIncome) {
-//      this.operatingIncome = operatingIncome;
-//    }
-//
-//    private void netIncome(BigDecimal netIncome) {
-//      this.netIncome = netIncome;
-//    }
   }
 
 

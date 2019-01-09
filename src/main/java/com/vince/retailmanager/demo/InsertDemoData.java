@@ -34,7 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class InsertDemoData {
 
-  private static final String dummyPassword = "password";
+  private static final String DUMMY_PASSWORD = "password";
   //defaults
   private static final int NUM_OF_FRANCHISEES = 2;
   private static final int BEGINNING_BALANCE = 1000;
@@ -67,9 +67,14 @@ public class InsertDemoData {
     System.out.println("Setting up demo data...");
     clearDBTables();
     createFranchises();
-
     setupAdmin();
+    addNewUser();
     System.out.println("\nDemo data setup complete!");
+  }
+
+  void addNewUser() {
+    User user = new User("new_user", DUMMY_PASSWORD);
+    userService.saveUser(user);
   }
 
   void createFranchises() throws Exception {
@@ -96,7 +101,6 @@ public class InsertDemoData {
     payment.setSender(firstFranchisee);
     payment.setRecipient(franchisor);
     paymentRepo.save(payment);
-
     createIncomeStatements(firstFranchisee, 3);
 
     LocalDate startDate = LocalDate.of(2018, 10, 1);
@@ -104,12 +108,6 @@ public class InsertDemoData {
     DateRange dateRange = new DateRange(startDate, endDate);
     IncomeStatementStatistics statistics = IncomeStatementStatistics
         .create(firstFranchisee, dateRange);
-    System.out.println("statistics = " + statistics);
-//		Royalty royalty = franchiseService.saveRoyalty();
-//		System.out.println("royalty = " + royalty);
-//		MarketingFee marketingFee = franchiseService.requestMarketingFee(franchisor, incomeStatement);
-//		System.out.println("marketingFee = " + marketingFee);
-
   }
 
   Invoice createInvoice(Company sender,
@@ -173,10 +171,10 @@ public class InsertDemoData {
 
   private void setupFranchisorInDB(String shortName,
       Franchisor franchisor) throws Exception {
-    User franchisorUser = new User(shortName + "_franchisor", dummyPassword);
+    User franchisorUser = new User(shortName + "_franchisor", DUMMY_PASSWORD);
     franchisorRepo.save(franchisor);
-//    franchisorUser.addAccessToken(franchisor);
     userService.saveUser(franchisorUser);
+    userService.addAccessToken(franchisorUser.getUsername(), franchisor);
   }
 
   private Franchisee setupFranchiseeInDB(String shortName,
@@ -185,13 +183,12 @@ public class InsertDemoData {
     Franchisee franchisee = Franchisee.builder()
         .build();
 
-    User franchiseeUser = new User(shortName + "_franchisee_" + i, dummyPassword);
+    User franchiseeUser = new User(shortName + "_franchisee_" + i, DUMMY_PASSWORD);
     franchiseeRepo.save(franchisee);
     franchisor.addFranchisee(franchisee);
 
-//    franchiseeUser.addAccessToken(franchisee);
     userService.saveUser(franchiseeUser);
-    System.out.println("saving " + franchisee);
+    userService.addAccessToken(franchiseeUser.getUsername(), franchisee);
     return franchisee;
   }
 }

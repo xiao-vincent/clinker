@@ -10,17 +10,16 @@ import com.vince.retailmanager.service.FranchiseService;
 import com.vince.retailmanager.service.TransactionService;
 import com.vince.retailmanager.service.UserService;
 import com.vince.retailmanager.utils.ValidatorUtils;
+import com.vince.retailmanager.web.controller.constants.ModelValue;
 import com.vince.retailmanager.web.controller.utils.ControllerUtils;
 import com.vince.retailmanager.web.exception.EntityNotFoundException;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.validation.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -43,8 +42,6 @@ public class TransactionsController {
   @Autowired
   public TransactionService transactionService;
   @Autowired
-  public Validator validator;
-  @Autowired
   public ControllerUtils controllerUtils;
   @Autowired
   public ValidatorUtils validatorUtils;
@@ -52,37 +49,14 @@ public class TransactionsController {
   @ModelAttribute
   public void populateModel(
       Model model,
-      @AuthenticationPrincipal org.springframework.security.core.userdetails.User authenticatedUser,
       @PathVariable("companyId") Integer companyId,
       @PathVariable(value = "invoiceId", required = false) Integer invoiceId,
       @PathVariable(value = "paymentId", required = false) Integer paymentId
   ) throws EntityNotFoundException {
-
-    addCompany(model, companyId);
-    ControllerUtils.addActiveUsername(model, authenticatedUser, companyId, userService);
-    addInvoice(model, invoiceId);
-    addPayment(model, paymentId);
-  }
-
-  private void addCompany(Model model,
-      @PathVariable("companyId") Integer companyId) throws EntityNotFoundException {
-    if (companyId != null) {
-      model.addAttribute("company", franchiseService.findCompanyById(companyId));
-    }
-  }
-
-  private void addPayment(Model model,
-      Integer paymentId) throws EntityNotFoundException {
-    if (paymentId != null) {
-      model.addAttribute("payment", transactionService.findPaymentById(paymentId));
-    }
-  }
-
-  private void addInvoice(Model model,
-      Integer invoiceId) throws EntityNotFoundException {
-    if (invoiceId != null) {
-      model.addAttribute("invoice", transactionService.findInvoiceById(invoiceId));
-    }
+    controllerUtils.setModel(model);
+    controllerUtils.addCompany(companyId);
+    controllerUtils.addInvoice(invoiceId);
+    controllerUtils.addPayment(paymentId);
   }
 
   @GetMapping("/payments/{paymentId}")
@@ -94,20 +68,20 @@ public class TransactionsController {
   @GetMapping("/payments")
   @JsonView(View.Public.class)
   public ResponseEntity<Collection<Payment>> getPayments(Company company,
-      @RequestParam(name = "type") DistributionType type) {
+      @RequestParam(name = ModelValue.DISTRIBUTION_TYPE) DistributionType type) {
     Collection<Payment> payments = transactionService.getPayments(company, type);
     return new ResponseEntity<>(payments, HttpStatus.OK);
   }
-
 
   @GetMapping("/invoices")
   @JsonView(View.Public.class)
   public ResponseEntity<Collection<Invoice>> getInvoices(
       Company company,
-      @RequestParam("type") DistributionType type,
-      @RequestParam(required = false, name = "fully-paid") final Boolean isFullyPaid) {
+      @RequestParam(ModelValue.DISTRIBUTION_TYPE) DistributionType type,
+      @RequestParam(required = false, name = ModelValue.FULLY_PAID) final Boolean isFullyPaid) {
     Collection<Invoice> invoices = transactionService.getInvoices(company, type);
-    invoices = isFullyPaid == null ? invoices : filterInvoicesByFullyPaid(invoices, isFullyPaid);
+    invoices = isFullyPaid == null ? invoices
+        : filterInvoicesByFullyPaid(invoices, isFullyPaid);
     return new ResponseEntity<>(invoices, HttpStatus.OK);
   }
 
@@ -176,5 +150,4 @@ public class TransactionsController {
         .filter(invoice -> invoice.isFullyPaid() == isFullyPaid)
         .collect(Collectors.toSet());
   }
-
 }

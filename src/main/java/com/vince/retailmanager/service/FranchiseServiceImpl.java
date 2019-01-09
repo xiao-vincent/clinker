@@ -9,6 +9,7 @@ import com.vince.retailmanager.model.entity.Franchisor;
 import com.vince.retailmanager.model.entity.IncomeStatement;
 import com.vince.retailmanager.model.entity.MarketingFee;
 import com.vince.retailmanager.model.entity.PercentageFee;
+import com.vince.retailmanager.model.entity.PercentageFee.FeeType;
 import com.vince.retailmanager.model.entity.Royalty;
 import com.vince.retailmanager.repository.CompanyRepository;
 import com.vince.retailmanager.repository.FranchiseeRepository;
@@ -22,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -86,8 +88,8 @@ public class FranchiseServiceImpl implements FranchiseService {
 
   @Override
   @Transactional
-  public void saveFranchisee(Franchisee franchisee) {
-    franchiseeRepository.save(franchisee);
+  public Franchisee saveFranchisee(Franchisee franchisee) {
+    return franchiseeRepository.save(franchisee);
   }
 
   @Override
@@ -172,7 +174,6 @@ public class FranchiseServiceImpl implements FranchiseService {
     List<PercentageFee> fees = new ArrayList<>();
     fees.add(Royalty.create(incomeStatement));
     fees.add(MarketingFee.create(incomeStatement));
-
     fees.forEach(fee -> savePercentageFee(fee));
     return fees;
 
@@ -180,11 +181,19 @@ public class FranchiseServiceImpl implements FranchiseService {
 
   @Override
   @Transactional
-  public List<PercentageFee> getPercentageFees(Franchisor franchisor) {
+  public List<PercentageFee> getPercentageFees(Franchisor franchisor, FeeType type) {
     if (franchisor == null) {
       return Collections.emptyList();
     }
-    return percentageFeeRepository.findAllByFranchisorId(franchisor.getId());
+    Set<Integer> franchiseeIds = franchisor.getFranchisees().stream().map(Franchisee::getId)
+        .collect(Collectors.toSet());
+    if (type != null) {
+      return percentageFeeRepository
+          .findAllByFranchiseeIdInAndFeeType(franchiseeIds, type.toString());
+    } else {
+      return percentageFeeRepository.findAllByFranchiseeIdIn(franchiseeIds);
+    }
+
   }
 }
 
