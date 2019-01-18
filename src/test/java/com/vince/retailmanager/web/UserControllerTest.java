@@ -5,7 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vince.retailmanager.model.entity.User;
+import com.vince.retailmanager.model.entity.authorization.User;
 import com.vince.retailmanager.service.UserService;
 import com.vince.retailmanager.service.businessService.ApplicationTestConfig;
 import com.vince.retailmanager.web.controller.UserController;
@@ -41,12 +41,11 @@ public class UserControllerTest {
     user.setPassword("password");
     ObjectMapper mapper = new ObjectMapper();
     String newUserJSON = mapper.writeValueAsString(user);
-    RequestBuilder requestBuilder = post("/users")
+    RequestBuilder requestBuilder = post("/authorization")
         .accept(MediaType.APPLICATION_JSON_VALUE)
         .content(newUserJSON)
         .contentType(MediaType.APPLICATION_JSON_VALUE)
         .with(csrf());
-    ;
     this.mockMvc.perform(requestBuilder)
         .andExpect(status().isCreated());
 
@@ -54,10 +53,9 @@ public class UserControllerTest {
 
   @Test
   public void createUserUnauthorized() throws Exception {
-    RequestBuilder requestBuilder = post("/users")
+    RequestBuilder requestBuilder = post("/authorization")
         .accept(MediaType.APPLICATION_JSON_VALUE)
         .with(csrf());
-    ;
     this.mockMvc.perform(requestBuilder)
         .andExpect(status().isUnauthorized());
 
@@ -71,7 +69,7 @@ public class UserControllerTest {
     user.setEnabled(true);
     ObjectMapper mapper = new ObjectMapper();
     String newUserJSON = mapper.writeValueAsString(user);
-    RequestBuilder requestBuilder = post("/users")
+    RequestBuilder requestBuilder = post("/authorization")
         .accept(MediaType.APPLICATION_JSON_VALUE)
         .content(newUserJSON)
         .contentType(MediaType.APPLICATION_JSON_VALUE)

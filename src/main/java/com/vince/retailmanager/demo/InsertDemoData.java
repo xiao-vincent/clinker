@@ -1,14 +1,14 @@
 package com.vince.retailmanager.demo;
 
-import com.vince.retailmanager.model.DateRange;
-import com.vince.retailmanager.model.IncomeStatementStatistics;
-import com.vince.retailmanager.model.entity.Company;
-import com.vince.retailmanager.model.entity.Franchisee;
-import com.vince.retailmanager.model.entity.Franchisor;
-import com.vince.retailmanager.model.entity.IncomeStatement;
-import com.vince.retailmanager.model.entity.Invoice;
-import com.vince.retailmanager.model.entity.Payment;
-import com.vince.retailmanager.model.entity.User;
+import com.vince.retailmanager.model.entity.authorization.User;
+import com.vince.retailmanager.model.entity.companies.Company;
+import com.vince.retailmanager.model.entity.companies.Franchisee;
+import com.vince.retailmanager.model.entity.companies.Franchisor;
+import com.vince.retailmanager.model.entity.financials.DateRange;
+import com.vince.retailmanager.model.entity.financials.IncomeStatement;
+import com.vince.retailmanager.model.entity.financials.IncomeStatementStatistics;
+import com.vince.retailmanager.model.entity.transactions.Invoice;
+import com.vince.retailmanager.model.entity.transactions.Payment;
 import com.vince.retailmanager.repository.AccessTokensRepository;
 import com.vince.retailmanager.repository.CompanyRepository;
 import com.vince.retailmanager.repository.FranchiseeRepository;
@@ -17,6 +17,7 @@ import com.vince.retailmanager.repository.IncomeStatementRepository;
 import com.vince.retailmanager.repository.InvoiceRepository;
 import com.vince.retailmanager.repository.PaymentRepository;
 import com.vince.retailmanager.repository.UserRepository;
+import com.vince.retailmanager.security.RoleType;
 import com.vince.retailmanager.service.FranchiseService;
 import com.vince.retailmanager.service.UserService;
 import java.time.LocalDate;
@@ -143,7 +144,7 @@ public class InsertDemoData {
 
   private void setupAdmin() throws Exception {
     User admin = new User("admin", "adminpassword");
-    admin.addRole("ADMIN");
+    admin.addRole(RoleType.ADMIN);
     userService.saveUser(admin);
     System.out.println("saving " + admin);
 
@@ -170,7 +171,7 @@ public class InsertDemoData {
   }
 
   private void setupFranchisorInDB(String shortName,
-      Franchisor franchisor) throws Exception {
+      Franchisor franchisor) {
     User franchisorUser = new User(shortName + "_franchisor", DUMMY_PASSWORD);
     franchisorRepo.save(franchisor);
     userService.saveUser(franchisorUser);
@@ -179,7 +180,7 @@ public class InsertDemoData {
 
   private Franchisee setupFranchiseeInDB(String shortName,
       Franchisor franchisor,
-      int i) throws Exception {
+      int i) {
     Franchisee franchisee = Franchisee.builder()
         .build();
 

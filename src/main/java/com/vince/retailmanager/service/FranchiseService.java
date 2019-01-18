@@ -1,14 +1,14 @@
 package com.vince.retailmanager.service;
 
-import com.vince.retailmanager.model.entity.Company;
-import com.vince.retailmanager.model.entity.Franchisee;
-import com.vince.retailmanager.model.entity.Franchisor;
-import com.vince.retailmanager.model.entity.IncomeStatement;
-import com.vince.retailmanager.model.entity.MarketingFee;
-import com.vince.retailmanager.model.entity.PercentageFee;
-import com.vince.retailmanager.model.entity.PercentageFee.FeeType;
-import com.vince.retailmanager.model.entity.Royalty;
-import com.vince.retailmanager.web.exception.EntityNotFoundException;
+import com.vince.retailmanager.model.entity.companies.Company;
+import com.vince.retailmanager.model.entity.companies.Franchisee;
+import com.vince.retailmanager.model.entity.companies.Franchisor;
+import com.vince.retailmanager.model.entity.fees.FeeType;
+import com.vince.retailmanager.model.entity.fees.MarketingFee;
+import com.vince.retailmanager.model.entity.fees.PercentageFee;
+import com.vince.retailmanager.model.entity.fees.Royalty;
+import com.vince.retailmanager.model.entity.financials.IncomeStatement;
+import com.vince.retailmanager.exception.EntityNotFoundException;
 import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
 

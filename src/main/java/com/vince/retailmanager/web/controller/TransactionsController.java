@@ -1,18 +1,18 @@
 package com.vince.retailmanager.web.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.vince.retailmanager.model.DistributionType;
-import com.vince.retailmanager.model.View;
-import com.vince.retailmanager.model.entity.Company;
-import com.vince.retailmanager.model.entity.Invoice;
-import com.vince.retailmanager.model.entity.Payment;
+import com.vince.retailmanager.exception.EntityNotFoundException;
+import com.vince.retailmanager.model.entity.companies.Company;
+import com.vince.retailmanager.model.entity.transactions.DistributionType;
+import com.vince.retailmanager.model.entity.transactions.Invoice;
+import com.vince.retailmanager.model.entity.transactions.Payment;
 import com.vince.retailmanager.service.FranchiseService;
 import com.vince.retailmanager.service.TransactionService;
 import com.vince.retailmanager.service.UserService;
 import com.vince.retailmanager.utils.ValidatorUtils;
-import com.vince.retailmanager.web.controller.constants.ModelValue;
-import com.vince.retailmanager.web.controller.utils.ControllerUtils;
-import com.vince.retailmanager.web.exception.EntityNotFoundException;
+import com.vince.retailmanager.web.constants.ModelValue;
+import com.vince.retailmanager.web.json.View;
+import com.vince.retailmanager.web.utils.ModelUtils;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Map;
@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -42,7 +43,7 @@ public class TransactionsController {
   @Autowired
   public TransactionService transactionService;
   @Autowired
-  public ControllerUtils controllerUtils;
+  public ModelUtils modelUtils;
   @Autowired
   public ValidatorUtils validatorUtils;
 
@@ -53,19 +54,21 @@ public class TransactionsController {
       @PathVariable(value = "invoiceId", required = false) Integer invoiceId,
       @PathVariable(value = "paymentId", required = false) Integer paymentId
   ) throws EntityNotFoundException {
-    controllerUtils.setModel(model);
-    controllerUtils.addCompany(companyId);
-    controllerUtils.addInvoice(invoiceId);
-    controllerUtils.addPayment(paymentId);
+    modelUtils.setModel(model);
+    modelUtils.addCompany(companyId);
+    modelUtils.addInvoice(invoiceId);
+    modelUtils.addPayment(paymentId);
   }
 
   @GetMapping("/payments/{paymentId}")
+  @PreAuthorize("@modelUtils.isAuthorized(#payment.getSender(),#payment.getRecipient() )")
   @JsonView(View.Summary.class)
   public ResponseEntity<Payment> getPayment(Payment payment) {
     return new ResponseEntity<>(payment, HttpStatus.OK);
   }
 
   @GetMapping("/payments")
+  @PreAuthorize("@modelUtils.isAuthorized(#company)")
   @JsonView(View.Public.class)
   public ResponseEntity<Collection<Payment>> getPayments(Company company,
       @RequestParam(name = ModelValue.DISTRIBUTION_TYPE) DistributionType type) {
@@ -74,6 +77,7 @@ public class TransactionsController {
   }
 
   @GetMapping("/invoices")
+  @PreAuthorize("@modelUtils.isAuthorized(#company)")
   @JsonView(View.Public.class)
   public ResponseEntity<Collection<Invoice>> getInvoices(
       Company company,
@@ -85,14 +89,15 @@ public class TransactionsController {
     return new ResponseEntity<>(invoices, HttpStatus.OK);
   }
 
-
   @GetMapping("/invoices/{invoiceId}")
+  @PreAuthorize("@modelUtils.isAuthorized(#invoice.getRecipient(), #invoice.getSender())")
   @JsonView(View.Invoice.class)
   public ResponseEntity<Invoice> getInvoice(Invoice invoice) {
     return new ResponseEntity<>(invoice, HttpStatus.OK);
   }
 
   @PostMapping("/invoices/{recipientId}")
+  @PreAuthorize("@modelUtils.isAuthorized(#company)")
   @JsonView(View.Invoice.class)
   public ResponseEntity<Invoice> createInvoice(Company company,
       @RequestBody Invoice invoice,
@@ -106,6 +111,7 @@ public class TransactionsController {
   }
 
   @PutMapping("/invoices/{invoiceId}")
+  @PreAuthorize("@modelUtils.isAuthorized(#invoice.getSender())")
   @JsonView(View.Invoice.class)
   public ResponseEntity<Invoice> updateInvoice(Invoice invoice,
       @RequestBody Invoice updatedInvoice) {
@@ -116,7 +122,9 @@ public class TransactionsController {
     return new ResponseEntity<>(invoice, HttpStatus.OK);
   }
 
+
   @PostMapping("/invoices/{invoiceId}/void")
+  @PreAuthorize("@modelUtils.isAuthorized(#invoice.getSender())")
   @JsonView(View.Invoice.class)
   public ResponseEntity<Invoice> voidInvoice(Invoice invoice) {
     invoice.setVoid(true);
@@ -127,17 +135,17 @@ public class TransactionsController {
   }
 
   @PostMapping("/invoices/{invoiceId}/pay")
+  @PreAuthorize("@modelUtils.isAuthorized(#invoice.getRecipient())")
   @JsonView(View.Payment.class)
   public ResponseEntity<Payment> payInvoice(@RequestBody Map<String, Object> body,
-      Invoice invoice,
-      Company company) {
+      Invoice invoice) {
     double paymentAmount = (double) ((Integer) body.get("amount"));
-    Payment payment = transactionService.payInvoice(company, invoice, paymentAmount);
+    Payment payment = transactionService.payInvoice(invoice.getRecipient(), invoice, paymentAmount);
     return new ResponseEntity<>(payment, HttpStatus.OK);
   }
 
-
   @PostMapping("/refunds/{paymentId}")
+  @PreAuthorize("@modelUtils.isAuthorized(#paymentToRefund.getRecipient())")
   @JsonView(View.Payment.class)
   public ResponseEntity<Payment> refundPayment(Payment paymentToRefund) {
     Payment refundPayment = transactionService.refundPayment(paymentToRefund);

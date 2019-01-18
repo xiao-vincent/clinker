@@ -1,6 +1,6 @@
 package com.vince.retailmanager.repository;
 
-import com.vince.retailmanager.model.entity.Invoice;
+import com.vince.retailmanager.model.entity.transactions.Invoice;
 import java.util.Collection;
 import org.springframework.data.jpa.repository.JpaRepository;
 

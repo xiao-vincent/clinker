@@ -8,7 +8,6 @@ public class InvalidOperationException extends IllegalStateException {
     super(message);
   }
 
-
   public InvalidOperationException(String message, Object detail) {
     super(message);
     this.detail = detail;

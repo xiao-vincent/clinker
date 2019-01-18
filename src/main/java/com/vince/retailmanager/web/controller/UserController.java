@@ -1,6 +1,6 @@
 package com.vince.retailmanager.web.controller;
 
-import com.vince.retailmanager.model.entity.User;
+import com.vince.retailmanager.model.entity.authorization.User;
 import com.vince.retailmanager.service.UserService;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +21,7 @@ public class UserController {
   private UserService userService;
 
   @PostMapping
-  public ResponseEntity<User> addUser(@RequestBody @Valid User user)
-      throws Exception {
+  public ResponseEntity<User> addUser(@RequestBody @Valid User user) {
     this.userService.saveUser(user);
     user.setPassword("");
     return new ResponseEntity<>(user, HttpStatus.CREATED);

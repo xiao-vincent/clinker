@@ -1,24 +1,24 @@
 package com.vince.retailmanager.web.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.vince.retailmanager.model.DateRange;
-import com.vince.retailmanager.model.IncomeStatementStatistics;
-import com.vince.retailmanager.model.Validation;
-import com.vince.retailmanager.model.View;
-import com.vince.retailmanager.model.View.Public;
-import com.vince.retailmanager.model.View.Summary;
-import com.vince.retailmanager.model.constants.Date;
-import com.vince.retailmanager.model.entity.Company;
-import com.vince.retailmanager.model.entity.Franchisee;
-import com.vince.retailmanager.model.entity.IncomeStatement;
-import com.vince.retailmanager.model.utils.IncomeStatementUtils;
+import com.vince.retailmanager.constants.Date;
+import com.vince.retailmanager.exception.EntityNotFoundException;
+import com.vince.retailmanager.model.entity.companies.Company;
+import com.vince.retailmanager.model.entity.companies.Franchisee;
+import com.vince.retailmanager.model.entity.financials.DateRange;
+import com.vince.retailmanager.model.entity.financials.IncomeStatement;
+import com.vince.retailmanager.model.entity.financials.IncomeStatementStatistics;
+import com.vince.retailmanager.model.entity.financials.utils.IncomeStatementUtils;
 import com.vince.retailmanager.service.FinancialService;
 import com.vince.retailmanager.service.FranchiseService;
 import com.vince.retailmanager.service.TransactionService;
 import com.vince.retailmanager.service.UserService;
 import com.vince.retailmanager.utils.ValidatorUtils;
-import com.vince.retailmanager.web.controller.utils.ControllerUtils;
-import com.vince.retailmanager.web.exception.EntityNotFoundException;
+import com.vince.retailmanager.web.json.View;
+import com.vince.retailmanager.web.json.View.Public;
+import com.vince.retailmanager.web.json.View.Summary;
+import com.vince.retailmanager.web.utils.ModelUtils;
+import com.vince.retailmanager.web.validator.ValidationGroups;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
@@ -50,7 +50,7 @@ public class FinancialController {
   @Autowired
   public FinancialService financialService;
   @Autowired
-  public ControllerUtils controllerUtils;
+  public ModelUtils modelUtils;
   @Autowired
   private FranchiseService franchiseService;
   @Autowired
@@ -62,37 +62,38 @@ public class FinancialController {
       @PathVariable("companyId") Integer companyId,
       @PathVariable(value = "incomeStatementId", required = false) Integer incomeStatementId
   ) throws EntityNotFoundException {
-    controllerUtils.setModel(model);
-    controllerUtils.addCompany(companyId);
-    controllerUtils.addIncomeStatement(incomeStatementId);
+    modelUtils.setModel(model);
+    modelUtils.addCompany(companyId);
+    modelUtils.addIncomeStatement(incomeStatementId);
   }
-
 
   @ModelAttribute("/income-statements")
   public void populateModelIncomeStatements(
       Model model,
-      @RequestParam(required = false) @DateTimeFormat(pattern = Date.DATE_FORMAT) LocalDate startDate,
-      @RequestParam(required = false) @DateTimeFormat(pattern = Date.DATE_FORMAT) LocalDate endDate) {
-    controllerUtils.addDateRange(model, startDate, endDate);
+      @RequestParam(required = false) @DateTimeFormat(pattern = Date.YEAR_MONTH_FORMAT) LocalDate startDate,
+      @RequestParam(required = false) @DateTimeFormat(pattern = Date.YEAR_MONTH_FORMAT) LocalDate endDate) {
+    modelUtils.addDateRange(model, startDate, endDate);
   }
 
   @GetMapping("/info")
   @JsonView(View.Financials.class)
-  @PreAuthorize("@controllerUtils.isAuthorized(#company)")
+  @PreAuthorize("@modelUtils.isAuthorized(#company)")
   public ResponseEntity<Company> getFinancials(Company company) {
     return new ResponseEntity<>(company, HttpStatus.OK);
+
   }
 
   @GetMapping("/income-statements/{incomeStatementId}")
-  @PreAuthorize("@controllerUtils.isAuthorizedInFranchise(#company)")
+  @PreAuthorize("@modelUtils.isAuthorizedInFranchise(#company)")
   @JsonView(View.Summary.class)
   public ResponseEntity<IncomeStatement> getIncomeStatement(Company company,
       IncomeStatement incomeStatement) {
     return new ResponseEntity<>(incomeStatement, HttpStatus.OK);
   }
 
+
   @PutMapping("/income-statements/{incomeStatementId}")
-  @PreAuthorize("@controllerUtils.isAuthorized(#company)")
+  @PreAuthorize("@modelUtils.isAuthorized(#company)")
   @JsonView(View.Summary.class)
   public ResponseEntity<IncomeStatement> updateIncomeStatement(
       Company company,
@@ -103,21 +104,21 @@ public class FinancialController {
     incomeStatement.setCostOfGoodsSold(update.getCostOfGoodsSold());
     incomeStatement.setOperatingExpenses(update.getSales());
     incomeStatement.setGeneralAndAdminExpenses(update.getSales());
-    validatorUtils.validate(incomeStatement, Validation.Entity.class);
+    validatorUtils.validate(incomeStatement, ValidationGroups.Entity.class);
     financialService.saveIncomeStatement(incomeStatement);
     return new ResponseEntity<>(incomeStatement, HttpStatus.OK);
   }
 
   @PostMapping("/income-statements/new")
-  @PreAuthorize("@controllerUtils.isAuthorized(#company)")
+  @PreAuthorize("@modelUtils.isAuthorized(#company)")
   @JsonView(View.Summary.class)
   public ResponseEntity<IncomeStatement> createIncomeStatement(
       Company company,
       @RequestBody @Validated IncomeStatement incomeStatement,
-      @RequestParam @DateTimeFormat(pattern = Date.DATE_FORMAT) LocalDate date) {
+      @RequestParam @DateTimeFormat(pattern = Date.YEAR_MONTH_FORMAT) LocalDate date) {
     company.addIncomeStatement(incomeStatement);
     incomeStatement.setDate(date);
-    validatorUtils.validate(incomeStatement, Validation.Entity.class);
+    validatorUtils.validate(incomeStatement, ValidationGroups.Entity.class);
     incomeStatement = financialService.saveIncomeStatement(incomeStatement);
     if (incomeStatement.getCompany() instanceof Franchisee) {
       franchiseService.createMonthlyFranchiseFees(incomeStatement);
@@ -126,7 +127,7 @@ public class FinancialController {
   }
 
   @GetMapping("/income-statements")
-  @PreAuthorize("@controllerUtils.isAuthorizedInFranchise(#company)")
+  @PreAuthorize("@modelUtils.isAuthorizedInFranchise(#company)")
   @JsonView(Public.class)
   public ResponseEntity<Collection<IncomeStatement>> getIncomeStatements(
       Company company,
@@ -138,7 +139,7 @@ public class FinancialController {
   }
 
   @PostMapping("/income-statements/missing")
-  @PreAuthorize("@controllerUtils.isAuthorizedInFranchise(#company)")
+  @PreAuthorize("@modelUtils.isAuthorizedInFranchise(#company)")
   public ResponseEntity<Collection<LocalDate>> getMissingIncomeStatementDates(
       Company company,
       DateRange dateRange
@@ -150,7 +151,7 @@ public class FinancialController {
 
 
   @GetMapping("/income-statements/statistics")
-  @PreAuthorize("@controllerUtils.isAuthorizedInFranchise(#company)")
+  @PreAuthorize("@modelUtils.isAuthorizedInFranchise(#company)")
   @JsonView(Summary.class)
   public ResponseEntity<IncomeStatementStatistics> getIncomeStatementStats(
       Company company,
@@ -160,7 +161,5 @@ public class FinancialController {
     validatorUtils.validate(stats);
     return new ResponseEntity<>(stats, HttpStatus.OK);
   }
-
-
 }
 

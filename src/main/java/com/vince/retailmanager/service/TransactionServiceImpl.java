@@ -1,14 +1,14 @@
 package com.vince.retailmanager.service;
 
 import com.vince.retailmanager.exception.InvalidOperationException;
-import com.vince.retailmanager.model.DistributionType;
-import com.vince.retailmanager.model.entity.Company;
-import com.vince.retailmanager.model.entity.Invoice;
-import com.vince.retailmanager.model.entity.Payment;
+import com.vince.retailmanager.model.entity.companies.Company;
+import com.vince.retailmanager.model.entity.transactions.DistributionType;
+import com.vince.retailmanager.model.entity.transactions.Invoice;
+import com.vince.retailmanager.model.entity.transactions.Payment;
 import com.vince.retailmanager.repository.InvoiceRepository;
 import com.vince.retailmanager.repository.PaymentRepository;
 import com.vince.retailmanager.utils.ValidatorUtils;
-import com.vince.retailmanager.web.exception.EntityNotFoundException;
+import com.vince.retailmanager.exception.EntityNotFoundException;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
@@ -124,8 +124,6 @@ public class TransactionServiceImpl implements TransactionService {
     payment.addInvoice(invoice);
     validatorUtils.validate(payment);
     return this.savePayment(payment);
-
-
   }
 
   private <T> Collection<T> getItemsByDistributionType(

@@ -1,6 +1,5 @@
 package com.vince.retailmanager.utils;
 
-import com.vince.retailmanager.exception.InvalidEnumArgumentException;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -12,7 +11,7 @@ public class EnumUtils {
     name = name.toLowerCase();
     T enumObject = nameMap.get(name);
     if (enumObject == null) {
-      throw new InvalidEnumArgumentException(String.format(
+      throw new IllegalArgumentException(String.format(
           "'%s' has no corresponding value. Accepted values: %s",
           name,
           nameMap.values().stream().map(t -> t.toString().toLowerCase())

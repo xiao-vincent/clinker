@@ -3,7 +3,7 @@ package com.vince.retailmanager.model.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.vince.retailmanager.model.View.Public;
+import com.vince.retailmanager.web.json.View.Public;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;

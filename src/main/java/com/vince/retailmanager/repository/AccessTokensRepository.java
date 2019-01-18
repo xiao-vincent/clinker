@@ -1,7 +1,7 @@
 package com.vince.retailmanager.repository;
 
-import com.vince.retailmanager.model.entity.AccessToken;
-import com.vince.retailmanager.model.entity.Company;
+import com.vince.retailmanager.model.entity.authorization.AccessToken;
+import com.vince.retailmanager.model.entity.companies.Company;
 import java.util.Optional;
 import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;

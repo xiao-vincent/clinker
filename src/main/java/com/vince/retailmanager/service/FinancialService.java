@@ -1,7 +1,7 @@
 package com.vince.retailmanager.service;
 
-import com.vince.retailmanager.model.entity.IncomeStatement;
-import com.vince.retailmanager.web.exception.EntityNotFoundException;
+import com.vince.retailmanager.model.entity.financials.IncomeStatement;
+import com.vince.retailmanager.exception.EntityNotFoundException;
 
 public interface FinancialService {
 

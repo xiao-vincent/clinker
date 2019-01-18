@@ -1,20 +1,20 @@
 package com.vince.retailmanager.web.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.vince.retailmanager.model.View;
-import com.vince.retailmanager.model.entity.Franchisee;
-import com.vince.retailmanager.model.entity.Franchisor;
-import com.vince.retailmanager.model.entity.IncomeStatement;
-import com.vince.retailmanager.model.entity.PercentageFee;
-import com.vince.retailmanager.model.entity.PercentageFee.FeeType;
+import com.vince.retailmanager.exception.EntityNotFoundException;
+import com.vince.retailmanager.model.entity.companies.Franchisee;
+import com.vince.retailmanager.model.entity.companies.Franchisor;
+import com.vince.retailmanager.model.entity.fees.FeeType;
+import com.vince.retailmanager.model.entity.fees.PercentageFee;
+import com.vince.retailmanager.model.entity.financials.IncomeStatement;
 import com.vince.retailmanager.service.FinancialService;
 import com.vince.retailmanager.service.FranchiseService;
 import com.vince.retailmanager.service.TransactionService;
 import com.vince.retailmanager.service.UserService;
 import com.vince.retailmanager.utils.ValidatorUtils;
-import com.vince.retailmanager.web.controller.constants.ModelValue;
-import com.vince.retailmanager.web.controller.utils.ControllerUtils;
-import com.vince.retailmanager.web.exception.EntityNotFoundException;
+import com.vince.retailmanager.web.constants.ModelValue;
+import com.vince.retailmanager.web.json.View;
+import com.vince.retailmanager.web.utils.ModelUtils;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,7 +49,7 @@ public class FranchisorController {
   @Autowired
   private FranchiseService franchiseService;
   @Autowired
-  public ControllerUtils controllerUtils;
+  public ModelUtils modelUtils;
   @Autowired
   public ValidatorUtils validatorUtils;
 
@@ -60,11 +60,12 @@ public class FranchisorController {
       @PathVariable(value = "franchiseeId", required = false) Integer franchiseeId,
       @PathVariable(value = "incomeStatementId", required = false) Integer incomeStatementId
   ) throws EntityNotFoundException {
-    controllerUtils.setModel(model);
-    controllerUtils.addFranchisor(franchisorId);
-    controllerUtils.addFranchisee(franchiseeId);
-    controllerUtils.addIncomeStatement(incomeStatementId);
+    modelUtils.setModel(model);
+    modelUtils.addFranchisor(franchisorId);
+    modelUtils.addFranchisee(franchiseeId);
+    modelUtils.addIncomeStatement(incomeStatementId);
   }
+
 
   @GetMapping("/{franchisorId}")
   @JsonView(View.Franchisor.class)
@@ -84,7 +85,7 @@ public class FranchisorController {
   }
 
   @PutMapping("/{franchisorId}")
-  @PreAuthorize("@controllerUtils.isAuthorized(#franchisor)")
+  @PreAuthorize("@modelUtils.isAuthorized(#franchisor)")
   @JsonView(View.Summary.class)
   public ResponseEntity<Franchisor> updateCompany(
       Franchisor franchisor,
@@ -99,7 +100,7 @@ public class FranchisorController {
   }
 
   @PostMapping("/{franchisorId}/franchisees/new")
-  @PreAuthorize("#controllerUtils.isAuthorized(#franchisor)")
+  @PreAuthorize("@modelUtils.isAuthorized(#franchisor)")
   @JsonView(View.Summary.class)
   public ResponseEntity<Franchisee> createFranchisee(
       Franchisor franchisor,
@@ -114,21 +115,21 @@ public class FranchisorController {
   }
 
   @GetMapping("/{franchisorId}/franchisees")
-  @PreAuthorize("#controllerUtils.isAuthorized(#franchisor)")
+  @PreAuthorize("@modelUtils.isAuthorized(#franchisor)")
   @JsonView(View.Public.class)
   public ResponseEntity<Collection<Franchisee>> getFranchisees(Franchisor franchisor) {
     return new ResponseEntity<>(franchisor.getFranchisees(), HttpStatus.OK);
   }
 
   @DeleteMapping("/{franchisorId}")
-  @PreAuthorize("#controllerUtils.isAuthorized(#franchisor)")
+  @PreAuthorize("@modelUtils.isAuthorized(#franchisor)")
   public ResponseEntity<Void> deleteFranchisor(Franchisor franchisor) throws Exception {
     franchiseService.disableFranchisor(franchisor);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
   @PostMapping("/{franchisorId}/franchisees/{franchiseeId}/request-fees/financials/{incomeStatementId}")
-  @PreAuthorize("#controllerUtils.isAuthorized(#franchisor)")
+  @PreAuthorize("@modelUtils.isAuthorized(#franchisor)")
   @JsonView(View.Summary.class)
   public ResponseEntity<Collection<PercentageFee>> requestMonthlyFranchiseFees(
       Franchisor franchisor,
@@ -139,7 +140,7 @@ public class FranchisorController {
   }
 
   @GetMapping("{franchisorId}/fees")
-  @PreAuthorize("#controllerUtils.isAuthorized(#franchisor)")
+  @PreAuthorize("@modelUtils.isAuthorized(#franchisor)")
   @JsonView(View.Summary.class)
   public ResponseEntity<Collection<PercentageFee>> getFees(
       Franchisor franchisor,

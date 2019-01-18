@@ -1,10 +1,10 @@
 package com.vince.retailmanager.service;
 
-import com.vince.retailmanager.model.DistributionType;
-import com.vince.retailmanager.model.entity.Company;
-import com.vince.retailmanager.model.entity.Invoice;
-import com.vince.retailmanager.model.entity.Payment;
-import com.vince.retailmanager.web.exception.EntityNotFoundException;
+import com.vince.retailmanager.model.entity.companies.Company;
+import com.vince.retailmanager.model.entity.transactions.DistributionType;
+import com.vince.retailmanager.model.entity.transactions.Invoice;
+import com.vince.retailmanager.model.entity.transactions.Payment;
+import com.vince.retailmanager.exception.EntityNotFoundException;
 import java.util.Collection;
 import org.springframework.transaction.annotation.Transactional;
 

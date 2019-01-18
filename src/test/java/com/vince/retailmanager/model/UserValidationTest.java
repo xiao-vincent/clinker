@@ -3,7 +3,7 @@ package com.vince.retailmanager.model;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import com.vince.retailmanager.model.entity.User;
+import com.vince.retailmanager.model.entity.authorization.User;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;

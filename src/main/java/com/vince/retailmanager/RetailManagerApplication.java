@@ -1,5 +1,8 @@
 package com.vince.retailmanager;
 
+import com.vince.retailmanager.web.json.converter.DistributionTypeConverter;
+import com.vince.retailmanager.web.json.converter.FeeTypeConverter;
+import com.vince.retailmanager.web.json.converter.YearMonthConverter;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.format.FormatterRegistry;

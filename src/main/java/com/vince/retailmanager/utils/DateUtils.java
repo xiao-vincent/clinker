@@ -1,6 +1,6 @@
 package com.vince.retailmanager.utils;
 
-import com.vince.retailmanager.model.DateRange;
+import com.vince.retailmanager.model.entity.financials.DateRange;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.temporal.ChronoUnit;

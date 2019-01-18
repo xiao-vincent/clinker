@@ -10,7 +10,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 
 @Configuration
@@ -21,32 +22,23 @@ public class AuthenticationAdapter extends WebSecurityConfigurerAdapter {
   @Autowired
   private DataSource dataSource;
 
-  //used for testing
-  //let's us add users with plaintext passwords
-  @SuppressWarnings("deprecation")
   @Bean
-  public static NoOpPasswordEncoder passwordEncoder() {
-    return (NoOpPasswordEncoder) NoOpPasswordEncoder.getInstance();
+  public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
   }
-//	@Override
-//	public void configure(AuthenticationManagerBuilder builder)
-//		 throws Exception {
-//		builder.userDetailsService(new UserDetailsServiceImpl());
-//	}
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     http
         .authorizeRequests()
         .antMatchers("/", "/login", "/mobile/login", "/api/auth/**", "/reservations/**").permitAll()
-        .anyRequest().authenticated().and()
-        .formLogin().loginProcessingUrl("/login")
+        .anyRequest().authenticated()
+        .anyRequest().hasRole("ADMIN")
         .and()
         .httpBasic()
         .and()
         .csrf().disable()
     ;
-
   }
 
   @Autowired
@@ -54,9 +46,12 @@ public class AuthenticationAdapter extends WebSecurityConfigurerAdapter {
     auth
         .jdbcAuthentication()
         .dataSource(dataSource)
-        .usersByUsernameQuery("select username,password,enabled from users where username=?")
+        .passwordEncoder(this.passwordEncoder())
+        .usersByUsernameQuery(
+            "select username,password,enabled from users where username=?")
         .authoritiesByUsernameQuery("select username,role from roles where username=?");
   }
+
 
   @Bean
   public StrictHttpFirewall httpFirewall() {
@@ -64,4 +59,14 @@ public class AuthenticationAdapter extends WebSecurityConfigurerAdapter {
     firewall.setAllowSemicolon(true);
     return firewall;
   }
+
+/*  used for testing
+  let's us add authorization with plaintext passwords
+  */
+//  @SuppressWarnings("deprecation")
+//  @Bean
+//  public static NoOpPasswordEncoder passwordEncoder() {
+//    return (NoOpPasswordEncoder) NoOpPasswordEncoder.getInstance();
+//
 }
+

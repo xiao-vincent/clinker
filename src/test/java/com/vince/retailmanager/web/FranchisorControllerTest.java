@@ -6,7 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.vince.retailmanager.model.entity.Franchisor;
+import com.vince.retailmanager.model.entity.companies.Franchisor;
 import com.vince.retailmanager.service.FranchiseService;
 import com.vince.retailmanager.service.businessService.ApplicationTestConfig;
 import com.vince.retailmanager.web.controller.FranchisorController;
