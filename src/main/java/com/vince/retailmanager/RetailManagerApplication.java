@@ -29,8 +29,5 @@ public class RetailManagerApplication implements WebMvcConfigurer {
     registry.addConverter(new YearMonthConverter());
     registry.addConverter(new DistributionTypeConverter());
     registry.addConverter(new FeeTypeConverter());
-
-
   }
-
 }

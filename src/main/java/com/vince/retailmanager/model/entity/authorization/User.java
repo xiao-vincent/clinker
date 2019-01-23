@@ -31,7 +31,6 @@ public class User {
   private String username;
 
   @Size(min = 8, max = 128)
-  @JsonIgnore
   @NotNull
   private String password;
 

@@ -1,82 +1,89 @@
 package com.vince.retailmanager.web;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vince.retailmanager.model.entity.authorization.User;
+import com.vince.retailmanager.security.RoleType;
 import com.vince.retailmanager.service.UserService;
-import com.vince.retailmanager.service.businessService.ApplicationTestConfig;
 import com.vince.retailmanager.web.controller.UserController;
+import org.junit.experimental.categories.Category;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.RequestBuilder;
 
+/*
+ * 1. ok status
+ * 2. validation
+ * */
 
 @WebMvcTest(UserController.class)
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = ApplicationTestConfig.class)
+@Import(ControllerUnitTestConfiguration.class)
+@Category(UnitTest.class)
 public class UserControllerTest {
+
+  private TaskHttpRequestBuilder requestBuilder;
 
   @Autowired
   private MockMvc mockMvc;
 
-  @MockBean
+  @Autowired
   private UserService userService;
 
-  @Test
-  @WithMockUser(roles = "ADMIN")
-  public void createUserSuccess() throws Exception {
+  @BeforeEach
+  void beforeEach() {
+    this.requestBuilder = new TaskHttpRequestBuilder(this.mockMvc);
+  }
+
+  private User createValidUser() {
     User user = new User();
     user.setUsername("username");
-    user.setPassword("password");
-    ObjectMapper mapper = new ObjectMapper();
-    String newUserJSON = mapper.writeValueAsString(user);
-    RequestBuilder requestBuilder = post("/authorization")
-        .accept(MediaType.APPLICATION_JSON_VALUE)
-        .content(newUserJSON)
-        .contentType(MediaType.APPLICATION_JSON_VALUE)
-        .with(csrf());
-    this.mockMvc.perform(requestBuilder)
-        .andExpect(status().isCreated());
-
+    user.setPassword("password123");
+    return user;
   }
 
-  @Test
-  public void createUserUnauthorized() throws Exception {
-    RequestBuilder requestBuilder = post("/authorization")
-        .accept(MediaType.APPLICATION_JSON_VALUE)
-        .with(csrf());
-    this.mockMvc.perform(requestBuilder)
-        .andExpect(status().isUnauthorized());
+  @Nested
+  public class Create {
+
+    private User user;
+
+    @BeforeEach
+    void beforeEach() {
+      this.user = UserControllerTest.this.createValidUser();
+    }
+
+    @Test
+    @WithMockUser(roles = RoleType.Constants.USER)
+    void createUserSuccess() throws Exception {
+      User returnUser = UserControllerTest.this.createValidUser();
+      returnUser.setPassword("");
+      given(UserControllerTest.this.userService.saveUser(any(User.class))).willReturn(returnUser);
+      UserControllerTest.this.requestBuilder.createUser(this.user).andExpect(status().isCreated());
+    }
+
+    @Test
+    void createUserUnauthorized() throws Exception {
+      UserControllerTest.this.requestBuilder.createUser(this.user)
+          .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(roles = RoleType.Constants.USER)
+    void usernameError() throws Exception {
+      this.user.setUsername("");
+      UserControllerTest.this.requestBuilder.createUser(this.user)
+          .andExpect(status().isBadRequest());
+
+      this.user.setUsername("a3");
+      UserControllerTest.this.requestBuilder.createUser(this.user)
+          .andExpect(status().isBadRequest());
+    }
 
   }
-
-  @Test
-  @WithMockUser(roles = "ADMIN")
-  public void createUserError() throws Exception {
-    User user = new User();
-    user.setPassword("password");
-    user.setEnabled(true);
-    ObjectMapper mapper = new ObjectMapper();
-    String newUserJSON = mapper.writeValueAsString(user);
-    RequestBuilder requestBuilder = post("/authorization")
-        .accept(MediaType.APPLICATION_JSON_VALUE)
-        .content(newUserJSON)
-        .contentType(MediaType.APPLICATION_JSON_VALUE)
-        .with(csrf());
-    this.mockMvc.perform(requestBuilder)
-        .andExpect(status().isBadRequest());
-
-  }
-
 }

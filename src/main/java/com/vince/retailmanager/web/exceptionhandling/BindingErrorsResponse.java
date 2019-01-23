@@ -13,7 +13,6 @@ import org.springframework.validation.FieldError;
 
 public class BindingErrorsResponse {
 
-
   private List<BindingError> bindingErrors = new ArrayList<>();
 
   public List<BindingError> getBindingErrors() {

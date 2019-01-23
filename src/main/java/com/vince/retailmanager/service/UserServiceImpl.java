@@ -26,9 +26,12 @@ public class UserServiceImpl implements UserService {
   @Autowired
   private PasswordEncoder passwordEncoder;
 
+  public UserServiceImpl() {
+  }
+
   @Override
   @Transactional
-  public void saveUser(User user) {
+  public User saveUser(User user) {
     if (user.getRoles() == null || user.getRoles().isEmpty()) {
       throw new InvalidOperationException("User must have at least one role set");
     }
@@ -43,7 +46,7 @@ public class UserServiceImpl implements UserService {
     user.setPassword(passwordEncoder.encode(user.getPassword()));
 
     validatorUtils.validate(user);
-    userRepository.save(user);
+    return userRepository.save(user);
   }
 
   @Override

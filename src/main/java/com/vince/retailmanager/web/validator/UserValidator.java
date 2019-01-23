@@ -19,8 +19,8 @@ public class UserValidator implements ConstraintValidator<ValidUser, User> {
     );
   }
 
-
   private boolean isUsernameValid(User user, ConstraintValidatorContext context) {
+    System.out.println("userRepository = " + userRepository);
     if (userRepository.existsByUsernameIgnoreCase(user.getUsername())) {
       ValidatorUtils.addExistsViolation(context, "username");
       return false;
@@ -29,4 +29,3 @@ public class UserValidator implements ConstraintValidator<ValidUser, User> {
   }
 
 }
-

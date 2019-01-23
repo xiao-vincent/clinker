@@ -8,7 +8,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.vince.retailmanager.model.entity.companies.Franchisor;
 import com.vince.retailmanager.service.FranchiseService;
-import com.vince.retailmanager.service.businessService.ApplicationTestConfig;
 import com.vince.retailmanager.web.controller.FranchisorController;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +19,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -30,7 +28,6 @@ import org.springframework.test.web.servlet.MockMvc;
 //@SpringBootTest(classes = {FranchisorController.class, BusinessServiceImpl.class, AuthenticationAdapter.class})
 @WebMvcTest(FranchisorController.class)
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = ApplicationTestConfig.class)
 public class FranchisorControllerTest {
 
   @Autowired

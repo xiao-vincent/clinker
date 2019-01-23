@@ -19,8 +19,6 @@ import org.springframework.security.web.firewall.StrictHttpFirewall;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class AuthenticationAdapter extends WebSecurityConfigurerAdapter {
 
-  @Autowired
-  private DataSource dataSource;
 
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -32,8 +30,8 @@ public class AuthenticationAdapter extends WebSecurityConfigurerAdapter {
     http
         .authorizeRequests()
         .antMatchers("/", "/login", "/mobile/login", "/api/auth/**", "/reservations/**").permitAll()
-        .anyRequest().authenticated()
         .anyRequest().hasRole("ADMIN")
+        .anyRequest().authenticated()
         .and()
         .httpBasic()
         .and()
@@ -42,7 +40,8 @@ public class AuthenticationAdapter extends WebSecurityConfigurerAdapter {
   }
 
   @Autowired
-  public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+  public void configureGlobal(AuthenticationManagerBuilder auth, DataSource dataSource)
+      throws Exception {
     auth
         .jdbcAuthentication()
         .dataSource(dataSource)
