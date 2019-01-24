@@ -5,9 +5,6 @@ import java.io.IOException;
 
 final class WebTestUtil {
 
-  /**
-   * Prevents instantiation.
-   */
   private WebTestUtil() {
   }
 

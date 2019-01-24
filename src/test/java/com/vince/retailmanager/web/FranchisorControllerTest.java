@@ -1,74 +1,92 @@
 package com.vince.retailmanager.web;
 
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
+import com.vince.retailmanager.demo.TestData;
 import com.vince.retailmanager.model.entity.companies.Franchisor;
+import com.vince.retailmanager.security.RoleType;
 import com.vince.retailmanager.service.FranchiseService;
 import com.vince.retailmanager.web.controller.FranchisorController;
-import java.util.ArrayList;
-import java.util.List;
+import org.junit.experimental.categories.Category;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
-/**
- * Test class for {@link FranchisorController}
- */
-//@SpringBootTest(classes = {FranchisorController.class, BusinessServiceImpl.class, AuthenticationAdapter.class})
 @WebMvcTest(FranchisorController.class)
-@ExtendWith(SpringExtension.class)
+@Import(ControllerUnitTestConfiguration.class)
+@Category(UnitTest.class)
 public class FranchisorControllerTest {
+
+  private HttpRequestBuilder requestBuilder;
 
   @Autowired
   private MockMvc mockMvc;
 
-
-  @MockBean
+  @Autowired
   private FranchiseService franchiseService;
 
-  private List<Franchisor> franchisors;
 
   @BeforeEach
-  public void setUp() throws Exception {
-    franchisors = new ArrayList<>();
-    Franchisor franchisor = new Franchisor();
-    franchisor.setId(1);
-    franchisors.add(franchisor);
+  public void beforeEach() {
+//    this.requestBuilder = new HttpRequestBuilder(this.mockMvc);
+  }
 
+  @Nested
+  class Create {
+
+    private Franchisor input;
+
+    @BeforeEach
+    void beforeEach() {
+      this.input = TestData.createFranchisor();
+    }
+
+    @Nested
+    class ValidFields {
+
+      private Franchisor returnFranchisor;
+
+      @BeforeEach
+      void beforeEach() {
+//        given(userService.saveUser(any(User.class))).willReturn(returnFranchisor);
+      }
+
+      @Test
+      @WithMockUser(roles = RoleType.Constants.USER)
+      void shouldReturnStatusCodeCreated() throws Exception {
+//        requestBuilder.createUser(input).andExpect(status().isCreated());
+      }
+
+      @Test
+      @WithMockUser(roles = RoleType.Constants.USER)
+      void shouldReturnCreatedUserWithJson() throws Exception {
+//        requestBuilder.createUser(input)
+//            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8));
+      }
+    }
+
+    @Test
+    void shouldReturnStatusCodeUnauthorized() throws Exception {
+//      requestBuilder.createUser(this.input)
+//          .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(roles = RoleType.Constants.USER)
+    void shouldReturnStatusCodeBadRequest() throws Exception {
+//      this.input.setUsername("");
+//      requestBuilder.createUser(this.input)
+//          .andExpect(status().isBadRequest());
+//
+//      this.input.setUsername("a3");
+//      requestBuilder.createUser(this.input)
+//          .andExpect(status().isBadRequest());
+    }
 
   }
 
-  @Test
-//    @WithMockUser(roles = "USER")
-  public void testGetOwnerNotAuthorized() throws Exception {
-//		when(this.franchiseService.findFranchisorById(1)).thenReturn(franchisors.get(0));
-    this.mockMvc.perform(get("/franchisors/1")
-        .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isUnauthorized());
-  }
 
-
-  @Test
-  @WithMockUser(roles = "USER")
-  public void testGetFranchisorSuccess() throws Exception {
-    when(this.franchiseService.findFranchisorById(1)).thenReturn(franchisors.get(0));
-    this.mockMvc.perform(get("/franchisors/1")
-        .accept(MediaType.APPLICATION_JSON_VALUE))
-        .andExpect(status().isOk())
-        .andExpect(content().contentType("application/json;charset=UTF-8"))
-        .andExpect(jsonPath("$.id").value(1))
-//                .andExpect(jsonPath("$.firstName").value("George"));
-    ;
-  }
 }

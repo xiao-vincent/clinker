@@ -61,5 +61,9 @@ public class User {
     this.roles.add(role);
   }
 
+  public void setNoPassword() {
+    this.password = "";
+  }
+
 
 }

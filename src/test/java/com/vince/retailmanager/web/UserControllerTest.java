@@ -2,8 +2,10 @@ package com.vince.retailmanager.web;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.vince.retailmanager.demo.TestData;
 import com.vince.retailmanager.model.entity.authorization.User;
 import com.vince.retailmanager.security.RoleType;
 import com.vince.retailmanager.service.UserService;
@@ -15,20 +17,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-
-/*
- * 1. ok status
- * 2. validation
- * */
 
 @WebMvcTest(UserController.class)
 @Import(ControllerUnitTestConfiguration.class)
 @Category(UnitTest.class)
 public class UserControllerTest {
 
-  private TaskHttpRequestBuilder requestBuilder;
+  private HttpRequestBuilder requestBuilder;
 
   @Autowired
   private MockMvc mockMvc;
@@ -38,50 +36,64 @@ public class UserControllerTest {
 
   @BeforeEach
   void beforeEach() {
-    this.requestBuilder = new TaskHttpRequestBuilder(this.mockMvc);
-  }
-
-  private User createValidUser() {
-    User user = new User();
-    user.setUsername("username");
-    user.setPassword("password123");
-    return user;
+//    this.requestBuilder = new HttpRequestBuilder(this.mockMvc);
   }
 
   @Nested
-  public class Create {
+  class Create {
 
-    private User user;
+    private User input;
 
     @BeforeEach
     void beforeEach() {
-      this.user = UserControllerTest.this.createValidUser();
+      this.input = TestData.createUser();
+      requestBuilder = HttpRequestBuilder.builder()
+          .mockMvc(mockMvc)
+          .route("/users")
+          .build();
+    }
+
+    @Nested
+    class ValidFields {
+
+      private User returnUserSuccess;
+
+      @BeforeEach
+      void beforeEach() {
+        returnUserSuccess = TestData.createUser();
+        returnUserSuccess.setPassword("");
+        given(userService.saveUser(any(User.class))).willReturn(returnUserSuccess);
+      }
+
+      @Test
+      @WithMockUser(roles = RoleType.Constants.USER)
+      void shouldReturnStatusCodeCreated() throws Exception {
+        requestBuilder.createUser(input).andExpect(status().isCreated());
+      }
+
+      @Test
+      @WithMockUser(roles = RoleType.Constants.USER)
+      void shouldReturnCreatedUserWithJson() throws Exception {
+        requestBuilder.createUser(input)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8));
+      }
     }
 
     @Test
-    @WithMockUser(roles = RoleType.Constants.USER)
-    void createUserSuccess() throws Exception {
-      User returnUser = UserControllerTest.this.createValidUser();
-      returnUser.setPassword("");
-      given(UserControllerTest.this.userService.saveUser(any(User.class))).willReturn(returnUser);
-      UserControllerTest.this.requestBuilder.createUser(this.user).andExpect(status().isCreated());
-    }
-
-    @Test
-    void createUserUnauthorized() throws Exception {
-      UserControllerTest.this.requestBuilder.createUser(this.user)
+    void shouldReturnStatusCodeUnauthorized() throws Exception {
+      requestBuilder.createUser(this.input)
           .andExpect(status().isUnauthorized());
     }
 
     @Test
     @WithMockUser(roles = RoleType.Constants.USER)
-    void usernameError() throws Exception {
-      this.user.setUsername("");
-      UserControllerTest.this.requestBuilder.createUser(this.user)
+    void shouldReturnStatusCodeBadRequest() throws Exception {
+      this.input.setUsername("");
+      requestBuilder.createUser(this.input)
           .andExpect(status().isBadRequest());
 
-      this.user.setUsername("a3");
-      UserControllerTest.this.requestBuilder.createUser(this.user)
+      this.input.setUsername("a3");
+      requestBuilder.createUser(this.input)
           .andExpect(status().isBadRequest());
     }
 

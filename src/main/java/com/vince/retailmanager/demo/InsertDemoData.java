@@ -10,22 +10,18 @@ import com.vince.retailmanager.model.entity.financials.IncomeStatementStatistics
 import com.vince.retailmanager.model.entity.transactions.Invoice;
 import com.vince.retailmanager.model.entity.transactions.Payment;
 import com.vince.retailmanager.repository.AccessTokensRepository;
-import com.vince.retailmanager.repository.CompanyRepository;
 import com.vince.retailmanager.repository.FranchiseeRepository;
 import com.vince.retailmanager.repository.FranchisorRepository;
 import com.vince.retailmanager.repository.IncomeStatementRepository;
 import com.vince.retailmanager.repository.InvoiceRepository;
 import com.vince.retailmanager.repository.PaymentRepository;
 import com.vince.retailmanager.repository.UserRepository;
-import com.vince.retailmanager.security.RoleType;
 import com.vince.retailmanager.service.FranchiseService;
 import com.vince.retailmanager.service.UserService;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -35,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class InsertDemoData {
 
-  private static final String DUMMY_PASSWORD = "password";
   //defaults
   private static final int NUM_OF_FRANCHISEES = 2;
   private static final int BEGINNING_BALANCE = 1000;
@@ -49,8 +44,6 @@ public class InsertDemoData {
   @Autowired
   private FranchiseService franchiseService;
   @Autowired
-  private CompanyRepository companyRepo;
-  @Autowired
   private FranchisorRepository franchisorRepo;
   @Autowired
   private FranchiseeRepository franchiseeRepo;
@@ -60,7 +53,6 @@ public class InsertDemoData {
   private InvoiceRepository invoiceRepo;
   @Autowired
   private IncomeStatementRepository incomeStatementRepo;
-  private Map<String, Franchisor> franchisors = new HashMap<>();
 
   @EventListener
   @Transactional
@@ -68,30 +60,20 @@ public class InsertDemoData {
     System.out.println("Setting up demo data...");
     clearDBTables();
     createFranchises();
-    setupAdmin();
+    TestData.setupAdmin(userService);
     addNewUser();
     System.out.println("\nDemo data setup complete!");
   }
 
   void addNewUser() {
-    User user = new User("new_user", DUMMY_PASSWORD);
+    User user = new User("new_user", TestData.DUMMY_PASSWORD);
     userService.saveUser(user);
   }
 
   void createFranchises() throws Exception {
-    String shortNameKey = "mc";
-    Franchisor franchisor = Franchisor.builder()
-        .name("McDonald's Corporation")
-        .website("mcdonalds.com")
-        .description("Fast food company")
-        .franchiseFee(30000.0)
-        .liquidCapitalRequirement(200000.0)
-        .royaltyFeePercent(.08)
-        .marketingFeePercent(.02)
-        .feeFrequency(12)
-        .build();
-    franchisors.put(shortNameKey, franchisor);
-    addFranchiseesToFranchisor(shortNameKey, franchisor, NUM_OF_FRANCHISEES);
+    String shortName = "mc";
+    Franchisor franchisor = TestData.createFranchisor();
+    addFranchiseesToFranchisor(shortName, franchisor, NUM_OF_FRANCHISEES);
 
     Franchisee firstFranchisee = franchisor.getFranchisees().stream().findFirst().orElse(null);
     Invoice invoice = createInvoice(franchisor, firstFranchisee, BEGINNING_BALANCE);
@@ -142,14 +124,6 @@ public class InsertDemoData {
     return incomeStatements;
   }
 
-  private void setupAdmin() throws Exception {
-    User admin = new User("admin", "adminpassword");
-    admin.addRole(RoleType.ADMIN);
-    userService.saveUser(admin);
-    System.out.println("saving " + admin);
-
-  }
-
   private void clearDBTables() {
     accessTokenRepo.deleteAll();
     userRepo.deleteAll();
@@ -172,7 +146,7 @@ public class InsertDemoData {
 
   private void setupFranchisorInDB(String shortName,
       Franchisor franchisor) {
-    User franchisorUser = new User(shortName + "_franchisor", DUMMY_PASSWORD);
+    User franchisorUser = new User(shortName + "_franchisor", TestData.DUMMY_PASSWORD);
     franchisorRepo.save(franchisor);
     userService.saveUser(franchisorUser);
     userService.addAccessToken(franchisorUser.getUsername(), franchisor);
@@ -184,7 +158,7 @@ public class InsertDemoData {
     Franchisee franchisee = Franchisee.builder()
         .build();
 
-    User franchiseeUser = new User(shortName + "_franchisee_" + i, DUMMY_PASSWORD);
+    User franchiseeUser = new User(shortName + "_franchisee_" + i, TestData.DUMMY_PASSWORD);
     franchiseeRepo.save(franchisee);
     franchisor.addFranchisee(franchisee);
 
