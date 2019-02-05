@@ -5,6 +5,10 @@ import java.util.Map;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.StringUtils;
 
+
+/**
+ * Custom EntityNotFoundException
+ */
 public class EntityNotFoundException extends Exception {
 
   public EntityNotFoundException(Class clazz, String... searchParamsMap) {

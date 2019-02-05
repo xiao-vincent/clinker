@@ -34,11 +34,6 @@ public class UserControllerTest {
   @Autowired
   private UserService userService;
 
-  @BeforeEach
-  void beforeEach() {
-//    this.requestBuilder = new HttpRequestBuilder(this.mockMvc);
-  }
-
   @Nested
   class Create {
 
@@ -56,32 +51,40 @@ public class UserControllerTest {
     @Nested
     class ValidFields {
 
-      private User returnUserSuccess;
+      private User returnUser;
 
       @BeforeEach
       void beforeEach() {
-        returnUserSuccess = TestData.createUser();
-        returnUserSuccess.setPassword("");
-        given(userService.saveUser(any(User.class))).willReturn(returnUserSuccess);
+        returnUser = TestData.createUser();
+        returnUser.setPassword("");
+        given(userService.saveUser(any(User.class))).willReturn(returnUser);
       }
 
       @Test
       @WithMockUser(roles = RoleType.Constants.USER)
       void shouldReturnStatusCodeCreated() throws Exception {
-        requestBuilder.createUser(input).andExpect(status().isCreated());
+        requestBuilder.makeRequest(input).andExpect(status().isCreated());
       }
 
       @Test
       @WithMockUser(roles = RoleType.Constants.USER)
       void shouldReturnCreatedUserWithJson() throws Exception {
-        requestBuilder.createUser(input)
+        requestBuilder.makeRequest(input)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8));
+      }
+
+      @Test
+      @WithMockUser(roles = RoleType.Constants.USER)
+      void shouldReturnUserInResponseBody() throws Exception {
+        requestBuilder.makeRequest(input)
+            .andExpect(content()
+                .string(WebTestUtil.convertToString(returnUser)));
       }
     }
 
     @Test
     void shouldReturnStatusCodeUnauthorized() throws Exception {
-      requestBuilder.createUser(this.input)
+      requestBuilder.makeRequest(this.input)
           .andExpect(status().isUnauthorized());
     }
 
@@ -89,11 +92,11 @@ public class UserControllerTest {
     @WithMockUser(roles = RoleType.Constants.USER)
     void shouldReturnStatusCodeBadRequest() throws Exception {
       this.input.setUsername("");
-      requestBuilder.createUser(this.input)
+      requestBuilder.makeRequest(this.input)
           .andExpect(status().isBadRequest());
 
       this.input.setUsername("a3");
-      requestBuilder.createUser(this.input)
+      requestBuilder.makeRequest(this.input)
           .andExpect(status().isBadRequest());
     }
 

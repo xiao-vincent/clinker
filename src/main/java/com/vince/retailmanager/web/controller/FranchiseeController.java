@@ -9,7 +9,6 @@ import com.vince.retailmanager.web.utils.ModelUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -29,7 +28,6 @@ public class FranchiseeController {
   @ModelAttribute
   public void populateModel(
       Model model,
-      @AuthenticationPrincipal org.springframework.security.core.userdetails.User authenticatedUser,
       @PathVariable("franchisorId") Integer franchisorId,
       @PathVariable("franchiseeId") Integer franchiseeId
   ) throws EntityNotFoundException {

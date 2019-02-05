@@ -3,6 +3,12 @@ package com.vince.retailmanager.model.entity.fees;
 import com.vince.retailmanager.utils.EnumUtils;
 import java.util.Map;
 
+/**
+ * Types for PercentageFee subclasses
+ *
+ * @author Vincent Xiao
+ * @see PercentageFee
+ */
 public enum FeeType {
   ROYALTY(Constants.ROYALTY),
   MARKETING(Constants.MARKETING);

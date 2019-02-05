@@ -1,5 +1,10 @@
 package com.vince.retailmanager.exception;
 
+/**
+ * Custom exception for adding error detail to IllegalStateException
+ *
+ * @author Vincent Xiao
+ */
 public class InvalidOperationException extends IllegalStateException {
 
   private Object detail;

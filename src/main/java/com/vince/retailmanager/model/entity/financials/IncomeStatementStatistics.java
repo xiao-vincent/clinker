@@ -25,6 +25,11 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.ToString.Exclude;
 
+/**
+ * Calculates income statement statistics over a specific period.
+ *
+ * @author Vincent Xiao
+ */
 @Getter
 @ToString
 @JsonView(Summary.class)
@@ -85,15 +90,9 @@ public class IncomeStatementStatistics {
     }
   }
 
-  private Double sum(Function<IncomeStatement, BigDecimal> mapper) {
-    return incomeStatements
-        .stream()
-        .map(mapper)
-        .reduce(BigDecimal.ZERO, BigDecimal::add)
-        .doubleValue()
-        ;
-  }
-
+  /*
+  Helper class to calculate statistics given a list of values
+   */
   @Getter
   @ToString
   @JsonView(Summary.class)
@@ -115,13 +114,12 @@ public class IncomeStatementStatistics {
 
         this.total += value;
 
-        //set min
+        //sets minimum value
         if (value < this.min.value) {
           this.min.setValue(value);
           this.min.setIncomeStatement(incomeStatement);
         }
-
-        //set max
+        //sets the maximum value
         if (value > this.max.value) {
           this.max.setValue(value);
           this.max.setIncomeStatement(incomeStatement);
@@ -150,6 +148,9 @@ public class IncomeStatementStatistics {
     }
 
 
+    /*
+     Income statement and value pair
+     */
     @Data
     @NoArgsConstructor
     @AllArgsConstructor

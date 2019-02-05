@@ -11,7 +11,6 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import lombok.EqualsAndHashCode;
 
-//@Data
 @EqualsAndHashCode(callSuper = false, of = {"user", "name"})
 @Entity
 @Table(name = "roles", uniqueConstraints = @UniqueConstraint(columnNames = {"username", "role"}))

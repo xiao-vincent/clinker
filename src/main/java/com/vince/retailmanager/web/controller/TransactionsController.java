@@ -10,7 +10,7 @@ import com.vince.retailmanager.service.FranchiseService;
 import com.vince.retailmanager.service.TransactionService;
 import com.vince.retailmanager.service.UserService;
 import com.vince.retailmanager.utils.ValidatorUtils;
-import com.vince.retailmanager.web.constants.ModelValue;
+import com.vince.retailmanager.web.constants.ParamValues;
 import com.vince.retailmanager.web.json.View;
 import com.vince.retailmanager.web.utils.ModelUtils;
 import java.math.BigDecimal;
@@ -71,7 +71,7 @@ public class TransactionsController {
   @PreAuthorize("@modelUtils.isAuthorized(#company)")
   @JsonView(View.Public.class)
   public ResponseEntity<Collection<Payment>> getPayments(Company company,
-      @RequestParam(name = ModelValue.DISTRIBUTION_TYPE) DistributionType type) {
+      @RequestParam(name = ParamValues.DISTRIBUTION_TYPE) DistributionType type) {
     Collection<Payment> payments = transactionService.getPayments(company, type);
     return new ResponseEntity<>(payments, HttpStatus.OK);
   }
@@ -81,8 +81,8 @@ public class TransactionsController {
   @JsonView(View.Public.class)
   public ResponseEntity<Collection<Invoice>> getInvoices(
       Company company,
-      @RequestParam(ModelValue.DISTRIBUTION_TYPE) DistributionType type,
-      @RequestParam(required = false, name = ModelValue.FULLY_PAID) final Boolean isFullyPaid) {
+      @RequestParam(ParamValues.DISTRIBUTION_TYPE) DistributionType type,
+      @RequestParam(required = false, name = ParamValues.FULLY_PAID) final Boolean isFullyPaid) {
     Collection<Invoice> invoices = transactionService.getInvoices(company, type);
     invoices = isFullyPaid == null ? invoices
         : filterInvoicesByFullyPaid(invoices, isFullyPaid);

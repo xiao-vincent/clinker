@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.vince.retailmanager.model.entity.BaseEntity;
 import com.vince.retailmanager.model.entity.financials.IncomeStatement;
-import com.vince.retailmanager.model.entity.transactions.Invoice;
 import com.vince.retailmanager.web.json.View;
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -18,16 +17,19 @@ import javax.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-@Entity
-@Table(name = "companies")
-/*
- Using the joined table approach maps each class of the inheritance hierarchy to its own database table. This abstract superclass gets mapped to a database table. This table contains columns for all shared entity attributes.
+/**
+ * Base abstract class for companies.
+ *
+ * @author Vincent Xiao
  */
+@Entity
+/*
+ Using the joined table approach maps each class of the inheritance hierarchy to its own database table. This abstract superclass gets mapped to a database table. This table contains all shared entity attributes.
+ */
+@Table(name = "companies")
 @Inheritance(strategy = InheritanceType.JOINED)
 @Data
 @EqualsAndHashCode(callSuper = true, of = {""})
-//@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-//@JsonIdentityReference
 public abstract class Company extends BaseEntity {
 
   @JsonIgnore
@@ -44,14 +46,13 @@ public abstract class Company extends BaseEntity {
   @JsonIgnore
   private Set<IncomeStatement> incomeStatements = new HashSet<>();
 
-  public void addInvoiceReceived(Invoice invoice) {
-    invoice.setRecipient(this);
-  }
 
-  public void addInvoiceSent(Invoice invoice) {
-    invoice.setSender(this);
-  }
-
+  /**
+   * Sets the bidirectional one-to-many relationship and adjusts the company's cash balance by the
+   * income statement's net income
+   *
+   * @param incomeStatement the income statement reported by the company
+   */
   public void addIncomeStatement(IncomeStatement incomeStatement) {
     incomeStatements.add(incomeStatement);
     incomeStatement.setCompany(this);

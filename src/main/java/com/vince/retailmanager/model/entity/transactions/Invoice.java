@@ -26,6 +26,11 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * An invoice is issued by the seller to a buyer.
+ *
+ * @author Vincent Xiao
+ */
 @Entity
 @Table(name = "invoices")
 @Data
@@ -68,22 +73,26 @@ public class Invoice extends BaseEntity {
   @JsonManagedReference
   private Set<Payment> payments = new HashSet<>();
 
-  public BigDecimal getBalance() {
-    BigDecimal total = BigDecimal.ZERO;
+
+  BigDecimal getBalance() {
+    BigDecimal totalPayments = BigDecimal.ZERO;
     for (Payment payment : payments) {
+      //if the payment has been refunded, subtract from the total payment amount
       if (payment.getRefundedPayment() != null) {
-        total = total.subtract(payment.getAmount());
+        totalPayments = totalPayments.subtract(payment.getAmount());
       } else {
-        total = total.add(payment.getAmount());
+        totalPayments = totalPayments.add(payment.getAmount());
       }
     }
-    return due.subtract(total);
+    return due.subtract(totalPayments);
   }
 
   public boolean isFullyPaid() {
     return this.getBalance().compareTo(BigDecimal.ZERO) <= 0;
   }
 
+
+  /* Helper class for Lombok's @Builder api */
   public static class ObjectBuilder {
 
     public ObjectBuilder due(Double amountDue) {

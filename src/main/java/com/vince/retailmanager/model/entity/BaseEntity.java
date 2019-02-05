@@ -11,6 +11,11 @@ import javax.persistence.MappedSuperclass;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+/**
+ * Abstract base class for all objects that need a generated ID
+ *
+ * @author Vincent Xiao
+ */
 @MappedSuperclass
 @Data
 @EqualsAndHashCode

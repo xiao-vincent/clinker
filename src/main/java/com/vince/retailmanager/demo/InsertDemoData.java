@@ -99,9 +99,9 @@ public class InsertDemoData {
     Invoice invoice = Invoice.builder()
         .due(balance)
         .description("sample invoice description")
+        .recipient(recipient)
+        .sender(sender)
         .build();
-    sender.addInvoiceSent(invoice);
-    recipient.addInvoiceReceived(invoice);
     invoiceRepo.save(invoice);
     return invoice;
   }

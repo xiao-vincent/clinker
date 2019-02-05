@@ -7,6 +7,11 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import lombok.NoArgsConstructor;
 
+/**
+ * A marketing fee is paid into the franchise's marketing budget.
+ *
+ * @author Vincent Xiao
+ */
 @Entity
 @DiscriminatorValue(Constants.MARKETING)
 @NoArgsConstructor

@@ -23,6 +23,14 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Range;
 
+
+/**
+ * A franchisor owns the franchise brand and offers franchisees use of its intellectual property and
+ * business support in exchange for fees.
+ *
+ * @author Vincent Xiao
+ * @see Franchisee
+ */
 @Entity
 @Table(name = "franchisors")
 @Data
@@ -85,11 +93,6 @@ public class Franchisor extends Company {
   public void addFranchisee(Franchisee franchisee) {
     franchisees.add(franchisee);
     franchisee.setFranchisor(this);
-  }
 
-//  @Override
-//  @JsonView(View.Franchisor.class)
-//  public BigDecimal getCashBalance() {
-//    return super.getCashBalance();
-//  }
+  }
 }

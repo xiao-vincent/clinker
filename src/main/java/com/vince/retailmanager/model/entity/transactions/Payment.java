@@ -22,6 +22,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+/**
+ * A payment.
+ */
 @Entity
 @Table(name = "payments")
 @Data
@@ -29,7 +32,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-//@ValidPayment
 public class Payment extends BaseEntity {
 
   @Min(0)
@@ -63,7 +65,6 @@ public class Payment extends BaseEntity {
   @JsonBackReference
   @JsonView(Public.class)
   private Invoice invoice;
-
 
   public void addInvoice(Invoice invoice) {
     this.invoice = invoice;

@@ -1,0 +1,1 @@
+memberSearchIndex = [{"p":"com.vince.retailmanager.model.entity.companies","c":"Franchisor","l":"addFranchisee(Franchisee)","url":"addFranchisee(com.vince.retailmanager.model.entity.companies.Franchisee)"},{"p":"com.vince.retailmanager.model.entity.companies","c":"Franchisor","l":"Franchisor()","url":"%3Cinit%3E()"}]

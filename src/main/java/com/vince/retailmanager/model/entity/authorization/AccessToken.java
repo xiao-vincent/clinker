@@ -14,6 +14,12 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+/**
+ * An AccessToken is used for api endpoint authorization. Authorization is a success if company and
+ * user AccessToken exists
+ *
+ * @author Vincent Xiao
+ */
 @Entity
 @Table(name = "access_tokens", uniqueConstraints = @UniqueConstraint(columnNames = {"username",
     "company"}))

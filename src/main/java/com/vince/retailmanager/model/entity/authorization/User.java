@@ -37,11 +37,9 @@ public class User {
   private Boolean enabled;
 
   @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.EAGER)
-  private Set<Role> roles;
+  private Set<Role> roles = new HashSet<>();
 
   public User() {
-    //add default  role
-    this.addRole(RoleType.USER);
     this.setEnabled(true);
   }
 
@@ -53,9 +51,9 @@ public class User {
 
   @JsonIgnore
   public void addRole(RoleType roleType) {
-    if (this.roles == null) {
-      this.roles = new HashSet<>();
-    }
+//    if (this.roles == null) {
+//      this.roles = new HashSet<>();
+//    }
     Role role = new Role();
     role.setName(roleType.name());
     this.roles.add(role);
@@ -64,6 +62,4 @@ public class User {
   public void setNoPassword() {
     this.password = "";
   }
-
-
 }

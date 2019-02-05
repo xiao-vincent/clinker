@@ -25,6 +25,10 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * An income statement is a financial statement reporting a company's financial performance over a
+ * specific period.
+ */
 @Entity
 @Table(name = "income_statements", uniqueConstraints = @UniqueConstraint(columnNames = {"company",
     "date"}))
@@ -75,6 +79,7 @@ public class IncomeStatement extends BaseEntity {
   @JsonView(Public.class)
   private LocalDate date;
 
+
   public BigDecimal getGrossProfit() {
     return sales.subtract(costOfGoodsSold);
   }
@@ -87,7 +92,7 @@ public class IncomeStatement extends BaseEntity {
     return getOperatingIncome().subtract(generalAndAdminExpenses);
   }
 
-
+  /* Helper class for Lombok's @Builder api */
   public static class ObjectBuilder {
 
     public ObjectBuilder sales(Double amt) {

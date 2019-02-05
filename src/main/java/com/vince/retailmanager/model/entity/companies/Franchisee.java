@@ -13,6 +13,13 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+/**
+ * A franchisee is a business that operates under the franchise's brand. A franchisee receives
+ * business support and must adhere to the franchisor's brand guidelines.
+ *
+ * @author Vincent Xiao
+ * @see Franchisor
+ */
 @Entity
 @Table(name = "franchisees")
 @Data
@@ -29,25 +36,4 @@ public class Franchisee extends Company {
   @JsonView(Franchisee.class)
   @NotNull
   private Franchisor franchisor;
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

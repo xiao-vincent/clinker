@@ -6,6 +6,11 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import lombok.NoArgsConstructor;
 
+/**
+ * A royalty is paid to the franchisor for use of the franchise's brand and business support.
+ *
+ * @author Vincent Xiao
+ */
 @Entity
 @DiscriminatorValue(Constants.ROYALTY)
 @NoArgsConstructor

@@ -1,10 +1,17 @@
 package com.vince.retailmanager.web;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.fasterxml.jackson.annotation.JsonView;
 import com.vince.retailmanager.demo.TestData;
 import com.vince.retailmanager.model.entity.companies.Franchisor;
 import com.vince.retailmanager.security.RoleType;
 import com.vince.retailmanager.service.FranchiseService;
 import com.vince.retailmanager.web.controller.FranchisorController;
+import com.vince.retailmanager.web.json.View;
 import org.junit.experimental.categories.Category;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -28,49 +35,46 @@ public class FranchisorControllerTest {
   @Autowired
   private FranchiseService franchiseService;
 
-
-  @BeforeEach
-  public void beforeEach() {
-//    this.requestBuilder = new HttpRequestBuilder(this.mockMvc);
-  }
-
   @Nested
   class Create {
 
+    @JsonView(View.Franchisor.class)
     private Franchisor input;
 
     @BeforeEach
     void beforeEach() {
       this.input = TestData.createFranchisor();
+      requestBuilder = HttpRequestBuilder.builder()
+          .mockMvc(mockMvc)
+          .route("/franchisors/new")
+          .build();
     }
 
     @Nested
     class ValidFields {
 
-      private Franchisor returnFranchisor;
-
       @BeforeEach
       void beforeEach() {
-//        given(userService.saveUser(any(User.class))).willReturn(returnFranchisor);
+        given(franchiseService.saveFranchisor(any(Franchisor.class))).willReturn(input);
       }
 
       @Test
-      @WithMockUser(roles = RoleType.Constants.USER)
+      @WithMockUser
       void shouldReturnStatusCodeCreated() throws Exception {
-//        requestBuilder.createUser(input).andExpect(status().isCreated());
+        requestBuilder.makeRequest(input).andExpect(status().isCreated());
       }
 
       @Test
-      @WithMockUser(roles = RoleType.Constants.USER)
-      void shouldReturnCreatedUserWithJson() throws Exception {
-//        requestBuilder.createUser(input)
-//            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8));
+      @WithMockUser
+      void shouldReturnFranchisorInResponseBody() throws Exception {
+        requestBuilder.makeRequest(input)
+            .andExpect(content().string(WebTestUtil.convertToString(input, View.Franchisor.class)));
       }
     }
 
     @Test
     void shouldReturnStatusCodeUnauthorized() throws Exception {
-//      requestBuilder.createUser(this.input)
+//      requestBuilder.makeRequest(this.input)
 //          .andExpect(status().isUnauthorized());
     }
 
@@ -78,11 +82,11 @@ public class FranchisorControllerTest {
     @WithMockUser(roles = RoleType.Constants.USER)
     void shouldReturnStatusCodeBadRequest() throws Exception {
 //      this.input.setUsername("");
-//      requestBuilder.createUser(this.input)
+//      requestBuilder.makeRequest(this.input)
 //          .andExpect(status().isBadRequest());
 //
 //      this.input.setUsername("a3");
-//      requestBuilder.createUser(this.input)
+//      requestBuilder.makeRequest(this.input)
 //          .andExpect(status().isBadRequest());
     }
 

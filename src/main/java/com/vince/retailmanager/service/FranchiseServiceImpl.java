@@ -2,6 +2,7 @@ package com.vince.retailmanager.service;
 
 import static com.vince.retailmanager.utils.StringUtils.singlePlural;
 
+import com.vince.retailmanager.exception.EntityNotFoundException;
 import com.vince.retailmanager.exception.InvalidOperationException;
 import com.vince.retailmanager.model.entity.companies.Company;
 import com.vince.retailmanager.model.entity.companies.Franchisee;
@@ -16,7 +17,6 @@ import com.vince.retailmanager.repository.FranchiseeRepository;
 import com.vince.retailmanager.repository.FranchisorRepository;
 import com.vince.retailmanager.repository.PercentageFeeRepository;
 import com.vince.retailmanager.utils.ValidatorUtils;
-import com.vince.retailmanager.exception.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -92,12 +91,6 @@ public class FranchiseServiceImpl implements FranchiseService {
     return franchiseeRepository.save(franchisee);
   }
 
-  @Override
-  @Transactional(readOnly = true)
-  public List<Franchisor> findAllFranchisors() throws DataAccessException {
-    return franchisorRepository.findAll();
-  }
-
 
   @Override
   @Transactional(readOnly = true)
@@ -146,18 +139,6 @@ public class FranchiseServiceImpl implements FranchiseService {
     companyRepository.save(company);
   }
 
-
-  @Override
-  @Transactional
-  public Royalty saveRoyalty(Royalty royalty) {
-    return percentageFeeRepository.save(royalty);
-  }
-
-  @Override
-  @Transactional
-  public MarketingFee saveMarketingFee(MarketingFee marketingFee) {
-    return percentageFeeRepository.save(marketingFee);
-  }
 
   @Override
   @Transactional

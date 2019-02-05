@@ -7,7 +7,6 @@ public enum DistributionType {
   RECEIVED(),
   SENT();
 
-
   private static final Map<String, DistributionType> NAME_MAP = EnumUtils
       .createNameMap(DistributionType.class);
 

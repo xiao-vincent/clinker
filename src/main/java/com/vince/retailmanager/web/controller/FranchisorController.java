@@ -12,7 +12,7 @@ import com.vince.retailmanager.service.FranchiseService;
 import com.vince.retailmanager.service.TransactionService;
 import com.vince.retailmanager.service.UserService;
 import com.vince.retailmanager.utils.ValidatorUtils;
-import com.vince.retailmanager.web.constants.ModelValue;
+import com.vince.retailmanager.web.constants.ParamValues;
 import com.vince.retailmanager.web.json.View;
 import com.vince.retailmanager.web.utils.ModelUtils;
 import java.util.Collection;
@@ -50,7 +50,7 @@ public class FranchisorController {
   private FranchiseService franchiseService;
   @Autowired
   public ModelUtils modelUtils;
-  @Autowired
+  @Autowired(required = false)
   public ValidatorUtils validatorUtils;
 
   @ModelAttribute
@@ -87,7 +87,7 @@ public class FranchisorController {
   @PutMapping("/{franchisorId}")
   @PreAuthorize("@modelUtils.isAuthorized(#franchisor)")
   @JsonView(View.Summary.class)
-  public ResponseEntity<Franchisor> updateCompany(
+  public ResponseEntity<Franchisor> updateFranchisor(
       Franchisor franchisor,
       @RequestBody Franchisor updatedFranchisor
   ) {
@@ -145,7 +145,7 @@ public class FranchisorController {
   public ResponseEntity<Collection<PercentageFee>> getFees(
       Franchisor franchisor,
       @RequestParam(name = "fee-type", required = false) final FeeType type,
-      @RequestParam(required = false, name = ModelValue.FULLY_PAID) final Boolean isFullyPaid
+      @RequestParam(required = false, name = ParamValues.FULLY_PAID) final Boolean isFullyPaid
   ) {
     Collection<PercentageFee> fees = franchiseService.getPercentageFees(franchisor, type);
     fees = isFullyPaid == null ? fees
