@@ -15,7 +15,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 /**
- * An AccessToken is used for api endpoint authorization. Authorization is a success if company and
+ * An AccessToken is used in api endpoint authorization. Authorization is a success if company and
  * user AccessToken exists
  *
  * @author Vincent Xiao

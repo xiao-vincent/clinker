@@ -26,8 +26,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * An income statement is a financial statement reporting a company's financial performance over a
- * specific period.
+ * An income statement reporting a company's financial performance over a specific period.
  */
 @Entity
 @Table(name = "income_statements", uniqueConstraints = @UniqueConstraint(columnNames = {"company",

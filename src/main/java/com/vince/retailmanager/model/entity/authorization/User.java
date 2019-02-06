@@ -40,6 +40,7 @@ public class User {
   private Set<Role> roles = new HashSet<>();
 
   public User() {
+//    this.addRole(RoleType.USER);
     this.setEnabled(true);
   }
 

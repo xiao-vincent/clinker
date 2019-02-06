@@ -7,7 +7,7 @@ import javax.persistence.Entity;
 import lombok.NoArgsConstructor;
 
 /**
- * A royalty is paid to the franchisor for use of the franchise's brand and business support.
+ * A royalty is paid to the franchisor for use of the franchise's brand.
  *
  * @author Vincent Xiao
  */

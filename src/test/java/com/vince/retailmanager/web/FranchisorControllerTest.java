@@ -55,7 +55,7 @@ public class FranchisorControllerTest {
 
       @BeforeEach
       void beforeEach() {
-        given(franchiseService.saveFranchisor(any(Franchisor.class))).willReturn(input);
+        given(franchiseService.saveCompany(any(Franchisor.class))).willReturn(input);
       }
 
       @Test

@@ -55,7 +55,7 @@ public class FranchiseServiceImpl implements FranchiseService {
 
   @Override
   @Transactional
-  public Company saveCompany(Company company) {
+  public <R extends Company> R saveCompany(R company) {
     return companyRepository.save(company);
   }
 
@@ -69,49 +69,6 @@ public class FranchiseServiceImpl implements FranchiseService {
     return company;
   }
 
-  @Override
-  @Transactional(readOnly = true)
-  public Franchisor findFranchisorById(int id) throws EntityNotFoundException {
-    Franchisor franchisor = franchisorRepository.findById(id).orElse(null);
-    if (franchisor == null) {
-      throw new EntityNotFoundException(Franchisor.class, "id", String.valueOf(id));
-    }
-    return franchisor;
-  }
-
-  @Override
-  @Transactional
-  public Franchisor saveFranchisor(Franchisor franchisor) {
-    return franchisorRepository.save(franchisor);
-  }
-
-  @Override
-  @Transactional
-  public Franchisee saveFranchisee(Franchisee franchisee) {
-    return franchiseeRepository.save(franchisee);
-  }
-
-
-  @Override
-  @Transactional(readOnly = true)
-  public Franchisee findFranchiseeById(int id) throws EntityNotFoundException {
-    Franchisee franchisee = franchiseeRepository.findById(id).orElse(null);
-    if (franchisee == null) {
-      throw new EntityNotFoundException(Franchisee.class, "id", String.valueOf(id));
-    }
-    return franchisee;
-  }
-
-
-  @Override
-  public void disableFranchisor(Franchisor franchisor) throws InvalidOperationException {
-    Set<Franchisee> franchisees = franchisor.getFranchisees();
-    if (!franchisees.isEmpty()) {
-      throwActiveFranchiseesException(franchisor, franchisees);
-      return;
-    }
-    disableCompany(franchisor);
-  }
 
   private void throwActiveFranchiseesException(Franchisor franchisor, Set<Franchisee> franchisees) {
     Map<String, Set<Franchisee>> invalidValues = new HashMap<>();
@@ -131,14 +88,20 @@ public class FranchiseServiceImpl implements FranchiseService {
     );
   }
 
-
-  @Override
-  @Transactional
-  public void disableCompany(Company company) {
+  private void disableCompany(Company company) {
     company.setEnabled(false);
     companyRepository.save(company);
   }
 
+  @Override
+  @Transactional
+  public void disable(Franchisor franchisor) {
+    Set<Franchisee> franchisees = franchisor.getFranchisees();
+    if (!franchisees.isEmpty()) {
+      throwActiveFranchiseesException(franchisor, franchisees);
+    }
+    disableCompany(franchisor);
+  }
 
   @Override
   @Transactional

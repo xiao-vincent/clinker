@@ -79,7 +79,7 @@ public class FranchisorController {
       @Valid @RequestBody Franchisor franchisor,
       @AuthenticationPrincipal org.springframework.security.core.userdetails.User authenticatedUser
   ) {
-    franchisor = franchiseService.saveFranchisor(franchisor);
+    franchisor = franchiseService.saveCompany(franchisor);
     userService.addAccessToken(authenticatedUser.getUsername(), franchisor);
     return new ResponseEntity<>(franchisor, HttpStatus.CREATED);
   }
@@ -109,7 +109,7 @@ public class FranchisorController {
   ) {
     franchisor.addFranchisee(franchisee);
     validatorUtils.validate(franchisee);
-    franchisee = this.franchiseService.saveFranchisee(franchisee);
+    franchisee = this.franchiseService.saveCompany(franchisee);
     userService.addAccessToken(authenticatedUser.getUsername(), franchisee);
     return new ResponseEntity<>(franchisee, HttpStatus.CREATED);
   }
@@ -124,7 +124,7 @@ public class FranchisorController {
   @DeleteMapping("/{franchisorId}")
   @PreAuthorize("@modelUtils.isAuthorized(#franchisor)")
   public ResponseEntity<Void> deleteFranchisor(Franchisor franchisor) throws Exception {
-    franchiseService.disableFranchisor(franchisor);
+    franchiseService.disable(franchisor);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 

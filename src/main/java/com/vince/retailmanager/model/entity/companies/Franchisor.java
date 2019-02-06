@@ -25,8 +25,7 @@ import org.hibernate.validator.constraints.Range;
 
 
 /**
- * A franchisor owns the franchise brand and offers franchisees use of its intellectual property and
- * business support in exchange for fees.
+ * A franchisor owns the franchise.
  *
  * @author Vincent Xiao
  * @see Franchisee

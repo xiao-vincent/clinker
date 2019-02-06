@@ -1,9 +1,8 @@
 package com.vince.retailmanager.service;
 
+import com.vince.retailmanager.exception.EntityNotFoundException;
 import com.vince.retailmanager.model.entity.financials.IncomeStatement;
 import com.vince.retailmanager.repository.IncomeStatementRepository;
-import com.vince.retailmanager.exception.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,7 +11,6 @@ public class FinancialServiceImpl implements FinancialService {
 
   private IncomeStatementRepository incomeStatementRepository;
 
-  @Autowired
   public FinancialServiceImpl(
       IncomeStatementRepository incomeStatemetRepository
   ) {

@@ -30,7 +30,7 @@ public class AuthenticationAdapter extends WebSecurityConfigurerAdapter {
     http
         .authorizeRequests()
         .antMatchers("/", "/login", "/mobile/login", "/api/auth/**", "/reservations/**").permitAll()
-        .anyRequest().hasRole("ADMIN")
+//        .anyRequest().hasRole("ADMIN")
         .anyRequest().authenticated()
         .and()
         .httpBasic()
@@ -46,9 +46,10 @@ public class AuthenticationAdapter extends WebSecurityConfigurerAdapter {
         .jdbcAuthentication()
         .dataSource(dataSource)
         .passwordEncoder(this.passwordEncoder())
-        .usersByUsernameQuery(
-            "select username,password,enabled from users where username=?")
-        .authoritiesByUsernameQuery("select username,role from roles where username=?");
+//        .usersByUsernameQuery(
+//            "select username,password,enabled from users where username=?")
+//        .authoritiesByUsernameQuery("select username,role from roles where username=?");
+        .authoritiesByUsernameQuery("select username,password,enabled from users where username=?");
   }
 
 

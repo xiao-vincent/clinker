@@ -14,8 +14,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 /**
- * A franchisee is a business that operates under the franchise's brand. A franchisee receives
- * business support and must adhere to the franchisor's brand guidelines.
+ * A franchisee operates under the franchisor's business model and brand.
  *
  * @author Vincent Xiao
  * @see Franchisor

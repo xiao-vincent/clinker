@@ -91,14 +91,14 @@ public class ModelUtils {
   public void addFranchisee(Integer franchiseeId)
       throws EntityNotFoundException {
     if (franchiseeId != null) {
-      model.addAttribute("franchisee", franchiseService.findFranchiseeById(franchiseeId));
+      model.addAttribute("franchisee", franchiseService.findCompanyById(franchiseeId));
     }
   }
 
   public void addFranchisor(Integer franchisorId)
       throws EntityNotFoundException {
     if (franchisorId != null) {
-      model.addAttribute("franchisor", franchiseService.findFranchisorById(franchisorId));
+      model.addAttribute("franchisor", franchiseService.findCompanyById(franchisorId));
     }
   }
 
