@@ -1,5 +1,8 @@
 package com.vince.retailmanager.web.json;
 
+/**
+ * JSON views for case by case deserializing
+ */
 public class View {
 
   public interface Public {
@@ -10,6 +13,9 @@ public class View {
 
   }
 
+  /*
+  companies
+   */
   public interface Company extends Summary {
 
   }

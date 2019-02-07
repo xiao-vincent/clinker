@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 
 /**
- *
+ * Adds controller utility methods for authorization and injecting data into the model layer.
  */
 @Component
 public class ModelUtils {
@@ -65,6 +65,28 @@ public class ModelUtils {
     }
   }
 
+  public void addFranchisee(Integer franchiseeId)
+      throws EntityNotFoundException {
+    if (franchiseeId != null) {
+      model.addAttribute("franchisee", franchiseService.findCompanyById(franchiseeId));
+    }
+  }
+
+  public void addFranchisor(Integer franchisorId)
+      throws EntityNotFoundException {
+    if (franchisorId != null) {
+      model.addAttribute("franchisor", franchiseService.findCompanyById(franchisorId));
+    }
+  }
+
+  public void addIncomeStatement(Integer incomeStatementId)
+      throws EntityNotFoundException {
+    if (incomeStatementId != null) {
+      model.addAttribute("incomeStatement",
+          financialService.findIncomeStatementById(incomeStatementId));
+    }
+  }
+
   public boolean isAuthorized(Company... companies) {
     System.out.println("companies = " + companies);
     String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -88,29 +110,5 @@ public class ModelUtils {
     }
 
   }
-
-
-  public void addFranchisee(Integer franchiseeId)
-      throws EntityNotFoundException {
-    if (franchiseeId != null) {
-      model.addAttribute("franchisee", franchiseService.findCompanyById(franchiseeId));
-    }
-  }
-
-  public void addFranchisor(Integer franchisorId)
-      throws EntityNotFoundException {
-    if (franchisorId != null) {
-      model.addAttribute("franchisor", franchiseService.findCompanyById(franchisorId));
-    }
-  }
-
-  public void addIncomeStatement(Integer incomeStatementId)
-      throws EntityNotFoundException {
-    if (incomeStatementId != null) {
-      model.addAttribute("incomeStatement",
-          financialService.findIncomeStatementById(incomeStatementId));
-    }
-  }
-
 
 }

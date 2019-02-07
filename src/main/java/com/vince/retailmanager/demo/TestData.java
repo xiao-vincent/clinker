@@ -18,7 +18,6 @@ public class TestData {
     return user;
   }
 
-
   public static Franchisor createFranchisor() {
     return Franchisor.builder()
         .name("McDonald's Corporation")

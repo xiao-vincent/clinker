@@ -9,7 +9,6 @@ import com.vince.retailmanager.model.entity.financials.IncomeStatement;
 import com.vince.retailmanager.model.entity.financials.IncomeStatementStatistics;
 import com.vince.retailmanager.model.entity.financials.utils.IncomeStatementUtils;
 import com.vince.retailmanager.service.FinancialService;
-import com.vince.retailmanager.service.FranchiseService;
 import com.vince.retailmanager.service.TransactionService;
 import com.vince.retailmanager.service.UserService;
 import com.vince.retailmanager.utils.ValidatorUtils;
@@ -50,8 +49,6 @@ public class FinancialController {
   public FinancialService financialService;
   @Autowired
   public ModelUtils modelUtils;
-  @Autowired
-  private FranchiseService franchiseService;
   @Autowired
   public ValidatorUtils validatorUtils;
 

@@ -4,11 +4,8 @@ import com.vince.retailmanager.model.entity.authorization.User;
 import com.vince.retailmanager.model.entity.companies.Company;
 import com.vince.retailmanager.model.entity.companies.Franchisee;
 import com.vince.retailmanager.model.entity.companies.Franchisor;
-import com.vince.retailmanager.model.entity.financials.DateRange;
 import com.vince.retailmanager.model.entity.financials.IncomeStatement;
-import com.vince.retailmanager.model.entity.financials.IncomeStatementStatistics;
 import com.vince.retailmanager.model.entity.transactions.Invoice;
-import com.vince.retailmanager.model.entity.transactions.Payment;
 import com.vince.retailmanager.repository.AccessTokensRepository;
 import com.vince.retailmanager.repository.FranchiseeRepository;
 import com.vince.retailmanager.repository.FranchisorRepository;
@@ -18,7 +15,6 @@ import com.vince.retailmanager.repository.PaymentRepository;
 import com.vince.retailmanager.repository.UserRepository;
 import com.vince.retailmanager.service.FranchiseService;
 import com.vince.retailmanager.service.UserService;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -65,32 +61,39 @@ public class InsertDemoData {
     System.out.println("\nDemo data setup complete!");
   }
 
+  private void clearDBTables() {
+    accessTokenRepo.deleteAll();
+    userRepo.deleteAll();
+    paymentRepo.deleteAll();
+    franchisorRepo.deleteAll();
+    franchiseeRepo.deleteAll();
+  }
+
   void addNewUser() {
     User user = new User("new_user", TestData.DUMMY_PASSWORD);
     userService.saveUser(user);
   }
 
   void createFranchises() throws Exception {
-    String shortName = "mc";
     Franchisor franchisor = TestData.createFranchisor();
-    addFranchiseesToFranchisor(shortName, franchisor, NUM_OF_FRANCHISEES);
+    addFranchiseesToFranchisor("mc", franchisor, NUM_OF_FRANCHISEES);
 
-    Franchisee firstFranchisee = franchisor.getFranchisees().stream().findFirst().orElse(null);
-    Invoice invoice = createInvoice(franchisor, firstFranchisee, BEGINNING_BALANCE);
-    Payment payment = Payment.builder()
-        .amount(PAYMENT_AMOUNT)
-        .invoice(invoice)
-        .build();
-    payment.setSender(firstFranchisee);
-    payment.setRecipient(franchisor);
-    paymentRepo.save(payment);
-    createIncomeStatements(firstFranchisee, 3);
-
-    LocalDate startDate = LocalDate.of(2018, 10, 1);
-    LocalDate endDate = LocalDate.of(2018, 12, 31);
-    DateRange dateRange = new DateRange(startDate, endDate);
-    IncomeStatementStatistics statistics = IncomeStatementStatistics
-        .create(firstFranchisee, dateRange);
+//    Franchisee firstFranchisee = franchisor.getFranchisees().stream().findFirst().orElse(null);
+//    Invoice invoice = createInvoice(franchisor, firstFranchisee, BEGINNING_BALANCE);
+//    Payment payment = Payment.builder()
+//        .amount(PAYMENT_AMOUNT)
+//        .invoice(invoice)
+//        .build();
+//    payment.setSender(firstFranchisee);
+//    payment.setRecipient(franchisor);
+//    paymentRepo.save(payment);
+//    createIncomeStatements(firstFranchisee, 3);
+//
+//    LocalDate startDate = LocalDate.of(2018, 10, 1);
+//    LocalDate endDate = LocalDate.of(2018, 12, 31);
+//    DateRange dateRange = new DateRange(startDate, endDate);
+//    IncomeStatementStatistics statistics = IncomeStatementStatistics
+//        .create(firstFranchisee, dateRange);
   }
 
   Invoice createInvoice(Company sender,
@@ -124,19 +127,10 @@ public class InsertDemoData {
     return incomeStatements;
   }
 
-  private void clearDBTables() {
-    accessTokenRepo.deleteAll();
-    userRepo.deleteAll();
-    paymentRepo.deleteAll();
-    franchisorRepo.deleteAll();
-    franchiseeRepo.deleteAll();
-  }
-
 
   public void addFranchiseesToFranchisor(String shortName,
       Franchisor franchisor,
-      int numOfFranchisees) throws Exception {
-    shortName = shortName.toLowerCase();
+      int numOfFranchisees) {
     setupFranchisorInDB(shortName, franchisor);
     for (int i = 1; i <= numOfFranchisees; i++) {
       setupFranchiseeInDB(shortName, franchisor, i);
@@ -161,7 +155,6 @@ public class InsertDemoData {
     User franchiseeUser = new User(shortName + "_franchisee_" + i, TestData.DUMMY_PASSWORD);
     franchiseeRepo.save(franchisee);
     franchisor.addFranchisee(franchisee);
-
     userService.saveUser(franchiseeUser);
     userService.addAccessToken(franchiseeUser.getUsername(), franchisee);
     return franchisee;
