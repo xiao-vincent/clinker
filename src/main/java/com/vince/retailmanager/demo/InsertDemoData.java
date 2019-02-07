@@ -77,23 +77,6 @@ public class InsertDemoData {
   void createFranchises() throws Exception {
     Franchisor franchisor = TestData.createFranchisor();
     addFranchiseesToFranchisor("mc", franchisor, NUM_OF_FRANCHISEES);
-
-//    Franchisee firstFranchisee = franchisor.getFranchisees().stream().findFirst().orElse(null);
-//    Invoice invoice = createInvoice(franchisor, firstFranchisee, BEGINNING_BALANCE);
-//    Payment payment = Payment.builder()
-//        .amount(PAYMENT_AMOUNT)
-//        .invoice(invoice)
-//        .build();
-//    payment.setSender(firstFranchisee);
-//    payment.setRecipient(franchisor);
-//    paymentRepo.save(payment);
-//    createIncomeStatements(firstFranchisee, 3);
-//
-//    LocalDate startDate = LocalDate.of(2018, 10, 1);
-//    LocalDate endDate = LocalDate.of(2018, 12, 31);
-//    DateRange dateRange = new DateRange(startDate, endDate);
-//    IncomeStatementStatistics statistics = IncomeStatementStatistics
-//        .create(firstFranchisee, dateRange);
   }
 
   Invoice createInvoice(Company sender,
@@ -135,7 +118,6 @@ public class InsertDemoData {
     for (int i = 1; i <= numOfFranchisees; i++) {
       setupFranchiseeInDB(shortName, franchisor, i);
     }
-
   }
 
   private void setupFranchisorInDB(String shortName,
