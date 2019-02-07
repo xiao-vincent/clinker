@@ -29,7 +29,8 @@ public class AuthenticationAdapter extends WebSecurityConfigurerAdapter {
   protected void configure(HttpSecurity http) throws Exception {
     http
         .authorizeRequests()
-        .antMatchers("/", "/login", "/mobile/login", "/api/auth/**", "/reservations/**").permitAll()
+        .antMatchers("/", "/ping", "/login", "/mobile/login", "/api/auth/**", "/reservations/**")
+        .permitAll()
 //        .anyRequest().hasRole("ADMIN")
         .anyRequest().authenticated()
         .and()
