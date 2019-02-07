@@ -17,6 +17,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 
+/**
+ *
+ */
 @Component
 public class ModelUtils {
 
@@ -36,7 +39,6 @@ public class ModelUtils {
     this.userService = userService;
     this.transactionService = transactionService;
   }
-
 
   public void addCompany(Integer companyId) throws EntityNotFoundException {
     if (companyId != null) {
@@ -69,7 +71,7 @@ public class ModelUtils {
     if (username.isEmpty()) {
       return false;
     }
-    AccessToken accessToken = userService.findAccessToken(username, Set.of(companies));
+    AccessToken accessToken = userService.findFirstAccessToken(username, Set.of(companies));
     System.out.println("accessToken = " + accessToken);
     return accessToken != null;
   }

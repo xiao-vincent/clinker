@@ -54,7 +54,6 @@ public abstract class PercentageFee extends BaseEntity {
   @JsonView(View.Summary.class)
   private String description;
 
-
   @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
       CascadeType.REFRESH})
   @JoinColumn(name = "franchisee_id")
@@ -76,6 +75,18 @@ public abstract class PercentageFee extends BaseEntity {
   @Valid
   @JsonView(View.PercentageFee.class)
   private Invoice invoice;
+
+  PercentageFee(@NotNull String description, @NotNull IncomeStatement incomeStatement) {
+    this.description = description;
+    this.incomeStatement = incomeStatement;
+    try {
+      this.franchisee = (Franchisee) incomeStatement.getCompany();
+    } catch (ClassCastException e) {
+      throw new InvalidOperationException(incomeStatement.getCompany() + " is not a franchisee");
+    }
+    this.setFeePercent(this.getFranchisor().getMarketingFeePercent());
+    this.setDefaultInvoice();
+  }
 
   // Helper method
   protected Franchisor getFranchisor() {
@@ -107,18 +118,6 @@ public abstract class PercentageFee extends BaseEntity {
         .sender(this.franchisee.getFranchisor())
         .recipient(this.getFranchisee())
         .build());
-  }
-
-  PercentageFee(@NotNull String description, @NotNull IncomeStatement incomeStatement) {
-    this.description = description;
-    this.incomeStatement = incomeStatement;
-    try {
-      this.franchisee = (Franchisee) incomeStatement.getCompany();
-    } catch (ClassCastException e) {
-      throw new InvalidOperationException(incomeStatement.getCompany() + " is not a franchisee");
-    }
-    this.setFeePercent(this.getFranchisor().getMarketingFeePercent());
-    this.setDefaultInvoice();
   }
 
 

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.vince.retailmanager.constants.Date;
 import com.vince.retailmanager.exception.EntityNotFoundException;
 import com.vince.retailmanager.model.entity.companies.Company;
-import com.vince.retailmanager.model.entity.companies.Franchisee;
 import com.vince.retailmanager.model.entity.financials.DateRange;
 import com.vince.retailmanager.model.entity.financials.IncomeStatement;
 import com.vince.retailmanager.model.entity.financials.IncomeStatementStatistics;
@@ -120,9 +119,6 @@ public class FinancialController {
     incomeStatement.setDate(date);
     validatorUtils.validate(incomeStatement, ValidationGroups.Entity.class);
     incomeStatement = financialService.saveIncomeStatement(incomeStatement);
-    if (incomeStatement.getCompany() instanceof Franchisee) {
-      franchiseService.createMonthlyFranchiseFees(incomeStatement);
-    }
     return new ResponseEntity<>(incomeStatement, HttpStatus.OK);
   }
 

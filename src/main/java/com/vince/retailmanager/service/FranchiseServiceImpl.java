@@ -8,9 +8,7 @@ import com.vince.retailmanager.model.entity.companies.Company;
 import com.vince.retailmanager.model.entity.companies.Franchisee;
 import com.vince.retailmanager.model.entity.companies.Franchisor;
 import com.vince.retailmanager.model.entity.fees.FeeType;
-import com.vince.retailmanager.model.entity.fees.MarketingFee;
 import com.vince.retailmanager.model.entity.fees.PercentageFee;
-import com.vince.retailmanager.model.entity.fees.Royalty;
 import com.vince.retailmanager.model.entity.financials.IncomeStatement;
 import com.vince.retailmanager.repository.CompanyRepository;
 import com.vince.retailmanager.repository.FranchiseeRepository;
@@ -18,11 +16,11 @@ import com.vince.retailmanager.repository.FranchisorRepository;
 import com.vince.retailmanager.repository.PercentageFeeRepository;
 import com.vince.retailmanager.utils.ValidatorUtils;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -113,12 +111,21 @@ public class FranchiseServiceImpl implements FranchiseService {
 
   @Override
   @Transactional
-  public List<PercentageFee> createMonthlyFranchiseFees(IncomeStatement incomeStatement) {
+  public <R extends PercentageFee> List<PercentageFee> createMonthlyFranchiseFees(
+      IncomeStatement incomeStatement,
+      Function<IncomeStatement, PercentageFee>... percentageFeeSuppliers) {
     //if incomeStatement.get company is not an instance of Franchisee, throw exception
+    if (!(incomeStatement.getCompany() instanceof Franchisee)) {
+      throw new IllegalArgumentException(
+          "the incomeStatement's company must be a " + Franchisee.class + ". But found "
+              + incomeStatement.getCompany().getClass());
+    }
     List<PercentageFee> fees = new ArrayList<>();
-    fees.add(Royalty.create(incomeStatement));
-    fees.add(MarketingFee.create(incomeStatement));
-    fees.forEach(fee -> savePercentageFee(fee));
+    for (Function<IncomeStatement, PercentageFee> percentageFeeSupplier : percentageFeeSuppliers) {
+      PercentageFee fee = percentageFeeSupplier.apply(incomeStatement);
+      fees.add(fee);
+      savePercentageFee(fee);
+    }
     return fees;
 
   }
@@ -127,7 +134,7 @@ public class FranchiseServiceImpl implements FranchiseService {
   @Transactional
   public List<PercentageFee> getPercentageFees(Franchisor franchisor, FeeType type) {
     if (franchisor == null) {
-      return Collections.emptyList();
+      throw new NullPointerException("franchisor must not be null");
     }
     Set<Integer> franchiseeIds = franchisor.getFranchisees().stream().map(Franchisee::getId)
         .collect(Collectors.toSet());

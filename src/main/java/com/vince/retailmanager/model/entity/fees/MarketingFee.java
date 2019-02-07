@@ -21,8 +21,8 @@ public class MarketingFee extends PercentageFee {
     super(description, incomeStatement);
   }
 
-  public static MarketingFee create(IncomeStatement incomeStatement) {
-    return new MarketingFee("marketing fee", incomeStatement);
+  public MarketingFee(IncomeStatement incomeStatement) {
+    super("marketing fee", incomeStatement);
   }
 }
 

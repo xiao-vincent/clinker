@@ -68,7 +68,7 @@ public class UserServiceImpl implements UserService {
 
 
   @Override
-  public AccessToken findAccessToken(String username, Set<Company> companies) {
+  public AccessToken findFirstAccessToken(String username, Set<Company> companies) {
     return accessTokensRepository.findFirstByUserUsernameAndCompanyIn(username, companies)
         .orElse(null);
   }

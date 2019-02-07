@@ -16,11 +16,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Royalty extends PercentageFee {
 
+  public Royalty(IncomeStatement incomeStatement) {
+    super("royalty fee", incomeStatement);
+  }
+
   private Royalty(String description, IncomeStatement incomeStatement) {
     super(description, incomeStatement);
   }
 
-  public static Royalty create(IncomeStatement incomeStatement) {
-    return new Royalty("royalty fee", incomeStatement);
-  }
 }

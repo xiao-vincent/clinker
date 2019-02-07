@@ -5,7 +5,9 @@ import com.vince.retailmanager.exception.EntityNotFoundException;
 import com.vince.retailmanager.model.entity.companies.Franchisee;
 import com.vince.retailmanager.model.entity.companies.Franchisor;
 import com.vince.retailmanager.model.entity.fees.FeeType;
+import com.vince.retailmanager.model.entity.fees.MarketingFee;
 import com.vince.retailmanager.model.entity.fees.PercentageFee;
+import com.vince.retailmanager.model.entity.fees.Royalty;
 import com.vince.retailmanager.model.entity.financials.IncomeStatement;
 import com.vince.retailmanager.service.FinancialService;
 import com.vince.retailmanager.service.FranchiseService;
@@ -135,7 +137,8 @@ public class FranchisorController {
       Franchisor franchisor,
       IncomeStatement incomeStatement
   ) {
-    List<PercentageFee> fees = franchiseService.createMonthlyFranchiseFees(incomeStatement);
+    List<PercentageFee> fees = franchiseService
+        .createMonthlyFranchiseFees(incomeStatement, Royalty::new, MarketingFee::new);
     return new ResponseEntity<>(fees, HttpStatus.OK);
   }
 
