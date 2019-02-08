@@ -12,24 +12,17 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 //@ExtendWith(MockitoExtension.class)
 class FranchiseServiceTest {
 
-	@Autowired
-	private FranchiseService franchiseService;
+  @Autowired
+  private FranchiseService franchiseService;
 
-	@BeforeEach
-	void setUp() {
-	}
+  @BeforeEach
+  void setUp() {
+  }
 
 
-	@Test
-	public void insertFranchisee() {
-
-//		Franchisor franchisor = new Franchisor("Mcdonalds", "www.mcd.com", "fastfood", null);
-//
-//		this.franchiseService.saveCompany(franchisor);
-//
-//		Collection<Franchisor> franchisors = this.franchiseService.findAllFranchisors();
-//		System.out.println(franchisors);
-	}
+  @Test
+  public void insertFranchisee() {
+  }
 
 
 }

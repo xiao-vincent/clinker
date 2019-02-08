@@ -1,4 +1,4 @@
-package com.vince.retailmanager.demo;
+package com.vince.retailmanager.testdata;
 
 import com.vince.retailmanager.model.entity.authorization.User;
 import com.vince.retailmanager.model.entity.companies.Franchisor;

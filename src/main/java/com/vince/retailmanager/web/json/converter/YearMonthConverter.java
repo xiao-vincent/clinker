@@ -1,6 +1,6 @@
 package com.vince.retailmanager.web.json.converter;
 
-import com.vince.retailmanager.constants.Date;
+import com.vince.retailmanager.web.constants.Date;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;

@@ -1,4 +1,4 @@
-package com.vince.retailmanager.constants;
+package com.vince.retailmanager.web.constants;
 
 import lombok.experimental.UtilityClass;
 

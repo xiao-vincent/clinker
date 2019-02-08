@@ -98,11 +98,4 @@ public class UserValidationTest {
     assertEquals(input, violation.getInvalidValue());
   }
 
-//    //    @ParameterizedTest
-//    @ParameterizedTest(name = "\"{0}\" should be {1} and {2}")
-//    @CsvSource({"Hello, 5", "JUnit 5, 7", "'Hello, JUnit 5!', 15"})
-//    void withCsvSource(String word, int length) {
-//        System.out.println(length);
-//    }
-
 }

@@ -92,8 +92,6 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     ApiError apiError = new ApiError(BAD_REQUEST);
     apiError.setMessage("Validation error");
     apiError.addValidationErrors(ex.getBindingResult().getFieldErrors());
-    System.out.println(
-        "ex.getBindingResult().getFieldErrors() = " + ex.getBindingResult().getFieldErrors());
     apiError.addValidationError(ex.getBindingResult().getGlobalErrors());
     return buildResponseEntity(apiError);
   }

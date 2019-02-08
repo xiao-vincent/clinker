@@ -5,7 +5,7 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.vince.retailmanager.demo.TestData;
+import com.vince.retailmanager.testdata.TestData;
 import com.vince.retailmanager.model.entity.authorization.User;
 import com.vince.retailmanager.security.RoleType;
 import com.vince.retailmanager.service.UserService;

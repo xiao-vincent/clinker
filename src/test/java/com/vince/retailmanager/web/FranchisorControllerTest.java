@@ -6,7 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.vince.retailmanager.demo.TestData;
+import com.vince.retailmanager.testdata.TestData;
 import com.vince.retailmanager.model.entity.companies.Franchisor;
 import com.vince.retailmanager.security.RoleType;
 import com.vince.retailmanager.service.FranchiseService;

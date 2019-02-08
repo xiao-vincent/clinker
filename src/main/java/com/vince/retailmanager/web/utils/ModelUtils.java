@@ -88,13 +88,11 @@ public class ModelUtils {
   }
 
   public boolean isAuthorized(Company... companies) {
-    System.out.println("companies = " + companies);
     String username = SecurityContextHolder.getContext().getAuthentication().getName();
     if (username.isEmpty()) {
       return false;
     }
     AccessToken accessToken = userService.findFirstAccessToken(username, Set.of(companies));
-    System.out.println("accessToken = " + accessToken);
     return accessToken != null;
   }
 

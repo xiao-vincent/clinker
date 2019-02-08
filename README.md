@@ -2,7 +2,7 @@
 Clinker is a franchise management service powered by a REST API. 
 
 Features:
-  - tools for managing franchisor and franchisee data 
+  - manage franchisor and franchisee data
   - invoice and payment system
   - generate and track franchise fees (ex. royalties and marketing fees based on total sales)
   - record sales and expenses and generate financial metrics
@@ -14,7 +14,7 @@ Features:
 ### Installation
 ```shell
  git clone https://github.com/xiao-vincent/clinker.git
- cd clinker/ 
+ cd clinker 
 ```
 #### Database Configuration
 This application currently uses PostgreSQL. To use a different database,
@@ -26,7 +26,7 @@ databases](https://docs.spring.io/spring-boot/docs/current/reference/html/boot-f
 ```shell
 ./mvnw spring-boot:run
 ```
-or using your IDE's built-in build/run tool
+or use your IDE's build/run tool
 
 ### Test Connection
 Test the api with

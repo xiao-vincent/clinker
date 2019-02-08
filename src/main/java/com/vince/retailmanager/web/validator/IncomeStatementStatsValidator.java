@@ -46,7 +46,6 @@ public class IncomeStatementStatsValidator implements
         incomeStatementStatistics.getDateRange()
     );
     if (!missingDates.isEmpty()) {
-      System.out.println("what?");
       context.buildConstraintViolationWithTemplate("missing" + missingDates)
           .addPropertyNode("incomeStatements")
           .addConstraintViolation();
@@ -54,19 +53,6 @@ public class IncomeStatementStatsValidator implements
     }
     return true;
   }
-
-//	private boolean isDisableValid(IncomeStatementStatistics incomeStatementStats, ConstraintValidatorContext context) {
-//		System.out.println("VALIDATING DISABLED");
-//		if (!incomeStatementStats.getFranchisees().isEmpty()) {
-//			context
-//				 .buildConstraintViolationWithTemplate("franchisees rely on this incomeStatementStats")
-//				 .addPropertyNode("franchisees")
-//				 .addConstraintViolation();
-//			return false;
-//		}
-//		return true;
-//	}
-
 
 }
 

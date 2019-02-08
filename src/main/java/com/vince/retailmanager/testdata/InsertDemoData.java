@@ -1,4 +1,4 @@
-package com.vince.retailmanager.demo;
+package com.vince.retailmanager.testdata;
 
 import com.vince.retailmanager.model.entity.authorization.User;
 import com.vince.retailmanager.model.entity.companies.Company;
@@ -53,7 +53,7 @@ public class InsertDemoData {
   @EventListener
   @Transactional
   public void appReady(ApplicationReadyEvent event) throws Exception {
-    System.out.println("Setting up demo data...");
+    System.out.println("Setting up testdata data...");
     clearDBTables();
     createFranchises();
     TestData.setupAdmin(userService);

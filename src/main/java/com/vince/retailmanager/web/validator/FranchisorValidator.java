@@ -20,17 +20,6 @@ public class FranchisorValidator implements ConstraintValidator<ValidFranchisor,
     );
   }
 
-//	private boolean isDisableValid(Franchisor franchisor, ConstraintValidatorContext context) {
-//		if (!franchisor.getFranchisees().isEmpty()) {
-//			context
-//				 .buildConstraintViolationWithTemplate("franchisees rely on this franchisor")
-//				 .addPropertyNode("franchisees")
-//				 .addConstraintViolation();
-//			return false;
-//		}
-//		return true;
-//	}
-
   private boolean isNameValid(Franchisor franchisor, ConstraintValidatorContext context) {
     if (franchisorRepo.existsByNameIgnoreCase(franchisor.getName())) {
       ValidatorUtils.addExistsViolation(context, "name");
@@ -48,17 +37,6 @@ public class FranchisorValidator implements ConstraintValidator<ValidFranchisor,
     return true;
   }
 
-  //	@SafeVarargs
-//	private final boolean isValid(Franchisor franchisor, ConstraintValidatorContext context,
-//	                                      BiFunction<Franchisor, ConstraintValidatorContext, Boolean>... fns) {
-//		boolean isValid = true;
-//		for (BiFunction<Franchisor, ConstraintValidatorContext, Boolean> fn : fns) {
-//			if (!fn.apply(franchisor, context)) {
-//				isValid = false;
-//			}
-//		}
-//		return isValid;
-//	}
 
 }
 
