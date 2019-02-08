@@ -13,8 +13,8 @@ Features:
 - Maven
 ### Installation
 ```shell
- git clone ----
- cd 'name of github repo' 
+ git clone https://github.com/xiao-vincent/clinker.git
+ cd clinker/ 
 ```
 #### Database Configuration
 This application currently uses PostgreSQL. To use a different database,
@@ -26,6 +26,8 @@ databases](https://docs.spring.io/spring-boot/docs/current/reference/html/boot-f
 ```shell
 ./mvnw spring-boot:run
 ```
+or using your IDE's built-in build/run tool
+
 ### Test Connection
 Test the api with
 ```shell 
