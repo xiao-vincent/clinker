@@ -1,5 +1,5 @@
 # Clinker
-Clinker is a franchise management service powered by a REST API. 
+Clinker is a franchise management service backed by a REST API built with Java and Spring Boot. 
 
 Features:
   - manage franchisor and franchisee data
