@@ -98,8 +98,8 @@ public class FinancialController {
   ) {
     incomeStatement.setSales(update.getSales());
     incomeStatement.setCostOfGoodsSold(update.getCostOfGoodsSold());
-    incomeStatement.setOperatingExpenses(update.getSales());
-    incomeStatement.setGeneralAndAdminExpenses(update.getSales());
+    incomeStatement.setOperatingExpenses(update.getOperatingExpenses());
+    incomeStatement.setGeneralAndAdminExpenses(update.getGeneralAndAdminExpenses());
     validatorUtils.validate(incomeStatement, ValidationGroups.Entity.class);
     financialService.saveIncomeStatement(incomeStatement);
     return new ResponseEntity<>(incomeStatement, HttpStatus.OK);
